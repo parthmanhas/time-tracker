@@ -1,0 +1,46 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Timer {
+  id            Int         @id @default(autoincrement()) // Primary key, auto-incrementing ID
+  date          DateTime    @default(now()) // Date of the timer
+  remainingTime Int // Time left in seconds or milliseconds, depending on your preference
+  duration      Int
+  status        TimerStatus // Status of the timer
+  title         String
+  comments      Comment[]
+  tags          Tag[]
+}
+
+// Enum for status values
+enum TimerStatus {
+  ACTIVE
+  PAUSED
+  COMPLETED
+}
+
+model Tag {
+  id      Int    @id @default(autoincrement())
+  label   String
+  Timer   Timer? @relation(fields: [timerId], references: [id])
+  timerId Int?
+}
+
+model Comment {
+  id      Int    @id @default(autoincrement())
+  content String
+  Timer   Timer? @relation(fields: [timerId], references: [id])
+  timerId Int?
+}
