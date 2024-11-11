@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { v4 as uuidv4 } from 'uuid';
 import { Textarea } from "@/components/ui/textarea"
 import {
   Dialog,
@@ -32,15 +33,15 @@ import { cn } from "@/lib/utils"
 import { format } from "date-fns"
 
 type Timer = {
-  id: number
+  id: string
   label: string
   duration: number
   remainingTime: number
-  tags: string[]
-  status: "ACTIVE" | "PAUSED" | "FINISHED",
+  tags?: string[]
+  status: "ACTIVE" | "PAUSED" | "COMPLETED"
   createdAt: string
   completedAt?: string
-  comments: string[]
+  comments?: string[]
 }
 
 const timeOptions = [
@@ -62,7 +63,6 @@ const saveToDatabase = async (timers: Timer[], allTags: string[]) => {
 
 export default function CountdownTimerDashboard() {
   const [timers, setTimers] = React.useState<Timer[]>([])
-  const [nextTimerId, setNextTimerId] = React.useState(1)
   const [newTimerLabel, setNewTimerLabel] = React.useState('')
   const [newTimerDuration, setNewTimerDuration] = React.useState('')
   const [newTag, setNewTag] = React.useState('')
@@ -70,7 +70,7 @@ export default function CountdownTimerDashboard() {
   const [isDialogOpen, setIsDialogOpen] = React.useState(false)
   const [selectedTag, setSelectedTag] = React.useState<string | null>(null)
   const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(undefined)
-  const [editingTimerId, setEditingTimerId] = React.useState<number | null>(null)
+  const [editingTimerId, setEditingTimerId] = React.useState<string | null>(null)
   const [editedLabel, setEditedLabel] = React.useState('')
   const [newComment, setNewComment] = React.useState('')
   const { toast } = useToast();
@@ -79,20 +79,32 @@ export default function CountdownTimerDashboard() {
   // Load timers and tags from localStorage on initial render
   React.useEffect(() => {
     const savedTimers = localStorage.getItem('timers')
-    const savedNextTimerId = localStorage.getItem('nextTimerId')
     const savedAllTags = localStorage.getItem('allTags')
 
     if (savedTimers) {
       setTimers(JSON.parse(savedTimers))
     }
-    if (savedNextTimerId) {
-      setNextTimerId(parseInt(savedNextTimerId))
-    }
     if (savedAllTags) {
       setAllTags(JSON.parse(savedAllTags))
     }
     setLoadingFromLocalStorage(false)
+
+    fetchAllTimers();
+
   }, [])
+
+  const fetchAllTimers = async () => {
+    const response = await fetch("http://localhost:5000/api/timers");
+    const dbTimers = await response.json() as Timer[];
+    const timersWithoutCommentsAndTags = dbTimers.map(timer => {
+      const { comments, tags, ...t } = timer;
+      if (t.status === 'ACTIVE')
+        t.status = "PAUSED";
+      return t;
+    })
+    console.log(timersWithoutCommentsAndTags)
+    setTimers(timersWithoutCommentsAndTags);
+  }
 
   // Save timers and tags to localStorage and database whenever they change
   // React.useEffect(() => {
@@ -111,7 +123,7 @@ export default function CountdownTimerDashboard() {
     if (newTimerLabel.trim() === '' || newTimerDuration === '') return
 
     const newTimer: Timer = {
-      id: nextTimerId,
+      id: uuidv4(),
       label: newTimerLabel,
       duration: parseInt(newTimerDuration),
       remainingTime: parseInt(newTimerDuration),
@@ -121,13 +133,13 @@ export default function CountdownTimerDashboard() {
       comments: [],
     }
     setTimers([...timers, newTimer])
-    setNextTimerId(nextTimerId + 1)
     setNewTimerLabel('')
     setNewTimerDuration('')
     setIsDialogOpen(false)
   }
 
-  const toggleTimer = (id: number) => {
+  const toggleTimer = async (id: string) => {
+    updateTimer(timers.find(t => t.id === id));
     setTimers(timers.map(timer => {
       if (timer.id === id) {
         const currentStatus = timer.status;
@@ -138,31 +150,31 @@ export default function CountdownTimerDashboard() {
     }))
   }
 
-  const addTag = (timerId: number, tag: string) => {
+  const addTag = (timerId: string, tag: string) => {
     if (tag.trim() === '') return
 
-    setTimers(timers.map(timer => {
-      if (timer.id === timerId) {
-        let newTags = [...timer.tags]
-        if (tag === 'finished') {
-          newTags = newTags.filter(t => t !== 'unfinished')
-          if (!newTags.includes('finished')) {
-            newTags.push('finished')
-          }
-        } else if (tag === 'unfinished') {
-          if (timer.status === 'ACTIVE') {
-            newTags = newTags.filter(t => t !== 'finished')
-            if (!newTags.includes('unfinished')) {
-              newTags.push('unfinished')
-            }
-          }
-        } else if (!newTags.includes(tag)) {
-          newTags.push(tag)
-        }
-        return { ...timer, tags: newTags }
-      }
-      return timer
-    }))
+    // setTimers(timers.map(timer => {
+    //   if (timer.id === timerId) {
+    //     let newTags = [...timer.tags]
+    //     if (tag === 'finished') {
+    //       newTags = newTags.filter(t => t !== 'unfinished')
+    //       if (!newTags.includes('finished')) {
+    //         newTags.push('finished')
+    //       }
+    //     } else if (tag === 'unfinished') {
+    //       if (timer.status === 'ACTIVE') {
+    //         newTags = newTags.filter(t => t !== 'finished')
+    //         if (!newTags.includes('unfinished')) {
+    //           newTags.push('unfinished')
+    //         }
+    //       }
+    //     } else if (!newTags.includes(tag)) {
+    //       newTags.push(tag)
+    //     }
+    //     return { ...timer, tags: newTags }
+    //   }
+    //   return timer
+    // }))
 
     if (!allTags.includes(tag)) {
       setAllTags([...allTags, tag])
@@ -171,22 +183,22 @@ export default function CountdownTimerDashboard() {
     setNewTag('')
   }
 
-  const removeTag = (timerId: number, tagToRemove: string) => {
-    setTimers(timers.map(timer => {
-      if (timer.id === timerId) {
-        return { ...timer, tags: timer.tags.filter(tag => tag !== tagToRemove) }
-      }
-      return timer
-    }))
+  const removeTag = (timerId: string, tagToRemove: string) => {
+    // setTimers(timers.map(timer => {
+    //   if (timer.id === timerId) {
+    //     return { ...timer, tags: timer.tags.filter(tag => tag !== tagToRemove) }
+    //   }
+    //   return timer
+    // }))
 
     // Remove tag from allTags if it's not used by any timer
-    const isTagUsed = timers.some(timer => timer.tags.includes(tagToRemove))
-    if (!isTagUsed && tagToRemove !== 'finished' && tagToRemove !== 'unfinished') {
-      setAllTags(allTags.filter(tag => tag !== tagToRemove))
-    }
+    // const isTagUsed = timers.some(timer => timer.tags.includes(tagToRemove))
+    // if (!isTagUsed && tagToRemove !== 'finished' && tagToRemove !== 'unfinished') {
+    //   setAllTags(allTags.filter(tag => tag !== tagToRemove))
+    // }
   }
 
-  const editTimerLabel = (id: number) => {
+  const editTimerLabel = (id: string) => {
     setTimers(timers.map(timer => {
       if (timer.id === id) {
         return { ...timer, label: editedLabel }
@@ -197,16 +209,34 @@ export default function CountdownTimerDashboard() {
     setEditedLabel('')
   }
 
-  const addComment = (timerId: number, comment: string) => {
+  const addComment = (timerId: string, comment: string) => {
     if (comment.trim() === '') return
 
     setTimers(timers.map(timer => {
       if (timer.id === timerId) {
-        return { ...timer, comments: [...timer.comments, comment] }
+        // return { ...timer, comments: [...timer.comments, comment] }
       }
       return timer
     }))
     setNewComment('')
+  }
+
+  const updateTimer = async (timer: Timer | undefined) => {
+    if(!timer) {
+      console.error('Timer not found');
+      return;
+    }
+    try {
+      await fetch("http://localhost:5000/api/timers", {
+        method: "POST",
+        body: JSON.stringify({ timers: timer }),
+        headers: {
+          "Content-Type": "application/json",
+        }
+      });
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   React.useEffect(() => {
@@ -220,13 +250,15 @@ export default function CountdownTimerDashboard() {
               title: "Timer Finished",
               description: `${timer.label} has reached zero!`,
             })
-            return {
+            const completedTimer: Timer =  {
               ...timer,
               remainingTime: newRemainingTime,
-              status: 'FINISHED',
-              tags: timer.tags.filter(tag => tag !== 'unfinished').concat('finished'),
+              status: 'COMPLETED',
+              // tags: timer.tags.filter(tag => tag !== 'unfinished').concat('finished'),
               completedAt: now.toISOString()
             }
+            return completedTimer;
+
           }
           return { ...timer, remainingTime: newRemainingTime }
         }
@@ -234,7 +266,7 @@ export default function CountdownTimerDashboard() {
         if (['ACTIVE', 'PAUSED'].includes(timer.status) && new Date(timer.createdAt).getDate() !== now.getDate()) {
           return {
             ...timer,
-            tags: timer.tags.includes('unfinished') ? timer.tags : [...timer.tags, 'unfinished']
+            // tags: timer.tags.includes('unfinished') ? timer.tags : [...timer.tags, 'unfinished']
           }
         }
         return timer
@@ -267,11 +299,17 @@ export default function CountdownTimerDashboard() {
   }
 
   const sync = async () => {
-    console.log(timers)
+
+    const timersWithoutCommentsAndTags = timers.map(timer => {
+      const { comments, tags, label, ...t } = timer;
+      // change label to title 
+      return { title: label, ...t };
+    })
+    console.log(timersWithoutCommentsAndTags)
     try {
       await fetch("http://localhost:5000/api/timers", {
         method: "POST",
-        body: JSON.stringify({ timers }),
+        body: JSON.stringify({ timers: timersWithoutCommentsAndTags }),
         headers: {
           "Content-Type": "application/json",
         }
@@ -281,16 +319,18 @@ export default function CountdownTimerDashboard() {
     }
   }
 
-  const activeTimers = timers.filter(timer => ['ACTIVE'].includes(timer.status) && filterTimersByDate(timer))
-  const finishedTimers = timers.filter(timer => ['FINISHED'].includes(timer.status) && filterTimersByDate(timer))
+  const activeTimers = timers.filter(timer => ['ACTIVE', 'PAUSED'].includes(timer.status) && filterTimersByDate(timer))
+  const finishedTimers = timers.filter(timer => ['COMPLETED'].includes(timer.status) && filterTimersByDate(timer))
 
-  const filteredActiveTimers = selectedTag
-    ? activeTimers.filter(timer => timer.tags.includes(selectedTag))
-    : activeTimers
+  // const filteredActiveTimers = selectedTag
+  //   ? activeTimers.filter(timer => timer.tags.includes(selectedTag))
+  //   : activeTimers
+  const filteredActiveTimers = activeTimers;
 
-  const filteredFinishedTimers = selectedTag
-    ? finishedTimers.filter(timer => timer.tags.includes(selectedTag))
-    : finishedTimers
+  // const filteredFinishedTimers = selectedTag
+  //   ? finishedTimers.filter(timer => timer.tags.includes(selectedTag))
+  //   : finishedTimers
+  const filteredFinishedTimers = finishedTimers;
 
   return (
     <div className="container mx-auto p-6">
@@ -467,7 +507,7 @@ export default function CountdownTimerDashboard() {
                   </DropdownMenu>
                 </div>
                 <div className="flex flex-wrap gap-2 mb-4">
-                  {timer.tags.map(tag => (
+                  {timer.tags?.map(tag => (
                     <div key={tag} className="bg-secondary text-secondary-foreground px-2 py-1 rounded-full text-sm flex items-center">
                       {tag}
                       {!['finished', 'unfinished'].includes(tag) && <Button
@@ -483,7 +523,7 @@ export default function CountdownTimerDashboard() {
                 </div>
                 <div>
                   <h3 className="text-sm font-semibold mb-2">Comments</h3>
-                  {timer.comments.map((comment, index) => (
+                  {timer.comments?.map((comment, index) => (
                     <div key={index} className="text-sm mb-1">{comment}</div>
                   ))}
                   <form onSubmit={(e) => {
@@ -590,7 +630,7 @@ export default function CountdownTimerDashboard() {
                   </DropdownMenu>
                 </div>
                 <div className="flex flex-wrap gap-2 mb-4">
-                  {timer.tags.map(tag => (
+                  {timer.tags?.map(tag => (
                     <div key={tag} className="bg-secondary text-secondary-foreground px-2 py-1 rounded-full text-sm flex items-center">
                       {tag}
                       <Button
@@ -606,7 +646,7 @@ export default function CountdownTimerDashboard() {
                 </div>
                 <div>
                   <h3 className="text-sm font-semibold mb-2">Comments</h3>
-                  {timer.comments.map((comment, index) => (
+                  {timer.comments?.map((comment, index) => (
                     <div key={index} className="text-sm mb-1">{comment}</div>
                   ))}
                   <form onSubmit={(e) => {
