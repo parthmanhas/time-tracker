@@ -6,7 +6,25 @@ import cors from 'cors';
 
 dotenv.config();
 const app = express();
-const prisma = new PrismaClient();
+const prisma = new PrismaClient()
+// const prisma = new PrismaClient().$extends({
+//   model: {
+//     timer: {
+//       async updateCompletedAt(params, next) {
+//         console.log(params)
+//         if (params.model === 'Timer' && params.action === 'update') {
+//           const { status } = params.args.data;
+
+//           // Set `completedAt` if status is 'completed' and completedAt is not already set
+//           if (status === 'COMPLETED' && !params.args.data.completedAt) {
+//             params.args.data.completedAt = new Date().toISOString();
+//           }
+//         }
+//         return next(params);
+//       }
+//     }
+//   }
+// });
 
 app.use(cors());
 app.use(express.json());
@@ -25,12 +43,12 @@ app.get('/api/timers', async (req, res) => {
 // Route to create a new user
 app.post('/api/timers/:id', async (req, res) => {
   const { id } = req.params;
-  const { remainingTime, status, title, comments, duration } = req.body;
+  const { remainingTime, status, title, comments, duration, createdAt } = req.body;
   try {
     const timer = await prisma.timer.upsert({
-      where: { id: parseInt(id) },
-      update: { remainingTime, status, title, comments, duration },
-      create: { remainingTime, status, title, comments, duration }
+      where: { id },
+      update: { remainingTime, status, title, comments },
+      create: { id, remainingTime, status, title, comments, duration, createdAt }
     });
     res.json(timer);
   } catch (error) {
@@ -41,7 +59,6 @@ app.post('/api/timers/:id', async (req, res) => {
 
 app.post('/api/timers', async (req, res) => {
   const { timers } = req.body;
-  console.log(req.body)
   if (!timers) {
     console.error('No timers present');
   }
@@ -49,9 +66,9 @@ app.post('/api/timers', async (req, res) => {
     for (const timer of timers) {
       const { id, remainingTime, status, title, comments, duration } = timer;
       await prisma.timer.upsert({
-        where: { id: parseInt(id) },
+        where: { id },
         update: { remainingTime, status, title, comments, duration },
-        create: { remainingTime, status, title, comments, duration }
+        create: { id, remainingTime, status, title, comments, duration }
       });
     }
 

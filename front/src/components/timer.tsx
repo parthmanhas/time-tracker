@@ -1,16 +1,19 @@
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@radix-ui/react-dropdown-menu"
-import { Edit2, Pause, Play, Tag, X, MessageSquare } from "lucide-react"
+import { Edit2, Pause, Play, Tag, X, MessageSquare, CheckCircle } from "lucide-react"
 import { Card, CardContent } from "./ui/card"
 import { Input } from "./ui/input"
 import { Textarea } from "./ui/textarea"
 import { Button } from './ui/button'
 import React from "react"
+import { TimerType } from "@/types"
 
-export function Timer(timer) {
+export function Timer({ timer }: { timer: TimerType }) {
     const [editingTimerId, setEditingTimerId] = React.useState<string | null>(null)
     const [newTag, setNewTag] = React.useState('')
     const [allTags, setAllTags] = React.useState<string[]>(['finished', 'unfinished'])
     const [newComment, setNewComment] = React.useState('')
+    const [status, setStatus] = React.useState(timer.status)
+    const [remainingTime, setRemainingTime] = React.useState(timer.remainingTime)
 
     const formatTime = (seconds: number) => {
         const minutes = Math.floor(seconds / 60)
@@ -75,18 +78,49 @@ export function Timer(timer) {
         // }
     }
 
-    const toggleTimer = async (id: string) => {
-        // updateTimer(timers.find(t => t.id === id));
-        // setTimers(timers.map(timer => {
-        //     if (timer.id === id) {
-        //         const currentStatus = timer.status;
-        //         const toggledStatus = currentStatus === 'ACTIVE' ? 'PAUSED' : 'ACTIVE';
-        //         return { ...timer, status: toggledStatus }
-        //     }
-        //     return timer
-        // }))
+    const toggleTimer = () => {
+        setStatus(status === 'ACTIVE' ? 'PAUSED' : 'ACTIVE');
     }
 
+    const completeTimer = async (timer: TimerType | undefined) => {
+        if (!timer) {
+            console.error('Timer not found');
+            return;
+        }
+        const { comments, tags, ...timersWithoutCommentsAndTags } = timer;
+        console.log(timersWithoutCommentsAndTags)
+        try {
+            await fetch(`http://localhost:5000/api/timers/${timer.id}`, {
+                method: "POST",
+                body: JSON.stringify({ ...timersWithoutCommentsAndTags }), // change label to timer everywhere
+                headers: {
+                    "Content-Type": "application/json",
+                }
+            });
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    React.useEffect(() => {
+        if (status === 'PAUSED') return;
+        if (status === 'COMPLETED') completeTimer(timer);
+        const interval = setInterval(() => {
+            setRemainingTime(prevTime => {
+                if (prevTime <= 0) {
+                    setStatus('COMPLETED');
+                    timer.status = 'COMPLETED';
+                    timer.remainingTime = 0;
+                    clearInterval(interval);
+                    return 0;
+                }
+                const newRemainingTime = prevTime - 1;
+                timer.remainingTime = newRemainingTime;
+                return newRemainingTime;
+            });
+        }, 1000);
+        return () => clearInterval(interval);
+    }, [status])
     return (
         <Card key={timer.id}>
             <CardContent className="p-4">
@@ -103,9 +137,9 @@ export function Timer(timer) {
                             /> */}
                         </form>
                     ) : (
-                        <span className="text-lg font-semibold">{timer.label}</span>
+                        <span className="text-lg font-semibold">{timer.title}</span>
                     )}
-                    <Button
+                    {/* <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => {
@@ -118,19 +152,20 @@ export function Timer(timer) {
                         }}
                     >
                         <Edit2 className="h-4 w-4" />
-                    </Button>
+                    </Button> */}
+                    {status === 'COMPLETED' && <CheckCircle className="h-5 w-5 text-green-500" />}
                 </div>
                 <div className="text-3xl font-bold mb-4">
-                    {formatTime(timer.remainingTime)}
+                    {status === 'COMPLETED' ? formatTime(timer.duration) : formatTime(remainingTime)}
                 </div>
                 <div className="text-sm text-muted-foreground mb-2">
                     Created: {formatDate(timer.createdAt)}
                 </div>
                 <div className="flex space-x-2 mb-4">
-                    <Button onClick={() => toggleTimer(timer.id)} className="flex-grow">
-                        {timer.status === 'ACTIVE' ? <Pause className="mr-2 h-4 w-4" /> : <Play className="mr-2 h-4 w-4" />}
-                        {timer.status === 'ACTIVE' ? 'Pause' : 'Resume'}
-                    </Button>
+                    {status !== 'COMPLETED' && <Button onClick={() => toggleTimer()} className="flex-grow">
+                        {status === 'ACTIVE' ? <Pause className="mr-2 h-4 w-4" /> : <Play className="mr-2 h-4 w-4" />}
+                        {status === 'ACTIVE' ? 'Pause' : 'Resume'}
+                    </Button>}
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant="outline" size="icon">
