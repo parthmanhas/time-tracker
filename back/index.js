@@ -47,8 +47,8 @@ app.post('/api/timers/:id', async (req, res) => {
   try {
     const timer = await prisma.timer.upsert({
       where: { id },
-      update: { remainingTime, status, title, comments },
-      create: { id, remainingTime, status, title, comments, duration, createdAt }
+      update: { remainingTime, status, title, comments, completedAt: status === 'COMPLETED' ? new Date().toISOString() : null },
+      create: { id, remainingTime, status, title, comments, duration, createdAt, completedAt: null }
     });
     res.json(timer);
   } catch (error) {

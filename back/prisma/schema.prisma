@@ -16,7 +16,7 @@ datasource db {
 model Timer {
   id            String      @id @unique // Primary key
   createdAt     DateTime // Date of the timer
-  completedAt   DateTime    @default(now())// @default(now()) not working setting from node
+  completedAt   DateTime? // @default(now()) not working setting from node
   remainingTime Int // Time left in seconds or milliseconds, depending on your preference
   duration      Int
   status        TimerStatus // Status of the timer
