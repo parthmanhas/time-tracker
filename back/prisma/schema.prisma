@@ -15,12 +15,13 @@ datasource db {
 
 model Timer {
   id            String      @id @unique // Primary key
+  title         String
   createdAt     DateTime // Date of the timer
   completedAt   DateTime? // @default(now()) not working setting from node
+  due_at        DateTime?
   remainingTime Int // Time left in seconds or milliseconds, depending on your preference
   duration      Int
   status        TimerStatus // Status of the timer
-  title         String
 }
 
 // Enum for status values
@@ -29,13 +30,6 @@ enum TimerStatus {
   PAUSED
   COMPLETED
 }
-
-// model Tag {
-//   id      Int    @id @default(autoincrement())
-//   label   String
-//   Timer   Timer @relation(fields: [timerId], references: [id])
-//   timerId Int
-// }
 
 // model Comment {
 //   id      Int    @id @default(autoincrement())

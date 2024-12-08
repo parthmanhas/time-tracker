@@ -5,28 +5,31 @@ import { Textarea } from "./ui/textarea"
 import { Button } from './ui/button'
 import React from "react"
 import { TimerType } from "@/types"
+import { Input } from "./ui/input"
+import { Badge } from "./ui/badge"
+import { useTimerStore } from "@/store/useTimerStore"
 
 type TimerProps = {
     timer: TimerType,
-    updateTimerState: (timer: TimerType) => void
 }
 
-export function Timer({ timer, updateTimerState }: TimerProps) {
-    const [newComment, setNewComment] = React.useState('')
-    const [status, setStatus] = React.useState(timer.status)
-    const [remainingTime, setRemainingTime] = React.useState(timer.remainingTime)
+export function Timer({ timer }: TimerProps) {
 
-    const completeAt = Date.now() + timer.duration * 1000;
+    const {
+        setStatus,
+        newComment,
+        addComment,
+        newTag,
+        addTag,
+        setRemainingTime
+    } = useTimerStore();
+
+    const completeAt = Date.now() + Math.abs(timer.remainingTime - timer.duration) * 1000;
 
     const formatTime = (seconds: number) => {
         const minutes = Math.floor(seconds / 60)
         const remainingSeconds = seconds % 60
         return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`
-    }
-    const formatTimeHHMM = (seconds: number) => {
-        const minutes = Math.floor(seconds / 60)
-        const hours = minutes % 60;
-        return `${hours}:${minutes}`
     }
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleDateString('en-US', {
@@ -37,11 +40,9 @@ export function Timer({ timer, updateTimerState }: TimerProps) {
             minute: '2-digit'
         })
     }
-
     const toggleTimer = async () => {
-        setStatus(status === 'ACTIVE' ? 'PAUSED' : 'ACTIVE');
-        updateTimerState({ ...timer, status: status === 'ACTIVE' ? 'PAUSED' : 'ACTIVE' })
-        updateTimerDB({ ...timer, status: status === 'ACTIVE' ? 'PAUSED' : 'ACTIVE' })
+        setStatus(timer.id, timer.status === 'ACTIVE' ? 'PAUSED' : 'ACTIVE');
+        updateTimerDB({ ...timer, status: timer.status === 'ACTIVE' ? 'PAUSED' : 'ACTIVE' });
     }
 
     const updateTimerDB = async (timer: TimerType | undefined) => {
@@ -49,12 +50,10 @@ export function Timer({ timer, updateTimerState }: TimerProps) {
             console.error('Timer not found');
             return;
         }
-        const { comments, tags, ...timersWithoutCommentsAndTags } = timer;
-        // console.log(timersWithoutCommentsAndTags)
         try {
-            await fetch(`http://localhost:5000/api/timers/${timer.id}`, {
-                method: "POST",
-                body: JSON.stringify({ ...timersWithoutCommentsAndTags }), // change label to timer everywhere
+            await fetch(`http://localhost:5000/api/timer`, {
+                method: "PATCH",
+                body: JSON.stringify({ ...timer, due_at: new Date(completeAt) }), // change label to timer everywhere
                 headers: {
                     "Content-Type": "application/json",
                 }
@@ -65,27 +64,40 @@ export function Timer({ timer, updateTimerState }: TimerProps) {
     }
 
     const markComplete = async () => {
-        if (timer.status === 'COMPLETED' || status === 'COMPLETED') {
+        if (timer.status === 'COMPLETED') {
             console.info('Timer already completed');
             return;
         };
-        setStatus('COMPLETED');
-        timer.status = 'COMPLETED';
-        updateTimerState({ ...timer, status: 'COMPLETED' })
-        await updateTimerDB(timer);
+        // await updateTimerDB(timer);
+
+        try {
+            await fetch('http://localhost:5000/api/timer', {
+                method: 'PATCH',
+                body: JSON.stringify({ id: timer.id, status: 'COMPLETED' }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            setStatus(timer.id, 'COMPLETED');
+        } catch (e) {
+            console.error(e);
+        }
     }
 
     React.useEffect(() => {
-        const completeTimer = (interval) => {
-            setStatus('COMPLETED');
-            timer.status = 'COMPLETED';
-            updateTimerState({ ...timer, status: 'COMPLETED' })
+
+        const completeTimer = (interval?: NodeJS.Timeout) => {
             timer.remainingTime = 0;
-            clearInterval(interval);
+            if (interval)
+                clearInterval(interval);
         }
 
-        if (status === 'COMPLETED') return;
-        if (status === 'PAUSED') return;
+        if (Date.now() >= completeAt) {
+            completeTimer();
+        }
+
+        if (timer.status === 'COMPLETED') return;
+        if (timer.status === 'PAUSED') return;
         // below happens in ACTIVE state
 
         const interval = setInterval(() => {
@@ -93,18 +105,73 @@ export function Timer({ timer, updateTimerState }: TimerProps) {
                 console.error('Timer already finished but timer running !!');
                 completeTimer(interval);
             }
-            setRemainingTime(prevTime => {
-                if (prevTime <= 0) {
-                    completeTimer(interval);
-                    return 0;
-                }
-                const newRemainingTime = prevTime - 1;
-                timer.remainingTime = newRemainingTime;
-                return newRemainingTime;
-            });
+
+            if (timer.remainingTime <= 0) {
+                completeTimer(interval);
+                return;
+            }
+
+            setRemainingTime(timer.id, timer.remainingTime - 1);
+
         }, 1000);
+
         return () => clearInterval(interval);
-    }, [status, timer, updateTimerState, completeAt])
+    }, [completeAt, setRemainingTime, timer])
+
+    const addTagDB = async (timerId: string, tag: string) => {
+        if (!timerId) {
+            console.error('timerId missing');
+            return;
+        }
+        if (!tag) {
+            console.error('tag missing');
+            return;
+        }
+        try {
+            await fetch('http://localhost:5000/add-tag', {
+                method: 'post',
+                body: JSON.stringify({ id: timerId, tag }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            addTag(timer.id, tag);
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    const addCommentDB = async (timerId: string, comment: string) => {
+        try {
+            await fetch('http://localhost:5000/comment', {
+                method: 'post',
+                body: JSON.stringify({ id: timerId, comment }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            addComment(timer.id, comment);
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    const addTime = async () => {
+        timer.duration += timer.duration;
+        timer.status = 'ACTIVE';
+        try {
+            await fetch('http://localhost:5000/api/timer', {
+                method: 'PATCH',
+                body: JSON.stringify({ id: timer.id, duration: timer.duration, status: timer.status }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
     return (
         <Card key={timer.id}>
             <CardContent className="p-4 flex flex-col justify-between h-full">
@@ -114,7 +181,7 @@ export function Timer({ timer, updateTimerState }: TimerProps) {
                             {<span className="text-lg font-semibold">{timer.title}</span>}
                         </div>
                         <div className="flex h-full items-start">
-                            {status === 'COMPLETED' && <CheckCircle className="h-5 w-5 text-green-500" />}
+                            {timer.status === 'COMPLETED' && <CheckCircle className="h-5 w-5 text-green-500" />}
                         </div>
                     </div>
                     <div className="mb-4">
@@ -124,11 +191,7 @@ export function Timer({ timer, updateTimerState }: TimerProps) {
                         </div>
                         <div className="flex w-full justify-between font-semibold">
                             Time Remaining
-                            <p>{formatTime(remainingTime)}</p>
-                        </div>
-                        <div className="flex w-full justify-between font-semibold">
-                            Time worked
-                            <p>{formatTime(timer.duration - remainingTime)}</p>
+                            <p>{formatTime(timer.remainingTime)}</p>
                         </div>
                     </div>
                 </div>
@@ -136,15 +199,19 @@ export function Timer({ timer, updateTimerState }: TimerProps) {
                     <div className="text-sm text-muted-foreground mb-2">
                         Created: {formatDate(timer.createdAt)}
                     </div>
+                    <div className="text-sm mb-2 flex gap-1">
+                        Tags: {timer.tags?.map((tag, index) => <Badge key={index} variant="secondary">{tag}</Badge>)}
+                    </div>
                     {timer.completedAt && <div className="text-sm text-muted-foreground mb-2">
                         Completed: {formatDate(timer.completedAt)}
                     </div>}
-                    <div className="flex space-x-2 mb-4">
-                        {status !== 'COMPLETED' && <Button onClick={() => toggleTimer()} className="flex-grow">
-                            {status === 'ACTIVE' ? <Pause className="mr-2 h-4 w-4" /> : <Play className="mr-2 h-4 w-4" />}
-                            {status === 'ACTIVE' ? 'Pause' : 'Resume'}
+                    <div className="flex flex-wrap gap-2 mb-4">
+                        {timer.status !== 'COMPLETED' && <Button onClick={() => toggleTimer()} className="flex-grow">
+                            {timer.status === 'ACTIVE' ? <Pause className="mr-2 h-4 w-4" /> : <Play className="mr-2 h-4 w-4" />}
+                            {timer.status === 'ACTIVE' ? 'Pause' : 'Resume'}
                         </Button>}
-                        {status !== 'COMPLETED' && <Button onClick={markComplete}>Mark Complete</Button>}
+                        {timer.status !== 'COMPLETED' && <Button onClick={markComplete}>Mark Complete</Button>}
+                        {timer.status === 'COMPLETED' && <Button onClick={addTime}>+ 10</Button>}
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button variant="outline" size="icon">
@@ -155,13 +222,13 @@ export function Timer({ timer, updateTimerState }: TimerProps) {
                                 <div className="p-2">
                                     <form onSubmit={(e) => {
                                         e.preventDefault()
-                                        // addTag(timer.id, newTag)
+                                        addTagDB(timer.id, newTag)
                                     }}>
-                                        {/* <Input
-                                        value={newTag}
-                                        onChange={(e) => setNewTag(e.target.value)}
-                                        placeholder="Add new tag"
-                                    /> */}
+                                        <Input
+                                            value={newTag}
+                                            onChange={(e) => addTag(timer.id, e.target.value)}
+                                            placeholder="Add new tag"
+                                        />
                                     </form>
                                 </div>
                             </DropdownMenuContent>
@@ -174,11 +241,11 @@ export function Timer({ timer, updateTimerState }: TimerProps) {
                         ))}
                         <form onSubmit={(e) => {
                             e.preventDefault()
-                            // addComment(timer.id, newComment)
+                            addCommentDB(timer.id, newComment)
                         }} className="mt-2">
                             <Textarea
                                 value={newComment}
-                                onChange={(e) => setNewComment(e.target.value)}
+                                onChange={(e) => addComment(timer.id, e.target.value)}
                                 placeholder="Add a comment"
                                 className="mb-2"
                             />

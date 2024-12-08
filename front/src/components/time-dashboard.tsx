@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Clock, Plus, Pause, Play, Tag, CheckCircle, Calendar as CalendarIcon, Edit2, X, MessageSquare } from 'lucide-react'
+import { Plus, Calendar as CalendarIcon } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -18,128 +18,82 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { useToast } from "@/hooks/use-toast"
+// import { useToast } from "@/hooks/use-toast"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
 import { format } from "date-fns"
 import { Timer } from './timer'
 import { TimerType } from '@/types'
+import { useTimerStore } from '@/store/useTimerStore'
 
 const timeOptions = [
-  { value: '1', label: '1 seconds' },
-  { value: '3', label: '3 seconds' },
-  { value: '10', label: '10 seconds' },
-  { value: '120', label: '2 minutes' },
   { value: '600', label: '10 minutes' },
-  { value: '1200', label: '20 minutes' },
-  { value: '1800', label: '30 minutes' },
-  { value: '2400', label: '40 minutes' },
-  { value: '2700', label: '45 minutes' },
 ]
 
 export default function CountdownTimerDashboard() {
-  const [timers, setTimers] = React.useState<TimerType[]>([])
-  const [activeFilterName, setActiveFilterName] = React.useState('ALL')
-  const [newTimerLabel, setNewTimerLabel] = React.useState('')
-  const [newTimerDuration, setNewTimerDuration] = React.useState('')
   const [isDialogOpen, setIsDialogOpen] = React.useState(false)
-  const [selectedTag, setSelectedTag] = React.useState<string | null>(null)
   const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(undefined)
-  const { toast } = useToast();
+  // const { toast } = useToast();
 
   React.useEffect(() => {
     fetchAllTimers();
   }, [])
 
+  const {
+    setAllTimers,
+    setNewTimerTitle,
+    setNewTimerDuration,
+    setActiveFilter,
+    addNewTimer,
+    activeFilter,
+    allTimers,
+    newTimerTitle,
+    newTimerDuration
+  } = useTimerStore();
+
   const fetchAllTimers = async () => {
     const response = await fetch("http://localhost:5000/api/timers");
-    const dbTimers = await response.json() as TimerType[];
-    const timersWithoutCommentsAndTags = dbTimers.map(timer => {
-      const { comments, tags, ...t } = timer;
-      if (t.status === 'ACTIVE')
-        t.status = "PAUSED";
-      return t;
-    }).sort((a, b) => {
-      const order = { 'PAUSED': 0, 'ACTIVE': 0, 'COMPLETED': 1 };
-      return order[a.status] - order[b.status];
-    })
+    let dbTimers = await response.json() as TimerType[];
+    dbTimers = dbTimers.map(timer => ({
+      ...timer,
+      status: timer.status === 'ACTIVE' ? 'PAUSED' : timer.status
+    }))
+    setAllTimers(dbTimers);
     //should be atmost one active timer, active timer stays local until completed or paused
-    const activeTimer = timers.filter(timer => timer.status === 'ACTIVE');
-    if(activeTimer.length > 1) {
-      console.error('Cannot be 2 active timers, foucs man!');
-      setTimers([])
-      return;
-    }
-    const activeTimerId = activeTimer[0]?.id;
-    setTimers([...timers.filter(timer => timer.id === activeTimerId), ...timersWithoutCommentsAndTags.filter(timer => timer.id !== activeTimerId)]);
   }
 
   const addTimerDB = async (timer: TimerType | undefined) => {
     if (!timer) {
-        console.error('Timer not found');
-        return;
+      console.error('Timer not found');
+      return;
     }
-    const { comments, tags, ...timersWithoutCommentsAndTags } = timer;
-    // console.log(timersWithoutCommentsAndTags)
     try {
-        await fetch(`http://localhost:5000/api/timers/${timer.id}`, {
-            method: "POST",
-            body: JSON.stringify({ ...timersWithoutCommentsAndTags }), // change label to timer everywhere
-            headers: {
-                "Content-Type": "application/json",
-            }
-        });
+      await fetch(`http://localhost:5000/api/timers/${timer.id}`, {
+        method: "POST",
+        body: JSON.stringify({ ...timer }),
+        headers: {
+          "Content-Type": "application/json",
+        }
+      });
     } catch (e) {
-        console.error(e);
+      console.error(e);
     }
-}
+  }
 
   const addTimer = async (status: "ACTIVE" | "PAUSED" | "COMPLETED" = 'ACTIVE') => {
-    if (newTimerLabel.trim() === '' || newTimerDuration === '') return
-
     const newTimer: TimerType = {
       id: uuidv4(),
-      title: newTimerLabel,
-      duration: parseInt(newTimerDuration),
-      remainingTime: parseInt(newTimerDuration),
-      tags: ['unfinished'],
+      title: newTimerTitle,
+      duration: 600,
+      remainingTime: 600,
       status,
       createdAt: new Date().toISOString(),
       comments: [],
     }
     await addTimerDB(newTimer);
-    setTimers([...timers, newTimer])
-    setNewTimerLabel('')
-    setNewTimerDuration('')
-    setIsDialogOpen(false)
-  }
-
-  const sync = async () => {
-    console.log(timers);
-    return
-
-    const timersWithoutCommentsAndTags = timers.map(timer => {
-      const { comments, tags, ...t } = timer;
-      // change label to title 
-      return { ...t };
-    })
-    console.log(timersWithoutCommentsAndTags)
-    try {
-      await fetch("http://localhost:5000/api/timers", {
-        method: "POST",
-        body: JSON.stringify({ timers: timersWithoutCommentsAndTags }),
-        headers: {
-          "Content-Type": "application/json",
-        }
-      });
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
-  const updateTimerState = (timer: TimerType) => {
-    setTimers([...timers.filter(t => t.id !== timer.id), timer]);
+    addNewTimer(newTimer);
+    setIsDialogOpen(false);
   }
 
   return (
@@ -172,7 +126,7 @@ export default function CountdownTimerDashboard() {
             </Popover>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
-                <Button disabled={timers.findIndex(timer => timer.status === 'ACTIVE') > -1}>
+                <Button disabled={allTimers.findIndex(timer => timer.status === 'ACTIVE') > -1}>
                   <Plus className="mr-2 h-4 w-4" /> Add Timer
                 </Button>
               </DialogTrigger>
@@ -188,8 +142,8 @@ export default function CountdownTimerDashboard() {
                       </Label>
                       <Input
                         id="name"
-                        value={newTimerLabel}
-                        onChange={(e) => setNewTimerLabel(e.target.value)}
+                        value={newTimerTitle}
+                        onChange={(e) => setNewTimerTitle(e.target.value)}
                         className="col-span-3"
                       />
                     </div>
@@ -211,53 +165,45 @@ export default function CountdownTimerDashboard() {
                       </Select>
                     </div>
                   </div>
-                  <Button onClick={() => addTimer()}>Start Timer Now (Active)</Button>
-                  <Button onClick={() => addTimer("PAUSED")}> Start Later (Not Started)</Button>
+                  <div className='w-full flex justify-end gap-2'>
+                    <Button onClick={() => addTimer("ACTIVE")}>Start Now (Active)</Button>
+                    <Button onClick={() => addTimer("PAUSED")}> Start Later (Queued)</Button>
+                  </div>
                 </div>
               </DialogContent>
             </Dialog>
-            <Button onClick={sync}>Sync</Button>
           </div>
         </div>
 
         <div className="flex flex-wrap gap-2 mb-4">
           <Button
-            variant={activeFilterName === 'ALL' ? "secondary" : "outline"}
+            variant={activeFilter === 'ALL' ? "secondary" : "outline"}
             onClick={() => {
-              setActiveFilterName('ALL')
-              fetchAllTimers()
+              setActiveFilter('ALL')
             }}
           >
             All
           </Button>
           <Button
-            variant={activeFilterName === 'ACTIVE' ? "secondary" : "outline"}
+            variant={activeFilter === 'ACTIVE' ? "secondary" : "outline"}
             onClick={() => {
-              setActiveFilterName('ACTIVE')
+              setActiveFilter('ACTIVE')
             }}
           >
             Active (In progress)
           </Button>
           <Button
-            variant={activeFilterName === 'STARTED' ? "secondary" : "outline"}
+            variant={activeFilter === 'QUEUED' ? "secondary" : "outline"}
             onClick={() => {
-              setActiveFilterName('STARTED')
+              setActiveFilter('QUEUED')
             }}
           >
-            Started
+            Queued
           </Button>
           <Button
-            variant={activeFilterName === 'NOT_STARTED' ? "secondary" : "outline"}
+            variant={activeFilter === 'COMPLETED' ? "secondary" : "outline"}
             onClick={() => {
-              setActiveFilterName('NOT_STARTED')
-            }}
-          >
-            Not Started
-          </Button>
-          <Button
-            variant={activeFilterName === 'COMPLETED' ? "secondary" : "outline"}
-            onClick={() => {
-              setActiveFilterName('COMPLETED')
+              setActiveFilter('COMPLETED')
             }}
           >
             Completed
@@ -274,15 +220,14 @@ export default function CountdownTimerDashboard() {
         </div>
 
         <div className="flex justify-between items-center">
-          <h2 className="text-xl font-semibold">{activeFilterName} Timers</h2>
-          <span className="text-sm font-medium">Count: {timers.length}</span>
+          <h2 className="text-xl font-semibold">{activeFilter} Timers</h2>
+          <span className="text-sm font-medium">Count: {allTimers.length}</span>
         </div>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {activeFilterName === 'ALL' && timers.map(timer => (<Timer key={timer.id} updateTimerState={updateTimerState} timer={timer} />))}
-          {activeFilterName === 'COMPLETED' && timers.filter(timer => ['COMPLETED'].includes(timer.status)).map(timer => (<Timer key={timer.id} updateTimerState={updateTimerState} timer={timer} />))}
-          {activeFilterName === 'NOT_STARTED' && timers.filter(timer => Math.abs(timer.duration - timer.remainingTime) === 0 && !['COMPLETED'].includes(timer.status)).map(timer => (<Timer key={timer.id} updateTimerState={updateTimerState} timer={timer} />))}
-          {activeFilterName === 'STARTED' && timers.filter(timer => Math.abs(timer.duration - timer.remainingTime) > 0 && timer.status !== 'COMPLETED').map(timer => (<Timer key={timer.id} updateTimerState={updateTimerState} timer={timer} />))}
-          {activeFilterName === 'ACTIVE' && timers.filter(timer => ['ACTIVE'].includes(timer.status)).map(timer => (<Timer key={timer.id} updateTimerState={updateTimerState} timer={timer} />))}
+          {activeFilter === 'ALL' && allTimers.map(timer => (<Timer key={timer.id} timer={timer} />))}
+          {activeFilter === 'COMPLETED' && allTimers.filter(timer => ['COMPLETED'].includes(timer.status)).map(timer => (<Timer key={timer.id} timer={timer} />))}
+          {activeFilter === 'QUEUED' && allTimers.filter(timer => ['PAUSED'].includes(timer.status)).map(timer => (<Timer key={timer.id} timer={timer} />))}
+          {activeFilter === 'ACTIVE' && allTimers.filter(timer => ['ACTIVE'].includes(timer.status)).map(timer => (<Timer key={timer.id} timer={timer} />))}
         </div>
       </div>
     </div >
