@@ -14,7 +14,6 @@ type TimerProps = {
 }
 
 export function Timer({ timer }: TimerProps) {
-
     const {
         setStatus,
         newComment,
@@ -24,7 +23,7 @@ export function Timer({ timer }: TimerProps) {
         setRemainingTime
     } = useTimerStore();
 
-    const completeAt = Date.now() + Math.abs(timer.remainingTime - timer.duration) * 1000;
+    const completeAt = Date.now() + Math.abs(timer.remainingTime) * 1000;
 
     const formatTime = (seconds: number) => {
         const minutes = Math.floor(seconds / 60)
@@ -68,8 +67,7 @@ export function Timer({ timer }: TimerProps) {
             console.info('Timer already completed');
             return;
         };
-        // await updateTimerDB(timer);
-
+        
         try {
             await fetch('http://localhost:5000/api/timer', {
                 method: 'PATCH',
@@ -92,7 +90,8 @@ export function Timer({ timer }: TimerProps) {
                 clearInterval(interval);
         }
 
-        if (Date.now() >= completeAt) {
+        if (Date.now() >= completeAt && timer.status !== 'COMPLETED') {
+            console.log('completing timer');
             completeTimer();
         }
 

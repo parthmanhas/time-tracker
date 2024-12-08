@@ -69,7 +69,7 @@ export default function CountdownTimerDashboard() {
       return;
     }
     try {
-      await fetch(`http://localhost:5000/api/timers/${timer.id}`, {
+      await fetch(`http://localhost:5000/api/timer`, {
         method: "POST",
         body: JSON.stringify({ ...timer }),
         headers: {

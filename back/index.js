@@ -32,20 +32,19 @@ app.get('/api/timers', async (req, res) => {
 });
 
 // Route to create a new user
-app.post('/api/timers/:id', async (req, res) => {
-  const { id } = req.params;
-  const { remainingTime, status, title, duration } = req.body;
+app.post('/api/timer', async (req, res) => {
+  const { id, remainingTime, status, title, duration } = req.body;
   try {
-    await prisma.$queryRaw`INSERT INTO public."Timer" (id, status, title, duration, "remainingTime") values (${id}, ${status}::"TimerStatus", ${title}, ${duration}, ${remainingTime})`;
-    res.status(200);
-  } catch (error) {
-    console.error(error);
+    const timer = await prisma.$queryRaw`INSERT INTO public."Timer" (id, status, title, duration, "remainingTime") values (${id}, ${status}::"TimerStatus", ${title}, ${duration}, ${remainingTime})`;
+    res.status(200).json({ timer })
+
+  } catch (e) {
+    console.error(e);
     res.status(500).json({ error: 'Could not create timer' });
   }
 });
 
 app.patch('/api/timer', async (req, res) => {
-
   const { id, remainingTime, status, title, comments, duration, completedAt, due_at } = req.body;
 
   if (!id) {
@@ -59,7 +58,7 @@ app.patch('/api/timer', async (req, res) => {
     res.status(500).json({ error: 'info missing to update' });
     return;
   }
- 
+
   try {
     const timer = await prisma.timer.update({
       data: {
