@@ -11,17 +11,33 @@ import { useTimerStore } from "@/store/useTimerStore"
 
 type TimerProps = {
     timer: TimerType,
+    workerRef: React.MutableRefObject<Worker | null>
 }
 
-export function Timer({ timer }: TimerProps) {
+export function Timer({ timer, workerRef }: TimerProps) {
     const {
         setStatus,
         newComment,
         addComment,
         newTag,
         addTag,
-        setRemainingTime
+        setRemainingTime,
+        allTimers
     } = useTimerStore();
+
+
+
+    React.useEffect(() => {
+        if (timer.status === 'COMPLETED') {
+            return;
+        } else if (timer.status === 'ACTIVE') {
+            workerRef?.current?.postMessage({
+                type: "START_TIMER",
+                payload: { id: timer.id, remainingTime: timer.remainingTime },
+            });
+        }
+
+    }, [setRemainingTime, timer.duration, timer.id, timer.remainingTime, timer.status, workerRef]);
 
     const completeAt = Date.now() + Math.abs(timer.remainingTime) * 1000;
 
@@ -41,6 +57,10 @@ export function Timer({ timer }: TimerProps) {
     }
     const toggleTimer = async () => {
         setStatus(timer.id, timer.status === 'ACTIVE' ? 'PAUSED' : 'ACTIVE');
+        workerRef.current?.postMessage({
+            type: timer.status === 'ACTIVE' ? 'STOP_TIMER' : 'START_TIMER',
+            payload: { id: timer.id, remainingTime: timer.remainingTime },
+        });
         updateTimerDB({ ...timer, status: timer.status === 'ACTIVE' ? 'PAUSED' : 'ACTIVE' });
     }
 
@@ -67,7 +87,7 @@ export function Timer({ timer }: TimerProps) {
             console.info('Timer already completed');
             return;
         };
-        
+
         try {
             await fetch('http://localhost:5000/api/timer', {
                 method: 'PATCH',
@@ -81,41 +101,6 @@ export function Timer({ timer }: TimerProps) {
             console.error(e);
         }
     }
-
-    React.useEffect(() => {
-
-        const completeTimer = (interval?: NodeJS.Timeout) => {
-            timer.remainingTime = 0;
-            if (interval)
-                clearInterval(interval);
-        }
-
-        if (Date.now() >= completeAt && timer.status !== 'COMPLETED') {
-            console.log('completing timer');
-            completeTimer();
-        }
-
-        if (timer.status === 'COMPLETED') return;
-        if (timer.status === 'PAUSED') return;
-        // below happens in ACTIVE state
-
-        const interval = setInterval(() => {
-            if (Date.now() >= completeAt) {
-                console.error('Timer already finished but timer running !!');
-                completeTimer(interval);
-            }
-
-            if (timer.remainingTime <= 0) {
-                completeTimer(interval);
-                return;
-            }
-
-            setRemainingTime(timer.id, timer.remainingTime - 1);
-
-        }, 1000);
-
-        return () => clearInterval(interval);
-    }, [completeAt, setRemainingTime, timer])
 
     const addTagDB = async (timerId: string, tag: string) => {
         if (!timerId) {
@@ -205,10 +190,11 @@ export function Timer({ timer }: TimerProps) {
                         Completed: {formatDate(timer.completedAt)}
                     </div>}
                     <div className="flex flex-wrap gap-2 mb-4">
-                        {timer.status !== 'COMPLETED' && <Button onClick={() => toggleTimer()} className="flex-grow">
-                            {timer.status === 'ACTIVE' ? <Pause className="mr-2 h-4 w-4" /> : <Play className="mr-2 h-4 w-4" />}
-                            {timer.status === 'ACTIVE' ? 'Pause' : 'Resume'}
-                        </Button>}
+                        {timer.status !== 'COMPLETED' &&
+                            <Button disabled={allTimers.findIndex(timer => timer.status === 'ACTIVE') > -1 && timer.status === 'PAUSED'} onClick={() => toggleTimer()} className="flex-grow">
+                                {timer.status === 'ACTIVE' ? <Pause className="mr-2 h-4 w-4" /> : <Play className="mr-2 h-4 w-4" />}
+                                {timer.status === 'ACTIVE' ? 'Pause' : 'Resume'}
+                            </Button>}
                         {timer.status !== 'COMPLETED' && <Button onClick={markComplete}>Mark Complete</Button>}
                         {timer.status === 'COMPLETED' && <Button onClick={addTime}>+ 10</Button>}
                         <DropdownMenu>

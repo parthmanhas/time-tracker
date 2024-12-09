@@ -6,7 +6,6 @@ type TimerStatus = 'ACTIVE' | 'PAUSED' | 'COMPLETED';
 
 type TimerStoreStateType = {
     allTimers: TimerType[],
-    filteredTimers: TimerType[],
     activeFilter: ActiveFilter,
     date: string,
     setDateFilter: (date: string) => void,

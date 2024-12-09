@@ -25,7 +25,8 @@
     "noUncheckedSideEffectImports": true
   },
   "include": [
-    "src"
+    "src",
+    "public/timeWorker.js"
   ],
   "baseUrl": ".",
   "paths": {

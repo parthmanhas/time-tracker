@@ -49,7 +49,9 @@ export default function CountdownTimerDashboard() {
     activeFilter,
     allTimers,
     newTimerTitle,
-    newTimerDuration
+    newTimerDuration,
+    setRemainingTime,
+    setStatus
   } = useTimerStore();
 
   const fetchAllTimers = async () => {
@@ -96,12 +98,46 @@ export default function CountdownTimerDashboard() {
     setIsDialogOpen(false);
   }
 
+  const workerRef = React.useRef<Worker | null>(null);
+
+  React.useEffect(() => {
+    if (!workerRef.current) {
+      const workerUrl = new URL('../../timeWorker.js', import.meta.url);
+      const worker = new Worker(workerUrl);
+      workerRef.current = worker;
+      workerRef.current.onmessage = event => {
+        const { type, id, remainingTime } = event.data;
+
+        switch (type) {
+          case "TIMER_UPDATE":
+            setRemainingTime(id, remainingTime);
+            break;
+          case "TIMER_COMPLETED":
+            setStatus(id, 'COMPLETED');
+            console.log(allTimers.find(timer => timer.id === id))
+            workerRef?.current?.postMessage({
+              type: 'STOP_TIMER'
+            });
+            break;
+          default:
+            console.error('Unknown message type:', type);
+        }
+      }
+
+      return () => {
+        workerRef.current?.terminate();
+        workerRef.current = null;
+      };
+
+    }
+  }, [setRemainingTime, setStatus]);
+
   return (
     <div className="container mx-auto p-6">
       <div className="space-y-4">
-        <div className="flex justify-between items-center">
+        <div className="flex flex-wrap gap-2 justify-between items-center">
           <h1 className="text-2xl font-bold">Countdown Timers</h1>
-          <div className="flex space-x-2">
+          <div className="flex flex-wrap gap-3">
             <Popover>
               <PopoverTrigger asChild>
                 <Button
@@ -224,10 +260,10 @@ export default function CountdownTimerDashboard() {
           <span className="text-sm font-medium">Count: {allTimers.length}</span>
         </div>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {activeFilter === 'ALL' && allTimers.map(timer => (<Timer key={timer.id} timer={timer} />))}
-          {activeFilter === 'COMPLETED' && allTimers.filter(timer => ['COMPLETED'].includes(timer.status)).map(timer => (<Timer key={timer.id} timer={timer} />))}
-          {activeFilter === 'QUEUED' && allTimers.filter(timer => ['PAUSED'].includes(timer.status)).map(timer => (<Timer key={timer.id} timer={timer} />))}
-          {activeFilter === 'ACTIVE' && allTimers.filter(timer => ['ACTIVE'].includes(timer.status)).map(timer => (<Timer key={timer.id} timer={timer} />))}
+          {activeFilter === 'ALL' && allTimers.map(timer => (<Timer key={timer.id} timer={timer} workerRef={workerRef} />))}
+          {activeFilter === 'COMPLETED' && allTimers.filter(timer => ['COMPLETED'].includes(timer.status)).map(timer => (<Timer key={timer.id} timer={timer} workerRef={workerRef} />))}
+          {activeFilter === 'QUEUED' && allTimers.filter(timer => ['PAUSED'].includes(timer.status)).map(timer => (<Timer key={timer.id} timer={timer} workerRef={workerRef} />))}
+          {activeFilter === 'ACTIVE' && allTimers.filter(timer => ['ACTIVE'].includes(timer.status)).map(timer => (<Timer key={timer.id} timer={timer} workerRef={workerRef} />))}
         </div>
       </div>
     </div >
