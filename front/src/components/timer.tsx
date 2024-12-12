@@ -8,6 +8,7 @@ import { TimerType } from "@/types"
 import { Input } from "./ui/input"
 import { Badge } from "./ui/badge"
 import { useTimerStore } from "@/store/useTimerStore"
+import { markComplete } from "@/lib/utils"
 
 type TimerProps = {
     timer: TimerType,
@@ -17,15 +18,15 @@ type TimerProps = {
 export function Timer({ timer, workerRef }: TimerProps) {
     const {
         setStatus,
-        newComment,
         addComment,
-        newTag,
         addTag,
         setRemainingTime,
-        allTimers
+        allTimers,
+        setDuration
     } = useTimerStore();
 
-
+    const [newTag, setNewTag] = React.useState('');
+    const [newComment, setNewComment] = React.useState('');
 
     React.useEffect(() => {
         if (timer.status === 'COMPLETED') {
@@ -46,6 +47,7 @@ export function Timer({ timer, workerRef }: TimerProps) {
         const remainingSeconds = seconds % 60
         return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`
     }
+
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleDateString('en-US', {
             year: 'numeric',
@@ -55,6 +57,7 @@ export function Timer({ timer, workerRef }: TimerProps) {
             minute: '2-digit'
         })
     }
+
     const toggleTimer = async () => {
         setStatus(timer.id, timer.status === 'ACTIVE' ? 'PAUSED' : 'ACTIVE');
         workerRef.current?.postMessage({
@@ -82,26 +85,6 @@ export function Timer({ timer, workerRef }: TimerProps) {
         }
     }
 
-    const markComplete = async () => {
-        if (timer.status === 'COMPLETED') {
-            console.info('Timer already completed');
-            return;
-        };
-
-        try {
-            await fetch('http://localhost:5000/api/timer', {
-                method: 'PATCH',
-                body: JSON.stringify({ id: timer.id, status: 'COMPLETED' }),
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
-            setStatus(timer.id, 'COMPLETED');
-        } catch (e) {
-            console.error(e);
-        }
-    }
-
     const addTagDB = async (timerId: string, tag: string) => {
         if (!timerId) {
             console.error('timerId missing');
@@ -119,7 +102,7 @@ export function Timer({ timer, workerRef }: TimerProps) {
                     'Content-Type': 'application/json'
                 }
             })
-            addTag(timer.id, tag);
+            // addTag(timer.id, tag);
         } catch (e) {
             console.error(e);
         }
@@ -134,15 +117,15 @@ export function Timer({ timer, workerRef }: TimerProps) {
                     'Content-Type': 'application/json'
                 }
             })
-            addComment(timer.id, comment);
         } catch (e) {
             console.error(e);
         }
     }
 
     const addTime = async () => {
-        timer.duration += timer.duration;
-        timer.status = 'ACTIVE';
+        setDuration(timer.id, timer.duration + 600);
+        setStatus(timer.id, 'ACTIVE');
+        setRemainingTime(timer.id, 600);
         try {
             await fetch('http://localhost:5000/api/timer', {
                 method: 'PATCH',
@@ -195,7 +178,12 @@ export function Timer({ timer, workerRef }: TimerProps) {
                                 {timer.status === 'ACTIVE' ? <Pause className="mr-2 h-4 w-4" /> : <Play className="mr-2 h-4 w-4" />}
                                 {timer.status === 'ACTIVE' ? 'Pause' : 'Resume'}
                             </Button>}
-                        {timer.status !== 'COMPLETED' && <Button onClick={markComplete}>Mark Complete</Button>}
+                        {timer.status !== 'COMPLETED' && <Button onClick={() => {
+                            markComplete(timer, setStatus);
+                            workerRef.current?.postMessage({
+                                type: 'STOP_TIMER'
+                            })
+                        }}>Mark Complete</Button>}
                         {timer.status === 'COMPLETED' && <Button onClick={addTime}>+ 10</Button>}
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -205,13 +193,15 @@ export function Timer({ timer, workerRef }: TimerProps) {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent>
                                 <div className="p-2">
-                                    <form onSubmit={(e) => {
-                                        e.preventDefault()
-                                        addTagDB(timer.id, newTag)
+                                    <form onSubmit={async (e) => {
+                                        e.preventDefault();
+                                        await addTagDB(timer.id, newTag);
+                                        addTag(timer.id, newTag);
+                                        setNewTag('');
                                     }}>
                                         <Input
                                             value={newTag}
-                                            onChange={(e) => addTag(timer.id, e.target.value)}
+                                            onChange={(e) => setNewTag(e.target.value)}
                                             placeholder="Add new tag"
                                         />
                                     </form>
@@ -224,13 +214,15 @@ export function Timer({ timer, workerRef }: TimerProps) {
                         {timer.comments?.map((comment, index) => (
                             <div key={index} className="text-sm mb-1">{comment}</div>
                         ))}
-                        <form onSubmit={(e) => {
+                        <form onSubmit={async (e) => {
                             e.preventDefault()
-                            addCommentDB(timer.id, newComment)
+                            await addCommentDB(timer.id, newComment)
+                            addComment(timer.id, newComment);
+                            setNewComment(''); 
                         }} className="mt-2">
                             <Textarea
                                 value={newComment}
-                                onChange={(e) => addComment(timer.id, e.target.value)}
+                                onChange={(e) => setNewComment(e.target.value)}
                                 placeholder="Add a comment"
                                 className="mb-2"
                             />

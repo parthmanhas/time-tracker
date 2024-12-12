@@ -7,8 +7,6 @@ type TimerStatus = 'ACTIVE' | 'PAUSED' | 'COMPLETED';
 type TimerStoreStateType = {
     allTimers: TimerType[],
     activeFilter: ActiveFilter,
-    date: string,
-    setDateFilter: (date: string) => void,
     setActiveFilter: (filter: ActiveFilter) => void,
     setAllTimers: (timers: TimerType[]) => void,
     setStatus: (id: string, status: TimerStatus) => void,
@@ -24,18 +22,12 @@ type TimerStoreStateType = {
     setNewTimerTitle: (title: string) => void,
     setNewTimerDuration: (duration: string) => void
     addNewTimer: (timer: TimerType) => void
-
-    //single timer
-    newComment: string,
-    newTag: string,
 }
 
 export const useTimerStore = create<TimerStoreStateType>((set) => ({
     allTimers: [],
     filteredTimers: [],
     activeFilter: 'ALL',
-    date: new Date().toISOString(),
-    setDateFilter: (date) => set(state => ({ ...state, date })),
     setActiveFilter: (activeFilter: ActiveFilter) => set((state) => ({ ...state, activeFilter })),
     setAllTimers: (allTimers) => set((state) => ({ ...state, allTimers })),
     setStatus: (id: string, status: TimerStatus) =>
@@ -91,8 +83,4 @@ export const useTimerStore = create<TimerStoreStateType>((set) => ({
     addNewTimer: timer => set(state => ({
         allTimers: [...state.allTimers, timer],
     })),
-
-    // existing timer
-    newComment: '', // reference variable to add new comment
-    newTag: '', //// reference variable to add new tag
 }));

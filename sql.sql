@@ -2,36 +2,38 @@ select * from public."Timer" where title like '%display%';
 
 select * from public."Timer" order by "completedAt" desc;
 
-alter table public."Timer" rename column due to due_at;
-alter table public."Timer" rename column createdat to "createdAt";
+-- alter table public."Timer" rename column due to due_at;
+-- alter table public."Timer" rename column createdat to "createdAt";
 
-select * from public."Timer" where title like '%ec2%';
+select * from public."Timer" where title like '%test%';
 
 select distinct(tag) from tags;
 
+select * from tags where timerId = '4814d278-91d9-4cd9-a8f9-5a14ce348aa9';
+
 select * from public."Timer";
 
-create table tags (
-	id serial primary key,
-	tag varchar(100), 
-	timerId text,
-	constraint fk_timer foreign key (timerId) references public."Timer"(id)
-)
+-- create table tags (
+-- 	id serial primary key,
+-- 	tag varchar(100), 
+-- 	timerId text,
+-- 	constraint fk_timer foreign key (timerId) references public."Timer"(id)
+-- )
 
-alter table tags alter column tag set not null;
-alter table tags alter column id set not null;
-alter table tags alter column timerId set not null;
+-- alter table tags alter column tag set not null;
+-- alter table tags alter column id set not null;
+-- alter table tags alter column timerId set not null;
 
-alter table tags drop constraint fk_timer;
+-- alter table tags drop constraint fk_timer;
 
-alter table tags add constraint fk_timer foreign key (timerId) references public."Timer"(id) on delete cascade; 
+-- alter table tags add constraint fk_timer foreign key (timerId) references public."Timer"(id) on delete cascade; 
 
-alter table tags add constraint unique_tag_timerId unique (tag, timerId);
+-- alter table tags add constraint unique_tag_timerId unique (tag, timerId);
 
-alter table tags drop constraint unique_tag_timerId;
+-- alter table tags drop constraint unique_tag_timerId;
 
 select * from tags;
-INSERT INTO tags (timerId, tag) values ('e2da3712-2ce1-4de1-a444-bee89803d10a', 'test');
+-- INSERT INTO tags (timerId, tag) values ('e2da3712-2ce1-4de1-a444-bee89803d10a', 'test');
 select * from public."Timer";
 select
 	t.id,
@@ -51,18 +53,18 @@ group by t.id;
 
 select coalesce (null, '{}');
 
-create table comments (
-	id serial primary key not null,
-	comment text not null,
-	timerId text not null,
-	constraint fk_comments foreign key (timerId) references "Timer"(id)
-);
+-- create table comments (
+-- 	id serial primary key not null,
+-- 	comment text not null,
+-- 	timerId text not null,
+-- 	constraint fk_comments foreign key (timerId) references "Timer"(id)
+-- );
 
 select * from comments;
 
-select * from public."Timer" where title like '%add time to timer functionality%';
+select * from public."Timer" where title like '%inactive%';
 
-alter table public."Timer" alter column "createdAt" set default current_timestamp;
+-- alter table public."Timer" alter column "createdAt" set default current_timestamp;
 
 select * from public."Timer" where title like '%test%';
 

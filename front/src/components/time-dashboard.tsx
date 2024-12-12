@@ -21,7 +21,7 @@ import {
 // import { useToast } from "@/hooks/use-toast"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { cn } from "@/lib/utils"
+import { cn, markComplete } from "@/lib/utils"
 import { format } from "date-fns"
 import { Timer } from './timer'
 import { TimerType } from '@/types'
@@ -51,7 +51,7 @@ export default function CountdownTimerDashboard() {
     newTimerTitle,
     newTimerDuration,
     setRemainingTime,
-    setStatus
+    setStatus,
   } = useTimerStore();
 
   const fetchAllTimers = async () => {
@@ -63,6 +63,16 @@ export default function CountdownTimerDashboard() {
     }))
     setAllTimers(dbTimers);
     //should be atmost one active timer, active timer stays local until completed or paused
+    // const res = dbTimers.filter(timer => timer.completedAt?.split('T')[0] === convertToISODate(new Date().toLocaleDateString()))
+    // console.log(dbTimers[0].completedAt)
+    // console.log(new Date().toLocaleDateString().split('/').reverse())
+    // console.log(res)
+  }
+
+  const convertToISODate = (localDateString: string | undefined) => {
+    if (!localDateString) return;
+    const [month, day, year] = localDateString.split('/'); // Assuming the format is MM/DD/YYYY
+    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
   }
 
   const addTimerDB = async (timer: TimerType | undefined) => {
@@ -113,8 +123,7 @@ export default function CountdownTimerDashboard() {
             setRemainingTime(id, remainingTime);
             break;
           case "TIMER_COMPLETED":
-            setStatus(id, 'COMPLETED');
-            console.log(allTimers.find(timer => timer.id === id))
+            markComplete({ id, status: 'COMPLETED' }, setStatus);
             workerRef?.current?.postMessage({
               type: 'STOP_TIMER'
             });
@@ -131,6 +140,28 @@ export default function CountdownTimerDashboard() {
 
     }
   }, [setRemainingTime, setStatus]);
+
+  const getTimeSpent = (activeFilter: string) => {
+    if (activeFilter === 'COMPLETED') {
+      let seconds;
+      const completedTimers = allTimers.filter(timer => timer.status === 'COMPLETED');
+      if (selectedDate) {
+        seconds = completedTimers.filter(timer => timer.completedAt?.split('T')[0] === convertToISODate(selectedDate?.toLocaleDateString())).reduce((acc, curr) => acc += curr.duration, 0);
+      } else {
+        seconds = completedTimers.reduce((acc, curr) => acc += curr.duration, 0);
+      }
+      const hours = Math.floor(seconds / 3600);
+      const minutes = Math.floor((seconds % 3600) / 60);
+      return `${hours} hrs : ${minutes} min`
+    } else if (activeFilter === 'ALL') {
+      const seconds = allTimers.filter(timer => timer.status === 'COMPLETED').reduce((acc, curr) => acc += curr.duration, 0);
+      const hours = Math.floor(seconds / 3600);
+      const minutes = Math.floor((seconds % 3600) / 60);
+      return `${hours} hrs : ${minutes} min`
+    }
+    return 0;
+  }
+
 
   return (
     <div className="container mx-auto p-6">
@@ -257,13 +288,18 @@ export default function CountdownTimerDashboard() {
 
         <div className="flex justify-between items-center">
           <h2 className="text-xl font-semibold">{activeFilter} Timers</h2>
+          <h2 className="text-xl font-semibold">Time Spent: {getTimeSpent(activeFilter)}</h2>
           <span className="text-sm font-medium">Count: {allTimers.length}</span>
         </div>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {activeFilter === 'ALL' && allTimers.map(timer => (<Timer key={timer.id} timer={timer} workerRef={workerRef} />))}
-          {activeFilter === 'COMPLETED' && allTimers.filter(timer => ['COMPLETED'].includes(timer.status)).map(timer => (<Timer key={timer.id} timer={timer} workerRef={workerRef} />))}
-          {activeFilter === 'QUEUED' && allTimers.filter(timer => ['PAUSED'].includes(timer.status)).map(timer => (<Timer key={timer.id} timer={timer} workerRef={workerRef} />))}
+          {!selectedDate && activeFilter === 'ALL' && allTimers.map(timer => (<Timer key={timer.id} timer={timer} workerRef={workerRef} />))}
+          {!selectedDate && activeFilter === 'COMPLETED' && allTimers.filter(timer => ['COMPLETED'].includes(timer.status)).map(timer => (<Timer key={timer.id} timer={timer} workerRef={workerRef} />))}
+          {!selectedDate && activeFilter === 'QUEUED' && allTimers.filter(timer => ['PAUSED'].includes(timer.status)).map(timer => (<Timer key={timer.id} timer={timer} workerRef={workerRef} />))}
+
           {activeFilter === 'ACTIVE' && allTimers.filter(timer => ['ACTIVE'].includes(timer.status)).map(timer => (<Timer key={timer.id} timer={timer} workerRef={workerRef} />))}
+
+          {selectedDate && activeFilter === 'COMPLETED' && allTimers.filter(timer => timer.completedAt?.split('T')[0] === convertToISODate(selectedDate.toLocaleDateString())).filter(timer => ['COMPLETED'].includes(timer.status)).map(timer => (<Timer key={timer.id} timer={timer} workerRef={workerRef} />))}
+          {selectedDate && activeFilter === 'QUEUED' && allTimers.filter(timer => timer.createdAt.split('T')[0] === convertToISODate(selectedDate.toLocaleDateString())).filter(timer => ['PAUSED'].includes(timer.status)).map(timer => (<Timer key={timer.id} timer={timer} workerRef={workerRef} />))}
         </div>
       </div>
     </div >
