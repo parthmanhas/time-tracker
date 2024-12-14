@@ -209,7 +209,7 @@ export default function CountdownTimerDashboard() {
                 <DialogHeader>
                   <DialogTitle>Add New Timer</DialogTitle>
                 </DialogHeader>
-                <div>
+                <form>
                   <div className="grid gap-4 py-4">
                     <div className="grid grid-cols-4 items-center gap-4">
                       <Label htmlFor="name" className="text-right">
@@ -241,10 +241,10 @@ export default function CountdownTimerDashboard() {
                     </div>
                   </div>
                   <div className='w-full flex justify-end gap-2'>
-                    <Button onClick={() => addTimer("ACTIVE")}>Start Now (Active)</Button>
-                    <Button onClick={() => addTimer("PAUSED")}> Start Later (Queued)</Button>
+                    <Button disabled={!newTimerTitle || !newTimerDuration} onClick={() => addTimer("ACTIVE")}>Start Now (Active)</Button>
+                    <Button disabled={!newTimerTitle || !newTimerDuration} onClick={() => addTimer("PAUSED")}> Start Later (Queued)</Button>
                   </div>
-                </div>
+                </form>
               </DialogContent>
             </Dialog>
           </div>
