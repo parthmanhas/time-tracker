@@ -136,7 +136,7 @@ export function Timer({ timer, workerRef }: TimerProps) {
         try {
             await fetch('http://localhost:5000/api/timer', {
                 method: 'PATCH',
-                body: JSON.stringify({ id: timer.id, duration: timer.duration, status: timer.status }),
+                body: JSON.stringify({ id: timer.id, duration: timer.duration + 600, status: timer.status }),
                 headers: {
                     'Content-Type': 'application/json'
                 }
