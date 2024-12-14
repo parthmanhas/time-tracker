@@ -33,9 +33,14 @@ app.get('/api/timers', async (req, res) => {
 
 // Route to create a new user
 app.post('/api/timer', async (req, res) => {
-  const { id, remainingTime, status, title, duration } = req.body;
+  const { id, remainingTime, status, title, duration, tags } = req.body;
   try {
     const timer = await prisma.$queryRaw`INSERT INTO public."Timer" (id, status, title, duration, "remainingTime") values (${id}, ${status}::"TimerStatus", ${title}, ${duration}, ${remainingTime})`;
+    if (tags) {
+      for (const tag of tags) {
+        await prisma.$queryRaw`INSERT INTO tags (timerId, tag) values (${id}, ${tag})`;
+      }
+    }
     res.status(200).json({ timer })
 
   } catch (e) {

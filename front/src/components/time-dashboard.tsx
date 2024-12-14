@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Plus, Calendar as CalendarIcon, Search } from 'lucide-react'
+import { Plus, Calendar as CalendarIcon, Search, Tag, X, ChevronsUpDown, Check } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -26,6 +26,8 @@ import { format } from "date-fns"
 import { Timer } from './timer'
 import { TimerType } from '@/types'
 import { useTimerStore } from '@/store/useTimerStore'
+import { Badge } from "@/components/ui/badge"
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 
 const timeOptions = [
   { value: '600', label: '10 minutes' },
@@ -36,9 +38,11 @@ export default function CountdownTimerDashboard() {
   const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(undefined)
   const [searchQuery, setSearchQuery] = React.useState('')
   const [selectedTag, setSelectedTag] = React.useState<string | null>(null)
+  const [selectedTags, setSelectedTags] = React.useState<string[]>([])
+  const [isTagInputOpen, setIsTagInputOpen] = React.useState(false)
   // const { toast } = useToast();
 
- 
+
 
   const {
     setAllTimers,
@@ -93,10 +97,12 @@ export default function CountdownTimerDashboard() {
       status,
       createdAt: new Date().toISOString(),
       comments: [],
+      tags: selectedTags,
     }
     await addTimerDB(newTimer);
     addNewTimer(newTimer);
     setIsDialogOpen(false);
+    setSelectedTags([]);
   }
 
   const workerRef = React.useRef<Worker | null>(null);
@@ -153,7 +159,7 @@ export default function CountdownTimerDashboard() {
   }
 
   const filteredTimers = React.useMemo(() => {
-    return allTimers.filter(timer => 
+    return allTimers.filter(timer =>
       timer.title.toLowerCase().includes(searchQuery.toLowerCase())
     )
   }, [allTimers, searchQuery])
@@ -165,11 +171,24 @@ export default function CountdownTimerDashboard() {
 
   const uniqueTags = React.useMemo(() => {
     const tags = new Set<string>()
-    allTimers.forEach(timer => {
-      timer.tags?.forEach(tag => tag ? tags.add(tag) : '')
+    allTimers?.forEach(timer => {
+      if (timer.tags) {
+        timer.tags.forEach(tag => {
+          if (tag) tags.add(tag)
+        })
+      }
     })
     return Array.from(tags)
-  }, [allTimers])
+  }, [allTimers]) || []
+
+  const handleTagSelect = (tag: string) => {
+    setSelectedTags(prev => {
+      const prevTags = prev || []
+      return prevTags.includes(tag)
+        ? prevTags.filter(t => t !== tag)
+        : [...prevTags, tag]
+    })
+  }
 
   return (
     <div className="container mx-auto p-6">
@@ -209,7 +228,7 @@ export default function CountdownTimerDashboard() {
                 <DialogHeader>
                   <DialogTitle>Add New Timer</DialogTitle>
                 </DialogHeader>
-                <form>
+                <div>
                   <div className="grid gap-4 py-4">
                     <div className="grid grid-cols-4 items-center gap-4">
                       <Label htmlFor="name" className="text-right">
@@ -239,12 +258,30 @@ export default function CountdownTimerDashboard() {
                         </SelectContent>
                       </Select>
                     </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label className="text-right">
+                        Tags
+                      </Label>
+                      <div className="col-span-3">
+                        <div className="flex flex-wrap gap-2 mb-2">
+                          {uniqueTags.map(tag => (
+                            <Badge 
+                              key={tag}
+                              variant={selectedTags.includes(tag) ? "default" : "outline"}
+                              className="flex items-center gap-1 cursor-pointer"
+                              onClick={() => handleTagSelect(tag)}>
+                              {tag}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                   <div className='w-full flex justify-end gap-2'>
-                    <Button disabled={!newTimerTitle || !newTimerDuration} onClick={() => addTimer("ACTIVE")}>Start Now (Active)</Button>
-                    <Button disabled={!newTimerTitle || !newTimerDuration} onClick={() => addTimer("PAUSED")}> Start Later (Queued)</Button>
+                    <Button disabled={selectedTags.length === 0 || !newTimerTitle || !newTimerDuration} onClick={() => addTimer("ACTIVE")}>Start Now (Active)</Button>
+                    <Button disabled={selectedTags.length === 0 || !newTimerTitle || !newTimerDuration} onClick={() => addTimer("PAUSED")}> Start Later (Queued)</Button>
                   </div>
-                </form>
+                </div>
               </DialogContent>
             </Dialog>
           </div>
@@ -327,35 +364,35 @@ export default function CountdownTimerDashboard() {
           </span>
         </div>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {!selectedDate && activeFilter === 'ALL' && 
+          {!selectedDate && activeFilter === 'ALL' &&
             filteredByTagTimers.map(timer => (
               <Timer key={timer.id} timer={timer} workerRef={workerRef} />
             ))
           }
-          {!selectedDate && activeFilter === 'COMPLETED' && 
+          {!selectedDate && activeFilter === 'COMPLETED' &&
             filteredByTagTimers
               .filter(timer => ['COMPLETED'].includes(timer.status))
               .map(timer => (
                 <Timer key={timer.id} timer={timer} workerRef={workerRef} />
               ))
           }
-          {!selectedDate && activeFilter === 'QUEUED' && 
+          {!selectedDate && activeFilter === 'QUEUED' &&
             filteredByTagTimers
               .filter(timer => ['PAUSED'].includes(timer.status))
               .map(timer => (
                 <Timer key={timer.id} timer={timer} workerRef={workerRef} />
               ))
           }
-          {activeFilter === 'ACTIVE' && 
+          {activeFilter === 'ACTIVE' &&
             filteredByTagTimers
               .filter(timer => ['ACTIVE'].includes(timer.status))
               .map(timer => (
                 <Timer key={timer.id} timer={timer} workerRef={workerRef} />
               ))
           }
-          {selectedDate && activeFilter === 'COMPLETED' && 
+          {selectedDate && activeFilter === 'COMPLETED' &&
             filteredByTagTimers
-              .filter(timer => 
+              .filter(timer =>
                 timer.completedAt?.split('T')[0] === convertToISODate(selectedDate.toLocaleDateString())
               )
               .filter(timer => ['COMPLETED'].includes(timer.status))
@@ -363,9 +400,9 @@ export default function CountdownTimerDashboard() {
                 <Timer key={timer.id} timer={timer} workerRef={workerRef} />
               ))
           }
-          {selectedDate && activeFilter === 'QUEUED' && 
+          {selectedDate && activeFilter === 'QUEUED' &&
             filteredByTagTimers
-              .filter(timer => 
+              .filter(timer =>
                 timer.createdAt.split('T')[0] === convertToISODate(selectedDate.toLocaleDateString())
               )
               .filter(timer => ['PAUSED'].includes(timer.status))
