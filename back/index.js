@@ -148,6 +148,22 @@ app.post('/comment', async (req, res) => {
   }
 })
 
+app.delete('/api/tag', async (req, res) => {
+  const { tag } = req.body;
+  if (!tag) {
+    console.error('tag not present');
+    res.status(500).json({ error: 'tag missing' });
+    return;
+  }
+  try {
+    await prisma.$queryRaw`DELETE FROM tags WHERE tag = ${tag}`;
+    res.send(200);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Error deleting tag' });
+  }
+})
+
 // Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

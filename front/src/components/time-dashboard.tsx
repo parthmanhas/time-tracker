@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Plus, Calendar as CalendarIcon } from 'lucide-react'
+import { Plus, Calendar as CalendarIcon, Search } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -21,7 +21,7 @@ import {
 // import { useToast } from "@/hooks/use-toast"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { cn, markComplete } from "@/lib/utils"
+import { cn, fetchAllTimers, markComplete } from "@/lib/utils"
 import { format } from "date-fns"
 import { Timer } from './timer'
 import { TimerType } from '@/types'
@@ -34,11 +34,11 @@ const timeOptions = [
 export default function CountdownTimerDashboard() {
   const [isDialogOpen, setIsDialogOpen] = React.useState(false)
   const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(undefined)
+  const [searchQuery, setSearchQuery] = React.useState('')
+  const [selectedTag, setSelectedTag] = React.useState<string | null>(null)
   // const { toast } = useToast();
 
-  React.useEffect(() => {
-    fetchAllTimers();
-  }, [])
+ 
 
   const {
     setAllTimers,
@@ -54,20 +54,11 @@ export default function CountdownTimerDashboard() {
     setStatus,
   } = useTimerStore();
 
-  const fetchAllTimers = async () => {
-    const response = await fetch("http://localhost:5000/api/timers");
-    let dbTimers = await response.json() as TimerType[];
-    dbTimers = dbTimers.map(timer => ({
-      ...timer,
-      status: timer.status === 'ACTIVE' ? 'PAUSED' : timer.status
-    }))
-    setAllTimers(dbTimers);
-    //should be atmost one active timer, active timer stays local until completed or paused
-    // const res = dbTimers.filter(timer => timer.completedAt?.split('T')[0] === convertToISODate(new Date().toLocaleDateString()))
-    // console.log(dbTimers[0].completedAt)
-    // console.log(new Date().toLocaleDateString().split('/').reverse())
-    // console.log(res)
-  }
+  React.useEffect(() => {
+    fetchAllTimers(setAllTimers);
+  }, [])
+
+
 
   const convertToISODate = (localDateString: string | undefined) => {
     if (!localDateString) return;
@@ -137,7 +128,6 @@ export default function CountdownTimerDashboard() {
         workerRef.current?.terminate();
         workerRef.current = null;
       };
-
     }
   }, [setRemainingTime, setStatus]);
 
@@ -162,6 +152,24 @@ export default function CountdownTimerDashboard() {
     return 0;
   }
 
+  const filteredTimers = React.useMemo(() => {
+    return allTimers.filter(timer => 
+      timer.title.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+  }, [allTimers, searchQuery])
+
+  const filteredByTagTimers = React.useMemo(() => {
+    if (!selectedTag) return filteredTimers
+    return filteredTimers.filter(timer => timer.tags?.includes(selectedTag))
+  }, [filteredTimers, selectedTag])
+
+  const uniqueTags = React.useMemo(() => {
+    const tags = new Set<string>()
+    allTimers.forEach(timer => {
+      timer.tags?.forEach(tag => tag ? tags.add(tag) : '')
+    })
+    return Array.from(tags)
+  }, [allTimers])
 
   return (
     <div className="container mx-auto p-6">
@@ -242,66 +250,131 @@ export default function CountdownTimerDashboard() {
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-2 mb-4">
-          <Button
-            variant={activeFilter === 'ALL' ? "secondary" : "outline"}
-            onClick={() => {
-              setActiveFilter('ALL')
-            }}
-          >
-            All
-          </Button>
-          <Button
-            variant={activeFilter === 'ACTIVE' ? "secondary" : "outline"}
-            onClick={() => {
-              setActiveFilter('ACTIVE')
-            }}
-          >
-            Active (In progress)
-          </Button>
-          <Button
-            variant={activeFilter === 'QUEUED' ? "secondary" : "outline"}
-            onClick={() => {
-              setActiveFilter('QUEUED')
-            }}
-          >
-            Queued
-          </Button>
-          <Button
-            variant={activeFilter === 'COMPLETED' ? "secondary" : "outline"}
-            onClick={() => {
-              setActiveFilter('COMPLETED')
-            }}
-          >
-            Completed
-          </Button>
-          {/* {allTags.map(tag => (
+        <div className="relative">
+          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search timers..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-8"
+          />
+        </div>
+
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-wrap gap-2">
             <Button
-              key={tag}
-              variant={selectedTag === tag ? "secondary" : "outline"}
-              onClick={() => setSelectedTag(tag)}
+              variant={activeFilter === 'ALL' ? "secondary" : "outline"}
+              onClick={() => {
+                setActiveFilter('ALL')
+                setSelectedTag(null)
+              }}
             >
-              {tag}
+              All
             </Button>
-          ))} */}
+            <Button
+              variant={activeFilter === 'ACTIVE' ? "secondary" : "outline"}
+              onClick={() => {
+                setActiveFilter('ACTIVE')
+                setSelectedTag(null)
+              }}
+            >
+              Active (In progress)
+            </Button>
+            <Button
+              variant={activeFilter === 'QUEUED' ? "secondary" : "outline"}
+              onClick={() => {
+                setActiveFilter('QUEUED')
+                setSelectedTag(null)
+              }}
+            >
+              Queued
+            </Button>
+            <Button
+              variant={activeFilter === 'COMPLETED' ? "secondary" : "outline"}
+              onClick={() => {
+                setActiveFilter('COMPLETED')
+                setSelectedTag(null)
+              }}
+            >
+              Completed
+            </Button>
+          </div>
+
+          {uniqueTags.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {uniqueTags.map(tag => (
+                <Button
+                  key={tag}
+                  variant={selectedTag === tag ? "secondary" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedTag(tag === selectedTag ? null : tag)}
+                  className="h-7"
+                >
+                  {tag}
+                </Button>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="flex justify-between items-center">
-          <h2 className="text-xl font-semibold">{activeFilter} Timers</h2>
+          <h2 className="text-xl font-semibold">
+            {selectedTag ? `${activeFilter} Timers - ${selectedTag}` : `${activeFilter} Timers`}
+          </h2>
           <h2 className="text-xl font-semibold">Time Spent: {getTimeSpent(activeFilter)}</h2>
-          <span className="text-sm font-medium">Count: {allTimers.length}</span>
+          <span className="text-sm font-medium">
+            Count: {filteredByTagTimers.length}
+          </span>
         </div>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {!selectedDate && activeFilter === 'ALL' && allTimers.map(timer => (<Timer key={timer.id} timer={timer} workerRef={workerRef} />))}
-          {!selectedDate && activeFilter === 'COMPLETED' && allTimers.filter(timer => ['COMPLETED'].includes(timer.status)).map(timer => (<Timer key={timer.id} timer={timer} workerRef={workerRef} />))}
-          {!selectedDate && activeFilter === 'QUEUED' && allTimers.filter(timer => ['PAUSED'].includes(timer.status)).map(timer => (<Timer key={timer.id} timer={timer} workerRef={workerRef} />))}
-
-          {activeFilter === 'ACTIVE' && allTimers.filter(timer => ['ACTIVE'].includes(timer.status)).map(timer => (<Timer key={timer.id} timer={timer} workerRef={workerRef} />))}
-
-          {selectedDate && activeFilter === 'COMPLETED' && allTimers.filter(timer => timer.completedAt?.split('T')[0] === convertToISODate(selectedDate.toLocaleDateString())).filter(timer => ['COMPLETED'].includes(timer.status)).map(timer => (<Timer key={timer.id} timer={timer} workerRef={workerRef} />))}
-          {selectedDate && activeFilter === 'QUEUED' && allTimers.filter(timer => timer.createdAt.split('T')[0] === convertToISODate(selectedDate.toLocaleDateString())).filter(timer => ['PAUSED'].includes(timer.status)).map(timer => (<Timer key={timer.id} timer={timer} workerRef={workerRef} />))}
+          {!selectedDate && activeFilter === 'ALL' && 
+            filteredByTagTimers.map(timer => (
+              <Timer key={timer.id} timer={timer} workerRef={workerRef} />
+            ))
+          }
+          {!selectedDate && activeFilter === 'COMPLETED' && 
+            filteredByTagTimers
+              .filter(timer => ['COMPLETED'].includes(timer.status))
+              .map(timer => (
+                <Timer key={timer.id} timer={timer} workerRef={workerRef} />
+              ))
+          }
+          {!selectedDate && activeFilter === 'QUEUED' && 
+            filteredByTagTimers
+              .filter(timer => ['PAUSED'].includes(timer.status))
+              .map(timer => (
+                <Timer key={timer.id} timer={timer} workerRef={workerRef} />
+              ))
+          }
+          {activeFilter === 'ACTIVE' && 
+            filteredByTagTimers
+              .filter(timer => ['ACTIVE'].includes(timer.status))
+              .map(timer => (
+                <Timer key={timer.id} timer={timer} workerRef={workerRef} />
+              ))
+          }
+          {selectedDate && activeFilter === 'COMPLETED' && 
+            filteredByTagTimers
+              .filter(timer => 
+                timer.completedAt?.split('T')[0] === convertToISODate(selectedDate.toLocaleDateString())
+              )
+              .filter(timer => ['COMPLETED'].includes(timer.status))
+              .map(timer => (
+                <Timer key={timer.id} timer={timer} workerRef={workerRef} />
+              ))
+          }
+          {selectedDate && activeFilter === 'QUEUED' && 
+            filteredByTagTimers
+              .filter(timer => 
+                timer.createdAt.split('T')[0] === convertToISODate(selectedDate.toLocaleDateString())
+              )
+              .filter(timer => ['PAUSED'].includes(timer.status))
+              .map(timer => (
+                <Timer key={timer.id} timer={timer} workerRef={workerRef} />
+              ))
+          }
         </div>
       </div>
-    </div >
+    </div>
   )
 }

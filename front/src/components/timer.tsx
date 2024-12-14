@@ -9,6 +9,13 @@ import { Input } from "./ui/input"
 import { Badge } from "./ui/badge"
 import { useTimerStore } from "@/store/useTimerStore"
 import { markComplete } from "@/lib/utils"
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
 
 type TimerProps = {
     timer: TimerType,
@@ -27,6 +34,7 @@ export function Timer({ timer, workerRef }: TimerProps) {
 
     const [newTag, setNewTag] = React.useState('');
     const [newComment, setNewComment] = React.useState('');
+    const [isCommentsOpen, setIsCommentsOpen] = React.useState(false);
 
     React.useEffect(() => {
         if (timer.status === 'COMPLETED') {
@@ -139,6 +147,29 @@ export function Timer({ timer, workerRef }: TimerProps) {
         }
     }
 
+    const handleStart = () => {
+        setStatus(timer.id, 'ACTIVE')
+        workerRef?.current?.postMessage({
+            type: 'START_TIMER',
+            id: timer.id,
+            remainingTime: timer.remainingTime
+        })
+    }
+
+    const handlePause = () => {
+        setStatus(timer.id, 'PAUSED')
+        workerRef?.current?.postMessage({
+            type: 'STOP_TIMER'
+        })
+    }
+
+    const handleComplete = () => {
+        markComplete(timer, setStatus)
+        workerRef?.current?.postMessage({
+            type: 'STOP_TIMER'
+        })
+    }
+
     return (
         <Card key={timer.id}>
             <CardContent className="p-4 flex flex-col justify-between h-full">
@@ -167,7 +198,13 @@ export function Timer({ timer, workerRef }: TimerProps) {
                         Created: {formatDate(timer.createdAt)}
                     </div>
                     <div className="text-sm mb-2 flex gap-1">
-                        Tags: {timer.tags?.map((tag, index) => <Badge key={index} variant="secondary">{tag}</Badge>)}
+                        Tags: {timer.tags?.length ? (
+                            timer.tags.map((tag, index) => (
+                                <Badge key={index} variant="secondary">{tag}</Badge>
+                            ))
+                        ) : (
+                            <Badge variant="secondary" className="opacity-50">Untagged</Badge>
+                        )}
                     </div>
                     {timer.completedAt && <div className="text-sm text-muted-foreground mb-2">
                         Completed: {formatDate(timer.completedAt)}
@@ -211,26 +248,47 @@ export function Timer({ timer, workerRef }: TimerProps) {
                     </div>
                     <div>
                         <h3 className="text-sm font-semibold mb-2">Comments</h3>
-                        {timer.comments?.map((comment, index) => (
-                            <div key={index} className="text-sm mb-1">{comment}</div>
-                        ))}
-                        <form onSubmit={async (e) => {
-                            e.preventDefault()
-                            await addCommentDB(timer.id, newComment)
-                            addComment(timer.id, newComment);
-                            setNewComment(''); 
-                        }} className="mt-2">
-                            <Textarea
-                                value={newComment}
-                                onChange={(e) => setNewComment(e.target.value)}
-                                placeholder="Add a comment"
-                                className="mb-2"
-                            />
-                            <Button type="submit" size="sm">
-                                <MessageSquare className="mr-2 h-4 w-4" />
-                                Add Comment
-                            </Button>
-                        </form>
+                        <Collapsible
+                            open={isCommentsOpen}
+                            onOpenChange={setIsCommentsOpen}
+                            className="mt-4 space-y-2"
+                        >
+                            <CollapsibleTrigger asChild>
+                                <Button variant="ghost" size="sm" className="w-full justify-between">
+                                    Comments ({timer.comments?.length || 0})
+                                    <MessageSquare className="h-4 w-4" />
+                                </Button>
+                            </CollapsibleTrigger>
+                            <CollapsibleContent className="space-y-2">
+                                {timer.comments?.map((comment, index) => (
+                                    <div 
+                                        key={index} 
+                                        className="rounded-md border p-2 text-sm"
+                                    >
+                                        <ReactMarkdown 
+                                            remarkPlugins={[remarkGfm]}
+                                            className="prose prose-sm dark:prose-invert max-w-none"
+                                        >
+                                            {comment}
+                                        </ReactMarkdown>
+                                    </div>
+                                ))}
+                                <div className="flex gap-2">
+                                    <Input
+                                        placeholder="Add a comment..."
+                                        value={newComment}
+                                        onChange={(e) => setNewComment(e.target.value)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter' && !e.shiftKey) {
+                                                e.preventDefault()
+                                                // addCommentDB()
+                                            }
+                                        }}
+                                    />
+                                    <Button size="sm">Add</Button>
+                                </div>
+                            </CollapsibleContent>
+                        </Collapsible>
                     </div>
                 </div>
             </CardContent>

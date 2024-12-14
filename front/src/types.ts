@@ -11,3 +11,18 @@ export type TimerType = {
     completedAt?: string
     comments?: string[]
 }
+
+export type CountType = {
+  id: string
+  title: string
+  count: number
+  date: string // ISO string for the day
+  tags?: string[]
+}
+
+export type CountEntryType = {
+  id: string
+  countId: string
+  value: number
+  createdAt: string // ISO string with timestamp
+}
