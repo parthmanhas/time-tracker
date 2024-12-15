@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Plus, Calendar as CalendarIcon, Search, Tag, X, ChevronsUpDown, Check } from 'lucide-react'
+import { Plus, Calendar as CalendarIcon, Search } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"

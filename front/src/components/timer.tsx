@@ -142,29 +142,6 @@ export function Timer({ timer, workerRef }: TimerProps) {
         }
     }
 
-    const handleStart = () => {
-        setStatus(timer.id, 'ACTIVE')
-        workerRef?.current?.postMessage({
-            type: 'START_TIMER',
-            id: timer.id,
-            remainingTime: timer.remainingTime
-        })
-    }
-
-    const handlePause = () => {
-        setStatus(timer.id, 'PAUSED')
-        workerRef?.current?.postMessage({
-            type: 'STOP_TIMER'
-        })
-    }
-
-    const handleComplete = () => {
-        markComplete(timer, setStatus)
-        workerRef?.current?.postMessage({
-            type: 'STOP_TIMER'
-        })
-    }
-
     return (
         <Card key={timer.id}>
             <CardContent className="p-4 flex flex-col justify-between h-full">
@@ -273,10 +250,12 @@ export function Timer({ timer, workerRef }: TimerProps) {
                                         placeholder="Add a comment..."
                                         value={newComment}
                                         onChange={(e) => setNewComment(e.target.value)}
-                                        onKeyDown={(e) => {
+                                        onKeyDown={async (e) => {
                                             if (e.key === 'Enter' && !e.shiftKey) {
                                                 e.preventDefault()
-                                                // addCommentDB()
+                                                await addCommentDB(timer.id, newComment)
+                                                addComment(timer.id, newComment)
+                                                setNewComment('')
                                             }
                                         }}
                                     />

@@ -1,15 +1,8 @@
 import * as React from 'react'
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { Clock, BarChart2, Settings, ChevronLeft, ChevronRight, Tag, ChevronDown, Hash } from "lucide-react"
+import { Clock, BarChart2, Settings, ChevronLeft, ChevronRight, Tag } from "lucide-react"
 import { useLocation, Link } from 'react-router-dom'
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible"
-import { Badge } from "@/components/ui/badge"
-import { useTimerStore } from '@/store/useTimerStore'
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
   onCollapsedChange?: (collapsed: boolean) => void
@@ -18,23 +11,12 @@ interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
 export function Sidebar({ className, onCollapsedChange }: SidebarProps) {
   const location = useLocation()
   const [collapsed, setCollapsed] = React.useState(false)
-  const [isTagsOpen, setIsTagsOpen] = React.useState(true)
-  const { allTimers } = useTimerStore()
   
   const handleCollapse = () => {
     const newCollapsed = !collapsed
     setCollapsed(newCollapsed)
     onCollapsedChange?.(newCollapsed)
   }
-
-  // Get unique tags from all timers
-  const uniqueTags = React.useMemo(() => {
-    const tags = new Set<string>()
-    allTimers.forEach(timer => {
-      timer.tags?.forEach(tag => tags.add(tag))
-    })
-    return Array.from(tags)
-  }, [allTimers])
 
   const routes = [
     {
