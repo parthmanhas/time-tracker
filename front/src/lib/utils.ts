@@ -9,7 +9,7 @@ export function cn(...inputs: ClassValue[]) {
 
 export const markComplete = async (timer: Pick<TimerType, 'id' | 'status'>, setStatus: (id: string, status: TimerStatus) => void) => {
   try {
-    await fetch('http://localhost:5000/api/timer', {
+    await fetch(API.getUrl('TIMER'), {
       method: 'PATCH',
       body: JSON.stringify({ id: timer.id, status: 'COMPLETED', completedAt: new Date().toISOString(), remainingTime: 0 }),
       headers: {

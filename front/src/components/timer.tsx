@@ -130,7 +130,7 @@ export function Timer({ timer, workerRef }: TimerProps) {
         setStatus(timer.id, 'ACTIVE');
         setRemainingTime(timer.id, 600);
         try {
-            await fetch('http://localhost:5000/api/timer', {
+            await fetch(API.getUrl('TIMER'), {
                 method: 'PATCH',
                 body: JSON.stringify({ id: timer.id, duration: timer.duration + 600, status: timer.status }),
                 headers: {
