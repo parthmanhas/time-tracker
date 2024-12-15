@@ -14,14 +14,14 @@ datasource db {
 }
 
 model Timer {
-  id            String      @id @unique // Primary key
-  title         String
-  createdAt     DateTime // Date of the timer
-  completedAt   DateTime? // @default(now()) not working setting from node
-  due_at        DateTime?
-  remainingTime Int // Time left in seconds or milliseconds, depending on your preference
-  duration      Int
-  status        TimerStatus // Status of the timer
+  id             String      @id @unique // Primary key
+  title          String
+  created_at     DateTime // Date of the timer
+  completed_at   DateTime? // @default(now()) not working setting from node
+  due_at         DateTime?
+  remaining_time Int // Time left in seconds or milliseconds, depending on your preference
+  duration       Int
+  status         TimerStatus // Status of the timer
 }
 
 // Enum for status values

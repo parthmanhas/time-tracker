@@ -16,7 +16,7 @@ app.use(express.json());
 // Route to get all users
 app.get('/api/timers', async (req, res) => {
   try {
-    const timers = await prisma.$queryRaw`select t.id, t.status, t.title, t.duration, t."remainingTime", t."completedAt", t."createdAt", t.due_at, coalesce(array_agg(distinct tags.tag), '{}') as tags, coalesce(array_agg(distinct comments.comment), '{}') as comments from timer t left join tags on t.id = tags.timerId left join comments on t.id = comments.timerId group by t.id`;
+    const timers = await prisma.$queryRaw`select t.id, t.status, t.title, t.duration, remaining_time, completed_at, created_at, t.due_at, coalesce(array_agg(distinct tags.tag), '{}') as tags, coalesce(array_agg(distinct comments.comment), '{}') as comments from timer t left join tags on t.id = tags.timerId left join comments on t.id = comments.timerId group by t.id`;
     res.json(timers);
   } catch (error) {
     console.error(error);
@@ -28,7 +28,7 @@ app.get('/api/timers', async (req, res) => {
 app.post('/api/timer', async (req, res) => {
   const { id, remainingTime, status, title, duration, tags } = req.body;
   try {
-    const timer = await prisma.$queryRaw`INSERT INTO timer (id, status, title, duration, "remainingTime") values (${id}, ${status}::"TimerStatus", ${title}, ${duration}, ${remainingTime})`;
+    const timer = await prisma.$queryRaw`INSERT INTO timer (id, status, title, duration, remaining_time) values (${id}, ${status}::"TimerStatus", ${title}, ${duration}, ${remainingTime})`;
     if (tags) {
       for (const tag of tags) {
         await prisma.$queryRaw`INSERT INTO tags (timerId, tag) values (${id}, ${tag})`;
