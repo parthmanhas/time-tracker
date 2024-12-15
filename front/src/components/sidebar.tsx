@@ -93,7 +93,7 @@ export function Sidebar({ className, onCollapsedChange }: SidebarProps) {
           >
             Dashboard
           </h2>
-          <div className="space-y-1">
+          <div className='flex flex-col gap-2'>
             {routes.map((route) => (
               <Link key={route.href} to={route.href}>
                 <Button

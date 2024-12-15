@@ -15,6 +15,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
+import { API } from '@/config/api'
 
 type TimerProps = {
     timer: TimerType,
@@ -80,9 +81,9 @@ export function Timer({ timer, workerRef }: TimerProps) {
             return;
         }
         try {
-            await fetch(`http://localhost:5000/api/timer`, {
+            await fetch(API.getUrl('TIMER'), {
                 method: "PATCH",
-                body: JSON.stringify({ ...timer, due_at: new Date(completeAt) }), // change label to timer everywhere
+                body: JSON.stringify({ ...timer, due_at: new Date(completeAt) }),
                 headers: {
                     "Content-Type": "application/json",
                 }
@@ -93,23 +94,18 @@ export function Timer({ timer, workerRef }: TimerProps) {
     }
 
     const addTagDB = async (timerId: string, tag: string) => {
-        if (!timerId) {
-            console.error('timerId missing');
-            return;
-        }
-        if (!tag) {
-            console.error('tag missing');
+        if (!timerId || !tag) {
+            console.error('Missing required parameters');
             return;
         }
         try {
-            await fetch('http://localhost:5000/add-tag', {
-                method: 'post',
+            await fetch(API.getUrl('ADD_TAG'), {
+                method: 'POST',
                 body: JSON.stringify({ id: timerId, tag }),
                 headers: {
                     'Content-Type': 'application/json'
                 }
             })
-            // addTag(timer.id, tag);
         } catch (e) {
             console.error(e);
         }
@@ -117,8 +113,8 @@ export function Timer({ timer, workerRef }: TimerProps) {
 
     const addCommentDB = async (timerId: string, comment: string) => {
         try {
-            await fetch('http://localhost:5000/comment', {
-                method: 'post',
+            await fetch(API.getUrl('COMMENT'), {
+                method: 'POST',
                 body: JSON.stringify({ id: timerId, comment }),
                 headers: {
                     'Content-Type': 'application/json'

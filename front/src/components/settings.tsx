@@ -15,6 +15,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { fetchAllTimers } from '@/lib/utils'
+import { API } from '@/config/api'
 
 export function Settings() {
   const { allTimers, setAllTimers } = useTimerStore()
@@ -38,8 +39,7 @@ export function Settings() {
   }
 
   const handleDeleteTag = async (tag: string) => {
-    // Remove the tag from all timers
-    await fetch(`http://localhost:5000/api/tag`, {
+    await fetch(API.getUrl('TAG'), {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',

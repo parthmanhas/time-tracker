@@ -27,6 +27,7 @@ import { Timer } from './timer'
 import { TimerType } from '@/types'
 import { useTimerStore } from '@/store/useTimerStore'
 import { Badge } from "@/components/ui/badge"
+import { API } from '@/config/api'
 
 const timeOptions = [
   { value: '600', label: '10 minutes' },
@@ -70,7 +71,7 @@ export default function CountdownTimerDashboard() {
       return;
     }
     try {
-      await fetch(`http://localhost:5000/api/timer`, {
+      await fetch(API.getUrl('TIMER'), {
         method: "POST",
         body: JSON.stringify({ ...timer }),
         headers: {

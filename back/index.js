@@ -1,6 +1,6 @@
 // backend/index.js
 import express from 'express';
-import { PrismaClient, Prisma } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import dotenv from 'dotenv';
 import cors from 'cors';
 
@@ -9,13 +9,6 @@ const app = express();
 const prisma = new PrismaClient({
   log: ['query', 'info', 'warn', 'error'],
 })
-
-prisma.$use(async (params, next) => {
-  console.log('Query: ', params.model, params.action);
-  console.log('Params: ', params.args);
-  const result = await next(params);
-  return result;
-});
 
 app.use(cors());
 app.use(express.json());
@@ -108,7 +101,7 @@ app.patch('/api/timer', async (req, res) => {
 //   }
 // });
 
-app.post('/add-tag', async (req, res) => {
+app.post('/api/add-tag', async (req, res) => {
   const { id, tag } = req.body;
   if (!id) {
     console.error('id not present');
@@ -130,7 +123,7 @@ app.post('/add-tag', async (req, res) => {
   }
 })
 
-app.post('/comment', async (req, res) => {
+app.post('/api/comment', async (req, res) => {
   const { id, comment } = req.body;
   if (!id) {
     console.error('id not present');
