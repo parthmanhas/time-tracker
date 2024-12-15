@@ -13,7 +13,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Timer {
+model timer {
   id             String      @id @unique // Primary key
   title          String
   created_at     DateTime // Date of the timer
