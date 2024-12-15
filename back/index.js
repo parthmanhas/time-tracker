@@ -31,7 +31,7 @@ app.get('/api/timers', async (req, res) => {
   }
 });
 
-// Route to create a new user
+// Route to create a new timer
 app.post('/api/timer', async (req, res) => {
   const { id, remainingTime, status, title, duration, tags } = req.body;
   try {

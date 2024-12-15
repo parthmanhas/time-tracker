@@ -27,7 +27,6 @@ import { Timer } from './timer'
 import { TimerType } from '@/types'
 import { useTimerStore } from '@/store/useTimerStore'
 import { Badge } from "@/components/ui/badge"
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 
 const timeOptions = [
   { value: '600', label: '10 minutes' },
@@ -39,10 +38,7 @@ export default function CountdownTimerDashboard() {
   const [searchQuery, setSearchQuery] = React.useState('')
   const [selectedTag, setSelectedTag] = React.useState<string | null>(null)
   const [selectedTags, setSelectedTags] = React.useState<string[]>([])
-  const [isTagInputOpen, setIsTagInputOpen] = React.useState(false)
-  // const { toast } = useToast();
-
-
+  const [newTag, setNewTag] = React.useState('')
 
   const {
     setAllTimers,
@@ -61,8 +57,6 @@ export default function CountdownTimerDashboard() {
   React.useEffect(() => {
     fetchAllTimers(setAllTimers);
   }, [])
-
-
 
   const convertToISODate = (localDateString: string | undefined) => {
     if (!localDateString) return;
@@ -177,16 +171,21 @@ export default function CountdownTimerDashboard() {
           if (tag) tags.add(tag)
         })
       }
+      selectedTags.forEach(tag => {
+        if (tag) tags.add(tag)
+      })
     })
     return Array.from(tags)
-  }, [allTimers]) || []
+  }, [allTimers, selectedTags]) || []
 
   const handleTagSelect = (tag: string) => {
     setSelectedTags(prev => {
       const prevTags = prev || []
-      return prevTags.includes(tag)
-        ? prevTags.filter(t => t !== tag)
-        : [...prevTags, tag]
+      setNewTag('')
+      if (prevTags.includes(tag)) {
+        return prevTags.filter(t => t !== tag)
+      }
+      return [...prevTags, tag]
     })
   }
 
@@ -265,7 +264,7 @@ export default function CountdownTimerDashboard() {
                       <div className="col-span-3">
                         <div className="flex flex-wrap gap-2 mb-2">
                           {uniqueTags.map(tag => (
-                            <Badge 
+                            <Badge
                               key={tag}
                               variant={selectedTags.includes(tag) ? "default" : "outline"}
                               className="flex items-center gap-1 cursor-pointer"
@@ -273,6 +272,10 @@ export default function CountdownTimerDashboard() {
                               {tag}
                             </Badge>
                           ))}
+                        </div>
+                        <div className="flex gap-2">
+                          <Input placeholder="Add new tag" value={newTag} onChange={(e) => setNewTag(e.target.value)} />
+                          <Button onClick={() => handleTagSelect(newTag)}>Add</Button>
                         </div>
                       </div>
                     </div>
