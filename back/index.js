@@ -26,9 +26,9 @@ app.get('/api/timers', async (req, res) => {
 
 // Route to create a new timer
 app.post('/api/timer', async (req, res) => {
-  const { id, remainingTime, status, title, duration, tags } = req.body;
+  const { id, remainingTime: remaining_time, status, title, duration, tags } = req.body;
   try {
-    const timer = await prisma.$queryRaw`INSERT INTO timer (id, status, title, duration, remaining_time) values (${id}, ${status}::"TimerStatus", ${title}, ${duration}, ${remainingTime})`;
+    const timer = await prisma.$queryRaw`INSERT INTO timer (id, status, title, duration, remaining_time) values (${id}, ${status}::"TimerStatus", ${title}, ${duration}, ${remaining_time})`;
     if (tags) {
       for (const tag of tags) {
         await prisma.$queryRaw`INSERT INTO tags (timerId, tag) values (${id}, ${tag})`;
@@ -43,7 +43,7 @@ app.post('/api/timer', async (req, res) => {
 });
 
 app.patch('/api/timer', async (req, res) => {
-  const { id, remainingTime, status, title, comments, duration, completedAt, due_at } = req.body;
+  const { id, remainingTime: remaining_time, status, title, comments, duration, completedAt: completed_at, due_at } = req.body;
 
   if (!id) {
     console.error('id not present');
@@ -51,7 +51,7 @@ app.patch('/api/timer', async (req, res) => {
     return;
   }
 
-  if (!remainingTime && !status && !title && !comments && !duration && !completedAt && !due_at) {
+  if (!remaining_time && !status && !title && !comments && !duration && !completed_at && !due_at) {
     console.error('nothing to update');
     res.status(500).json({ error: 'info missing to update' });
     return;
@@ -63,8 +63,8 @@ app.patch('/api/timer', async (req, res) => {
         status,
         title,
         duration,
-        remainingTime,
-        completedAt,
+        remaining_time,
+        completed_at,
         due_at
       },
       where: {
