@@ -1,5 +1,18 @@
 export type TimerStatus = "ACTIVE" | "PAUSED" | "COMPLETED";
 
+export type TimerResponseType = {
+    id: string
+    title: string
+    duration: number
+    remaining_time: number
+    tags?: string[]
+    status: TimerStatus
+    created_at: string
+    completed_at?: string,
+    due_at?: string,
+    comments?: string[]
+}
+
 export type TimerType = {
     id: string
     title: string

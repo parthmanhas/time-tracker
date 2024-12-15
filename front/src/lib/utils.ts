@@ -1,4 +1,4 @@
-import { TimerStatus, TimerType } from "@/types";
+import { TimerResponseType, TimerStatus, TimerType } from "@/types";
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { API } from '@/config/api'
@@ -24,10 +24,14 @@ export const markComplete = async (timer: Pick<TimerType, 'id' | 'status'>, setS
 
 export const fetchAllTimers = async (setAllTimers: (timers: TimerType[]) => void) => {
   const response = await fetch(API.getUrl('TIMERS'));
-  let dbTimers = await response.json() as TimerType[];
-  dbTimers = dbTimers.map(timer => ({
+  const jsonResponse = await response.json() as TimerResponseType[];
+  const dbTimers: TimerType[] = jsonResponse.map(timer => ({
     ...timer,
-    status: timer.status === 'ACTIVE' ? 'PAUSED' : timer.status
+    status: timer.status === 'ACTIVE' ? 'PAUSED' : timer.status,
+    remainingTime: timer.remaining_time,
+    createdAt: timer.created_at,
+    completedAt: timer.completed_at,
+    dueAt: timer.due_at,
   }))
   setAllTimers(dbTimers);
 }
