@@ -289,8 +289,6 @@ export default function CountdownTimerDashboard() {
                   <div className='w-full flex justify-end gap-2'>
                     <WithLoading isLoading={isLoading}>
                       <Button disabled={selectedTags.length === 0 || !newTimerTitle || !newTimerDuration} onClick={() => addTimer("ACTIVE")}>Start Now (Active)</Button>
-                    </WithLoading>
-                    <WithLoading isLoading={isLoading}>
                       <Button disabled={selectedTags.length === 0 || !newTimerTitle || !newTimerDuration} onClick={() => addTimer("PAUSED")}> Start Later (Queued)</Button>
                     </WithLoading>
                   </div>
