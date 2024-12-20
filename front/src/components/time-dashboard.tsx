@@ -29,7 +29,6 @@ import { useTimerStore } from '@/store/useTimerStore'
 import { Badge } from "@/components/ui/badge"
 import { API } from '@/config/api'
 import { WithLoading } from '@/hoc/hoc'
-import { useAuth } from '@/context/AuthContext'
 
 const timeOptions = [
   { value: '600', label: '10 minutes' },
@@ -43,8 +42,6 @@ export default function CountdownTimerDashboard() {
   const [selectedTags, setSelectedTags] = React.useState<string[]>([])
   const [newTag, setNewTag] = React.useState('')
   const [isLoading, setIsLoading] = React.useState(false);
-
-  const { id: userId } = useAuth()?.user || {};
 
   const {
     setAllTimers,
@@ -61,7 +58,7 @@ export default function CountdownTimerDashboard() {
   } = useTimerStore();
 
   React.useEffect(() => {
-    fetchAllTimers(userId, setAllTimers);
+    fetchAllTimers(setAllTimers);
   }, [])
 
   const convertToISODate = (localDateString: string | undefined) => {
@@ -78,7 +75,7 @@ export default function CountdownTimerDashboard() {
     try {
       await fetch(API.getUrl('TIMER'), {
         method: "POST",
-        body: JSON.stringify({ userId, ...timer }),
+        body: JSON.stringify({ ...timer }),
         headers: {
           "Content-Type": "application/json",
         }

@@ -22,12 +22,11 @@ export const markComplete = async (timer: Pick<TimerType, 'id' | 'status'>, setS
   }
 }
 
-export const fetchAllTimers = async (userId: string | undefined, setAllTimers: (timers: TimerType[]) => void) => {
-  if (!userId) {
-    console.error('User ID not found');
-    return;
-  };
-  const response = await fetch(`${API.getUrl('TIMERS')}?userId=${userId}`);
+export const fetchAllTimers = async (setAllTimers: (timers: TimerType[]) => void) => {
+  const response = await fetch(API.getUrl('TIMERS'), {
+    method: 'GET',
+    credentials: 'include',
+  });
   const jsonResponse = await response.json() as TimerResponseType[];
   const dbTimers: TimerType[] = jsonResponse.map(timer => ({
     ...timer,

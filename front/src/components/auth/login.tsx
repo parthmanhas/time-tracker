@@ -23,7 +23,6 @@ export function Login() {
     setIsLoading(true)
 
     try {
-      console.log(API.getUrl('LOGIN'));
       const response = await fetch(API.getUrl('LOGIN'), {
         method: 'POST',
         headers: {

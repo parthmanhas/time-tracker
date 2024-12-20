@@ -4,14 +4,12 @@ import { useTimerStore } from '@/store/useTimerStore'
 import { subDays, format, eachDayOfInterval } from 'date-fns'
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts"
 import { fetchAllTimers } from '@/lib/utils'
-import { useAuth } from '@/context/AuthContext'
 
 export function Stats() {
   const { allTimers, setAllTimers } = useTimerStore()
-  const { id: userId } = useAuth()?.user || {};
 
   React.useEffect(() => {
-    fetchAllTimers(userId, setAllTimers);
+    fetchAllTimers(setAllTimers);
   }, [])
 
   const getCompletedTimersCount = (daysAgo: number) => {

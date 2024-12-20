@@ -25,7 +25,7 @@ export function Settings() {
   const { id: userId } = useAuth()?.user || {};
 
   React.useEffect(() => {
-    fetchAllTimers(userId, setAllTimers);
+    fetchAllTimers(setAllTimers);
   }, [])
 
 
