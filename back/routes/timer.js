@@ -13,7 +13,7 @@ router.post('/', authenticateToken, async (req, res) => {
     const { id, remainingTime: remaining_time, status, title, duration, tags } = req.body;
     const user_id = req.user.id;
     try {
-        const timer = await prisma.$queryRaw`INSERT INTO timer (id, status, title, duration, remaining_time) values (${id}, ${status}::"TimerStatus", ${title}, ${duration}, ${remaining_time})`;
+        const timer = await prisma.$queryRaw`INSERT INTO timer (id, status, title, duration, remaining_time, user_id) values (${id}, ${status}::"TimerStatus", ${title}, ${duration}, ${remaining_time}, ${user_id})`;
         if (tags) {
             for (const tag of tags) {
                 await prisma.$queryRaw`INSERT INTO tags (timerId, tag, user_id) values (${id}, ${tag}, ${user_id})`;
