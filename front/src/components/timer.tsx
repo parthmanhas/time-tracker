@@ -34,7 +34,7 @@ export function Timer({ timer, workerRef }: TimerProps) {
         setDuration
     } = useTimerStore();
 
-    const { userId } = useAuth().user;
+    const { id: userId } = useAuth()?.user || {};
 
     const [newTag, setNewTag] = React.useState('');
     const [newComment, setNewComment] = React.useState('');
