@@ -28,6 +28,8 @@ import { TimerType } from '@/types'
 import { useTimerStore } from '@/store/useTimerStore'
 import { Badge } from "@/components/ui/badge"
 import { API } from '@/config/api'
+import { WithLoading } from '@/hoc/hoc'
+import { useAuth } from '@/context/AuthContext'
 
 const timeOptions = [
   { value: '600', label: '10 minutes' },
@@ -40,6 +42,9 @@ export default function CountdownTimerDashboard() {
   const [selectedTag, setSelectedTag] = React.useState<string | null>(null)
   const [selectedTags, setSelectedTags] = React.useState<string[]>([])
   const [newTag, setNewTag] = React.useState('')
+  const [isLoading, setIsLoading] = React.useState(false);
+
+  const { id: userId } = useAuth()?.user || {};
 
   const {
     setAllTimers,
@@ -56,7 +61,7 @@ export default function CountdownTimerDashboard() {
   } = useTimerStore();
 
   React.useEffect(() => {
-    fetchAllTimers(setAllTimers);
+    fetchAllTimers(userId, setAllTimers);
   }, [])
 
   const convertToISODate = (localDateString: string | undefined) => {
@@ -73,7 +78,7 @@ export default function CountdownTimerDashboard() {
     try {
       await fetch(API.getUrl('TIMER'), {
         method: "POST",
-        body: JSON.stringify({ ...timer }),
+        body: JSON.stringify({ userId, ...timer }),
         headers: {
           "Content-Type": "application/json",
         }
@@ -84,6 +89,7 @@ export default function CountdownTimerDashboard() {
   }
 
   const addTimer = async (status: "ACTIVE" | "PAUSED" | "COMPLETED" = 'ACTIVE') => {
+    setIsLoading(true);
     const newTimer: TimerType = {
       id: uuidv4(),
       title: newTimerTitle,
@@ -98,6 +104,7 @@ export default function CountdownTimerDashboard() {
     addNewTimer(newTimer);
     setIsDialogOpen(false);
     setSelectedTags([]);
+    setIsLoading(false);
   }
 
   const workerRef = React.useRef<Worker | null>(null);
@@ -282,8 +289,12 @@ export default function CountdownTimerDashboard() {
                     </div>
                   </div>
                   <div className='w-full flex justify-end gap-2'>
-                    <Button disabled={selectedTags.length === 0 || !newTimerTitle || !newTimerDuration} onClick={() => addTimer("ACTIVE")}>Start Now (Active)</Button>
-                    <Button disabled={selectedTags.length === 0 || !newTimerTitle || !newTimerDuration} onClick={() => addTimer("PAUSED")}> Start Later (Queued)</Button>
+                    <WithLoading isLoading={isLoading}>
+                      <Button disabled={selectedTags.length === 0 || !newTimerTitle || !newTimerDuration} onClick={() => addTimer("ACTIVE")}>Start Now (Active)</Button>
+                    </WithLoading>
+                    <WithLoading isLoading={isLoading}>
+                      <Button disabled={selectedTags.length === 0 || !newTimerTitle || !newTimerDuration} onClick={() => addTimer("PAUSED")}> Start Later (Queued)</Button>
+                    </WithLoading>
                   </div>
                 </div>
               </DialogContent>

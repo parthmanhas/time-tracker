@@ -1,8 +1,9 @@
 import * as React from 'react'
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { Clock, BarChart2, Settings, ChevronLeft, ChevronRight, Tag } from "lucide-react"
-import { useLocation, Link } from 'react-router-dom'
+import { Clock, BarChart2, Settings, ChevronLeft, ChevronRight, Tag, LogOut } from "lucide-react"
+import { useLocation, Link, useNavigate } from 'react-router-dom'
+import { useAuth } from '@/context/AuthContext'
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
   onCollapsedChange?: (collapsed: boolean) => void
@@ -11,11 +12,18 @@ interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
 export function Sidebar({ className, onCollapsedChange }: SidebarProps) {
   const location = useLocation()
   const [collapsed, setCollapsed] = React.useState(false)
+  const { logout } = useAuth()
+  const navigate = useNavigate()
   
   const handleCollapse = () => {
     const newCollapsed = !collapsed
     setCollapsed(newCollapsed)
     onCollapsedChange?.(newCollapsed)
+  }
+
+  const handleLogout = () => {
+    logout()
+    navigate('/login')
   }
 
   const routes = [
@@ -93,6 +101,19 @@ export function Sidebar({ className, onCollapsedChange }: SidebarProps) {
             ))}
           </div>
         </div>
+      </div>
+      <div className="absolute bottom-4 left-0 right-0 px-3">
+        <Button
+          variant="ghost"
+          className={cn(
+            "w-full transition-all duration-300",
+            collapsed ? "justify-center px-2" : "justify-start px-4"
+          )}
+          onClick={handleLogout}
+        >
+          <LogOut className={cn("h-4 w-4", !collapsed && "mr-2")} />
+          {!collapsed && "Logout"}
+        </Button>
       </div>
     </div>
   )

@@ -1,9 +1,11 @@
 type ApiEndpoints = {
   TIMERS: string
   TIMER: string
-  TAG: string
   COMMENT: string
-  ADD_TAG: string
+  TAG: string
+  LOGIN: string
+  SIGNUP: string
+  FORGOT_PASSWORD: string
 }
 
 const API_URL = import.meta.env.VITE_API_URL

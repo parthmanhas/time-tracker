@@ -16,13 +16,16 @@ import {
 } from "@/components/ui/alert-dialog"
 import { fetchAllTimers } from '@/lib/utils'
 import { API } from '@/config/api'
+import { useAuth } from '@/context/AuthContext'
 
 export function Settings() {
   const { allTimers, setAllTimers } = useTimerStore()
   const [tagToDelete, setTagToDelete] = React.useState<string | null>(null)
 
+  const { id: userId } = useAuth()?.user || {};
+
   React.useEffect(() => {
-    fetchAllTimers(setAllTimers);
+    fetchAllTimers(userId, setAllTimers);
   }, [])
 
 
@@ -44,7 +47,7 @@ export function Settings() {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ tag }),
+      body: JSON.stringify({ userId,tag }),
     })
     const updatedTimers = allTimers.map(timer => ({
       ...timer,
@@ -57,7 +60,6 @@ export function Settings() {
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-2xl font-bold mb-6">Settings</h1>
-
       <div className="grid gap-6">
         <Card>
           <CardHeader>

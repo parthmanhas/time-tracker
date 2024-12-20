@@ -4,12 +4,14 @@ import { useTimerStore } from '@/store/useTimerStore'
 import { subDays, format, eachDayOfInterval } from 'date-fns'
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts"
 import { fetchAllTimers } from '@/lib/utils'
+import { useAuth } from '@/context/AuthContext'
 
 export function Stats() {
   const { allTimers, setAllTimers } = useTimerStore()
+  const { id: userId } = useAuth()?.user || {};
 
   React.useEffect(() => {
-    fetchAllTimers(setAllTimers);
+    fetchAllTimers(userId, setAllTimers);
   }, [])
 
   const getCompletedTimersCount = (daysAgo: number) => {
@@ -45,7 +47,7 @@ export function Stats() {
     const end = new Date()
     const start = subDays(end, 29)
     const dateRange = eachDayOfInterval({ start, end })
-    
+
     const completedByDate = allTimers.reduce((acc, timer) => {
       if (timer.status !== 'COMPLETED' || !timer.completedAt) return acc
       const date = timer.completedAt.split('T')[0]
@@ -94,7 +96,7 @@ export function Stats() {
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-2xl font-bold mb-6">Timer Statistics</h1>
-      
+
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-2 mb-6">
         <Card>

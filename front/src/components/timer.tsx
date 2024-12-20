@@ -11,11 +11,13 @@ import { markComplete } from "@/lib/utils"
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
+    Collapsible,
+    CollapsibleContent,
+    CollapsibleTrigger,
 } from "@/components/ui/collapsible"
 import { API } from '@/config/api'
+import { WithLoading } from "@/hoc/hoc"
+import { useAuth } from "@/context/AuthContext"
 
 type TimerProps = {
     timer: TimerType,
@@ -32,9 +34,12 @@ export function Timer({ timer, workerRef }: TimerProps) {
         setDuration
     } = useTimerStore();
 
+    const { userId } = useAuth().user;
+
     const [newTag, setNewTag] = React.useState('');
     const [newComment, setNewComment] = React.useState('');
     const [isCommentsOpen, setIsCommentsOpen] = React.useState(false);
+    const [isLoading, setIsLoading] = React.useState(false);
 
     React.useEffect(() => {
         if (timer.status === 'COMPLETED') {
@@ -83,7 +88,7 @@ export function Timer({ timer, workerRef }: TimerProps) {
         try {
             await fetch(API.getUrl('TIMER'), {
                 method: "PATCH",
-                body: JSON.stringify({ ...timer, due_at: new Date(completeAt) }),
+                body: JSON.stringify({ userId, ...timer, due_at: new Date(completeAt) }),
                 headers: {
                     "Content-Type": "application/json",
                 }
@@ -94,51 +99,61 @@ export function Timer({ timer, workerRef }: TimerProps) {
     }
 
     const addTagDB = async (timerId: string, tag: string) => {
+        setIsLoading(true);
         if (!timerId || !tag) {
             console.error('Missing required parameters');
+            setIsLoading(false);
             return;
         }
         try {
-            await fetch(API.getUrl('ADD_TAG'), {
+            await fetch(API.getUrl('TAG'), {
                 method: 'POST',
-                body: JSON.stringify({ id: timerId, tag }),
+                body: JSON.stringify({ userId, id: timerId, tag }),
                 headers: {
                     'Content-Type': 'application/json'
                 }
             })
         } catch (e) {
             console.error(e);
+        } finally {
+            setIsLoading(false);
         }
     }
 
     const addCommentDB = async (timerId: string, comment: string) => {
+        setIsLoading(true);
         try {
             await fetch(API.getUrl('COMMENT'), {
                 method: 'POST',
-                body: JSON.stringify({ id: timerId, comment }),
+                body: JSON.stringify({ userId, id: timerId, comment }),
                 headers: {
                     'Content-Type': 'application/json'
                 }
             })
         } catch (e) {
             console.error(e);
+        } finally {
+            setIsLoading(false);
         }
     }
 
     const addTime = async () => {
+        setIsLoading(true);
         setDuration(timer.id, timer.duration + 600);
         setStatus(timer.id, 'ACTIVE');
         setRemainingTime(timer.id, 600);
         try {
             await fetch(API.getUrl('TIMER'), {
                 method: 'PATCH',
-                body: JSON.stringify({ id: timer.id, duration: timer.duration + 600, status: timer.status }),
+                body: JSON.stringify({ userId, id: timer.id, duration: timer.duration + 600, status: timer.status }),
                 headers: {
                     'Content-Type': 'application/json'
                 }
             })
         } catch (e) {
             console.error(e);
+        } finally {
+            setIsLoading(false);
         }
     }
 
@@ -187,12 +202,16 @@ export function Timer({ timer, workerRef }: TimerProps) {
                                 {timer.status === 'ACTIVE' ? <Pause className="mr-2 h-4 w-4" /> : <Play className="mr-2 h-4 w-4" />}
                                 {timer.status === 'ACTIVE' ? 'Pause' : 'Resume'}
                             </Button>}
-                        {timer.status !== 'COMPLETED' && <Button onClick={() => {
-                            markComplete(timer, setStatus);
-                            workerRef.current?.postMessage({
-                                type: 'STOP_TIMER'
-                            })
-                        }}>Mark Complete</Button>}
+                        {timer.status !== 'COMPLETED' &&
+                            <WithLoading isLoading={isLoading}>
+                                <Button onClick={() => {
+                                    markComplete(timer, setStatus);
+                                    workerRef.current?.postMessage({
+                                        type: 'STOP_TIMER'
+                                    })
+                                }}>Mark Complete</Button>
+                            </WithLoading>
+                        }
                         {timer.status === 'COMPLETED' && <Button onClick={addTime}>+ 10</Button>}
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -233,11 +252,11 @@ export function Timer({ timer, workerRef }: TimerProps) {
                             </CollapsibleTrigger>
                             <CollapsibleContent className="space-y-2">
                                 {timer.comments?.map((comment, index) => (
-                                    <div 
-                                        key={index} 
+                                    <div
+                                        key={index}
                                         className="rounded-md border p-2 text-sm"
                                     >
-                                        <ReactMarkdown 
+                                        <ReactMarkdown
                                             remarkPlugins={[remarkGfm]}
                                             className="prose prose-sm dark:prose-invert max-w-none"
                                         >

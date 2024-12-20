@@ -22,6 +22,7 @@ model timer {
   remaining_time Int // Time left in seconds or milliseconds, depending on your preference
   duration       Int
   status         TimerStatus // Status of the timer
+  user_id        String
 }
 
 // Enum for status values
@@ -37,3 +38,14 @@ enum TimerStatus {
 //   Timer   Timer @relation(fields: [timerId], references: [id])
 //   timerId Int
 // }
+
+model user {
+  id               String    @id @default(uuid())
+  email            String    @unique
+  name             String
+  password         String
+  reset_token       String?
+  reset_token_expiry DateTime?
+  created_at        DateTime  @default(now())
+  updated_at        DateTime  @updatedAt
+}
