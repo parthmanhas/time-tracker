@@ -75,6 +75,7 @@ export default function CountdownTimerDashboard() {
     try {
       await fetch(API.getUrl('TIMER'), {
         method: "POST",
+        credentials: 'include',
         body: JSON.stringify({ ...timer }),
         headers: {
           "Content-Type": "application/json",

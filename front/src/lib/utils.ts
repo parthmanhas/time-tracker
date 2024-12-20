@@ -11,6 +11,7 @@ export const markComplete = async (timer: Pick<TimerType, 'id' | 'status'>, setS
   try {
     await fetch(API.getUrl('TIMER'), {
       method: 'PATCH',
+      credentials: 'include',
       body: JSON.stringify({ id: timer.id, status: 'COMPLETED', completedAt: new Date().toISOString(), remainingTime: 0 }),
       headers: {
         'Content-Type': 'application/json'

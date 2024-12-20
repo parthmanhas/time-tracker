@@ -44,6 +44,7 @@ export function Settings() {
   const handleDeleteTag = async (tag: string) => {
     await fetch(API.getUrl('TAG'), {
       method: 'DELETE',
+      credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
       },

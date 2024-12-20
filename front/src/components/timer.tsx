@@ -88,6 +88,7 @@ export function Timer({ timer, workerRef }: TimerProps) {
         try {
             await fetch(API.getUrl('TIMER'), {
                 method: "PATCH",
+                credentials: 'include',
                 body: JSON.stringify({ userId, ...timer, due_at: new Date(completeAt) }),
                 headers: {
                     "Content-Type": "application/json",
@@ -108,6 +109,7 @@ export function Timer({ timer, workerRef }: TimerProps) {
         try {
             await fetch(API.getUrl('TAG'), {
                 method: 'POST',
+                credentials: 'include',
                 body: JSON.stringify({ userId, id: timerId, tag }),
                 headers: {
                     'Content-Type': 'application/json'
@@ -125,6 +127,7 @@ export function Timer({ timer, workerRef }: TimerProps) {
         try {
             await fetch(API.getUrl('COMMENT'), {
                 method: 'POST',
+                credentials: 'include',
                 body: JSON.stringify({ userId, id: timerId, comment }),
                 headers: {
                     'Content-Type': 'application/json'
@@ -145,6 +148,7 @@ export function Timer({ timer, workerRef }: TimerProps) {
         try {
             await fetch(API.getUrl('TIMER'), {
                 method: 'PATCH',
+                credentials: 'include',
                 body: JSON.stringify({ userId, id: timer.id, duration: timer.duration + 600, status: timer.status }),
                 headers: {
                     'Content-Type': 'application/json'
