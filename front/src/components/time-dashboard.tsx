@@ -29,9 +29,13 @@ import { useTimerStore } from '@/store/useTimerStore'
 import { Badge } from "@/components/ui/badge"
 import { API } from '@/config/api'
 import { WithLoading } from '@/hoc/hoc'
+import { soundManager } from '@/lib/sound'
 
 const timeOptions = [
   { value: '600', label: '10 minutes' },
+  { value: '1200', label: '20 minutes' },
+  { value: '1800', label: '30 minutes' },
+  { value: '3600', label: '60 minutes' },
 ]
 
 export default function CountdownTimerDashboard() {
@@ -91,8 +95,8 @@ export default function CountdownTimerDashboard() {
     const newTimer: TimerType = {
       id: uuidv4(),
       title: newTimerTitle,
-      duration: 600,
-      remainingTime: 600,
+      duration: parseInt(newTimerDuration),
+      remainingTime: parseInt(newTimerDuration),
       status,
       createdAt: new Date().toISOString(),
       comments: [],
@@ -121,6 +125,7 @@ export default function CountdownTimerDashboard() {
             break;
           case "TIMER_COMPLETED":
             markComplete({ id, status: 'COMPLETED' }, setStatus);
+            soundManager.playTimerComplete();
             workerRef?.current?.postMessage({
               type: 'STOP_TIMER'
             });

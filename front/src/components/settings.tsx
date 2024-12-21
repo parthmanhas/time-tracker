@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Tag, Trash2 } from "lucide-react"
+import { Tag, Trash2, Volume2 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { useTimerStore } from '@/store/useTimerStore'
 import {
@@ -17,10 +17,14 @@ import {
 import { fetchAllTimers } from '@/lib/utils'
 import { API } from '@/config/api'
 import { useAuth } from '@/context/AuthContext'
+import { Switch } from "@/components/ui/switch"
 
 export function Settings() {
   const { allTimers, setAllTimers } = useTimerStore()
   const [tagToDelete, setTagToDelete] = React.useState<string | null>(null)
+  const [soundEnabled, setSoundEnabled] = React.useState(() => {
+    return localStorage.getItem('soundEnabled') !== 'false'
+  });
 
   const { id: userId } = useAuth()?.user || {};
 
@@ -57,6 +61,11 @@ export function Settings() {
     setAllTimers(updatedTimers)
     setTagToDelete(null)
   }
+
+  const handleSoundToggle = (enabled: boolean) => {
+    setSoundEnabled(enabled);
+    localStorage.setItem('soundEnabled', enabled.toString());
+  };
 
   return (
     <div className="container mx-auto p-6">
@@ -98,6 +107,28 @@ export function Settings() {
                   </div>
                 ))
               )}
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Volume2 className="h-5 w-5" />
+              Sound Settings
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium">Timer Completion Sound</p>
+                <p className="text-sm text-muted-foreground">
+                  Play a sound when a timer completes
+                </p>
+              </div>
+              <Switch
+                checked={soundEnabled}
+                onCheckedChange={handleSoundToggle}
+              />
             </div>
           </CardContent>
         </Card>
