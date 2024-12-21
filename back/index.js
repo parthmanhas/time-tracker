@@ -8,6 +8,7 @@ import timerRouter from './routes/timer.js';
 import tagRouter from './routes/tag.js';
 import commentRouter from './routes/comment.js';
 import authRouter from './routes/auth.js';
+import journalRouter from './routes/journal.js';
 
 dotenv.config();
 const app = express();
@@ -25,6 +26,7 @@ app.use('/api/timers', timersRouter);
 app.use('/api/timer', timerRouter);
 app.use('/api/tag', tagRouter);
 app.use('/api/comment', commentRouter);
+app.use('/api/journal', journalRouter);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

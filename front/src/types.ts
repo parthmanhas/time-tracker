@@ -39,3 +39,10 @@ export type CountEntryType = {
   value: number
   createdAt: string // ISO string with timestamp
 }
+
+export type JournalEntry = {
+  id: string
+  content: string
+  created_at: string
+  user_id: string
+}

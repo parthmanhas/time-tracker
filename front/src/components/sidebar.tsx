@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { Clock, BarChart2, Settings, ChevronLeft, ChevronRight, Tag, LogOut } from "lucide-react"
+import { Clock, BarChart2, Settings, ChevronLeft, ChevronRight, Tag, LogOut, BookOpen } from "lucide-react"
 import { useLocation, Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 
@@ -44,6 +44,12 @@ export function Sidebar({ className, onCollapsedChange }: SidebarProps) {
       icon: Tag,
       href: "/tags",
       active: location.pathname === "/tags",
+    },
+    {
+      label: "Journal",
+      icon: BookOpen,
+      href: "/journal",
+      active: location.pathname === "/journal",
     },
     {
       label: "Settings",

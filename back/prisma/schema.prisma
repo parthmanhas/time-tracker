@@ -49,3 +49,11 @@ model user {
   created_at        DateTime  @default(now())
   updated_at        DateTime  @updatedAt
 }
+
+// Add journal model
+model journal {
+  id          Int    @id @default(autoincrement())
+  content     String
+  user_id     String
+  created_at  DateTime  @default(now())
+}

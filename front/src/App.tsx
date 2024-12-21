@@ -12,6 +12,7 @@ import { Signup } from './components/auth/signup'
 import { ForgotPassword } from './components/auth/forgot-password'
 import { AuthProvider } from './context/AuthContext'
 import { ProtectedRoute } from './components/auth/protected-route'
+import { JournalDashboard } from './components/journal-dashboard'
 
 export default function App() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
@@ -45,6 +46,7 @@ export default function App() {
                       <Route path="/" element={<CountdownTimerDashboard />} />
                       <Route path="/stats" element={<Stats />} />
                       <Route path="/tags" element={<TagStats />} />
+                      <Route path="/journal" element={<JournalDashboard />} />
                       <Route path="/settings" element={<Settings />} />
                     </Routes>
                   </div>
