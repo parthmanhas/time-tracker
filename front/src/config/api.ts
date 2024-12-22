@@ -7,6 +7,7 @@ type ApiEndpoints = {
   SIGNUP: string
   FORGOT_PASSWORD: string
   JOURNAL: string
+  GOALS: string
 }
 
 const API_URL = import.meta.env.VITE_API_URL

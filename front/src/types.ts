@@ -46,3 +46,24 @@ export type JournalEntry = {
   created_at: string
   user_id: string
 }
+
+export type GoalPriority = 'HIGH' | 'MEDIUM' | 'LOW';
+
+export type Goal = {
+  id: string;
+  title: string;
+  description?: string;
+  target_hours: number;
+  priority: GoalPriority;
+  tags: string[];
+  created_at: string;
+  completed_at?: string;
+  is_active: boolean;
+}
+
+export type GoalProgress = {
+  goalId: string;
+  currentHours: number;
+  percentageComplete: number;
+  remainingHours: number;
+}

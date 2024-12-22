@@ -23,6 +23,7 @@ model timer {
   duration       Int
   status         TimerStatus // Status of the timer
   user_id        String
+  tags           tags[]
 }
 
 // Enum for status values
@@ -40,20 +41,51 @@ enum TimerStatus {
 // }
 
 model user {
-  id               String    @id @default(uuid())
-  email            String    @unique
-  name             String
-  password         String
-  reset_token       String?
+  id                 String    @id @default(uuid())
+  email              String    @unique
+  name               String
+  password           String
+  reset_token        String?
   reset_token_expiry DateTime?
-  created_at        DateTime  @default(now())
-  updated_at        DateTime  @updatedAt
+  created_at         DateTime  @default(now())
+  updated_at         DateTime  @updatedAt
+  tags               tags[]
 }
 
 // Add journal model
 model journal {
-  id          Int    @id @default(autoincrement())
-  content     String
-  user_id     String
-  created_at  DateTime  @default(now())
+  id         Int      @id @default(autoincrement())
+  content    String
+  user_id    String
+  created_at DateTime @default(now())
+}
+
+enum GoalPriority {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+model tags {
+  id       Int    @id @default(autoincrement())
+  tag      String
+  goal_id  Int
+  user_id  String
+  timerid  String
+  fk_users user   @relation(fields: [user_id], references: [id])
+  fk_timer timer  @relation(fields: [timerid], references: [id])
+  fk_goal  goal   @relation(fields: [goal_id], references: [id])
+}
+
+model goal {
+  id           Int          @id @default(autoincrement())
+  title        String
+  description  String?
+  target_hours Float
+  priority     GoalPriority
+  tags         tags[]
+  user_id      String
+  created_at   DateTime     @default(now())
+  completed_at DateTime?
+  is_active    Boolean      @default(true)
 }
