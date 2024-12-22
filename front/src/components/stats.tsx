@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useTimerStore } from '@/store/useTimerStore'
 import { fetchAllTimers } from '@/lib/utils'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip, Legend } from 'recharts'
-import { subDays, startOfMonth, isAfter, eachDayOfInterval, format } from 'date-fns'
+import { subDays, startOfMonth, eachDayOfInterval, format } from 'date-fns'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 export function Stats() {
@@ -101,9 +101,7 @@ export function Stats() {
     // Create daily records for each tag
     const tagHistory = dateRange.map(date => {
       const dateStr = format(date, 'yyyy-MM-dd')
-      const dayData: { [key: string]: number } = {
-        date: format(date, 'MMM dd'),
-      }
+      const dayData: { [key: string]: number } = {}
 
       // Initialize all tags with 0 hours
       uniqueTags.forEach(tag => {
