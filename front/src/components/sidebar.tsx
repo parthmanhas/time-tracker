@@ -52,16 +52,16 @@ export function Sidebar({ className, onCollapsedChange }: SidebarProps) {
       active: location.pathname === "/journal",
     },
     {
-      label: "Settings",
-      icon: Settings,
-      href: "/settings",
-      active: location.pathname === "/settings",
-    },
-    {
       label: "Goals",
       icon: Target,
       href: "/goals",
       active: location.pathname === "/goals",
+    },
+    {
+      label: "Settings",
+      icon: Settings,
+      href: "/settings",
+      active: location.pathname === "/settings",
     },
   ]
 
