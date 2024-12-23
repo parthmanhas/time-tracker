@@ -224,29 +224,26 @@ export function Timer({ timer, workerRef }: TimerProps) {
                             </WithLoading>
                         }
                         {timer.status === 'COMPLETED' && <Button onClick={addTime}>+ 10</Button>}
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="outline" size="icon">
-                                    <Tag className="h-4 w-4" />
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent>
-                                <div className="p-2">
-                                    <form onSubmit={async (e) => {
-                                        e.preventDefault();
-                                        await addTagDB(timer.id, newTag);
-                                        addTag(timer.id, newTag);
-                                        setNewTag('');
-                                    }}>
-                                        <Input
-                                            value={newTag}
-                                            onChange={(e) => setNewTag(e.target.value)}
-                                            placeholder="Add new tag"
-                                        />
-                                    </form>
-                                </div>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+                    </div>
+                    <div className="flex gap-2">
+                        {/* input to add tags */}
+                        <Input
+                            placeholder="Add new tag"
+                            value={newTag}
+                            onChange={(e) => setNewTag(e.target.value)} />
+                        <Button variant="outline" size="icon" onClick={async () => {
+                            await addTagDB(timer.id, newTag);
+                            addTag(timer.id, newTag);
+                            setNewTag('');
+                        }}>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="-5 0 36 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="lucide lucide-tag-with-plus !h-[2rem] !w-[1.75rem]">
+                                <path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z" />
+                                <circle cx="7.5" cy="7.5" r=".5" fill="currentColor" />
+                                <circle cx="20" cy="12" r="6" fill="white" stroke="currentColor" />
+                                <line x1="20" y1="9" x2="20" y2="15" stroke="currentColor" stroke-width="2" />
+                                <line x1="17" y1="12" x2="23" y2="12" stroke="currentColor" stroke-width="2" />
+                            </svg>
+                        </Button>
                     </div>
                     <div>
                         <Collapsible
