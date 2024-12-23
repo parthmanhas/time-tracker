@@ -20,7 +20,6 @@ export function JournalDashboard() {
         credentials: 'include'
       });
       const data = await response.json();
-      console.log(data)
       setEntries(data);
     } catch (error) {
       console.error('Failed to fetch journal entries:', error);

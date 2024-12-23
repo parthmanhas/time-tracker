@@ -223,7 +223,7 @@ export function Goals() {
             }
 
             const data = await response.json();
-            setGoals(prev => [...prev, data]);
+            setGoals(prev => [...prev, data].sort((a, b) => (b.completed_at ? 1 : 0) - (a.completed_at ? 1 : 0) || new Date(b.created_at).getTime() - new Date(a.created_at).getTime()));
             setIsDialogOpen(false);
             setNewGoal({
                 title: '',
