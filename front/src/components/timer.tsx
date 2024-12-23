@@ -1,5 +1,4 @@
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent } from "@radix-ui/react-dropdown-menu"
-import { Pause, Play, Tag, MessageSquare, CheckCircle } from "lucide-react"
+import { Pause, Play, MessageSquare, CheckCircle } from "lucide-react"
 import { Card, CardContent } from "./ui/card"
 import { Button } from './ui/button'
 import React from "react"
