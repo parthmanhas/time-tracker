@@ -8,7 +8,7 @@ const prisma = new PrismaClient({
 dotenv.config();
 const router = express.Router();
 
-router.post('/comment', authenticateToken, async (req, res) => {
+router.post('/', authenticateToken, async (req, res) => {
     const { id, comment } = req.body;
     const user_id = req.user.id;
     if (!id) {

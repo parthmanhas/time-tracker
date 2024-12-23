@@ -36,6 +36,7 @@ export const fetchAllTimers = async (setAllTimers: (timers: TimerType[]) => void
     createdAt: timer.created_at,
     completedAt: timer.completed_at,
     dueAt: timer.due_at,
+    comments: (timer.comments || [])?.filter(Boolean).length > 0 ? timer.comments : []
   }))
   setAllTimers(dbTimers);
 }

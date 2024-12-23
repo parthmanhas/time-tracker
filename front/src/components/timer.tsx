@@ -18,6 +18,7 @@ import {
 import { API } from '@/config/api'
 import { WithLoading } from "@/hoc/hoc"
 import { useAuth } from "@/context/AuthContext"
+import { Textarea } from "./ui/textarea"
 
 type TimerProps = {
     timer: TimerType,
@@ -161,6 +162,12 @@ export function Timer({ timer, workerRef }: TimerProps) {
         }
     }
 
+    const addCommentToTimer = async () => {
+        await addCommentDB(timer.id, newComment)
+        addComment(timer.id, newComment)
+        setNewComment('')
+    }
+
     return (
         <Card key={timer.id}>
             <CardContent className="p-4 flex flex-col justify-between h-full">
@@ -242,7 +249,6 @@ export function Timer({ timer, workerRef }: TimerProps) {
                         </DropdownMenu>
                     </div>
                     <div>
-                        <h3 className="text-sm font-semibold mb-2">Comments</h3>
                         <Collapsible
                             open={isCommentsOpen}
                             onOpenChange={setIsCommentsOpen}
@@ -269,20 +275,18 @@ export function Timer({ timer, workerRef }: TimerProps) {
                                     </div>
                                 ))}
                                 <div className="flex gap-2">
-                                    <Input
+                                    <Textarea
                                         placeholder="Add a comment..."
                                         value={newComment}
                                         onChange={(e) => setNewComment(e.target.value)}
                                         onKeyDown={async (e) => {
                                             if (e.key === 'Enter' && !e.shiftKey) {
                                                 e.preventDefault()
-                                                await addCommentDB(timer.id, newComment)
-                                                addComment(timer.id, newComment)
-                                                setNewComment('')
+                                                await addCommentToTimer()
                                             }
                                         }}
                                     />
-                                    <Button size="sm">Add</Button>
+                                    <Button onClick={addCommentToTimer} size="sm">Add</Button>
                                 </div>
                             </CollapsibleContent>
                         </Collapsible>

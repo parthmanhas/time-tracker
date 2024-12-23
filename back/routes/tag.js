@@ -8,7 +8,7 @@ const prisma = new PrismaClient({
 dotenv.config();
 const router = express.Router();
 
-router.post('/tag', authenticateToken, async (req, res) => {
+router.post('/', authenticateToken, async (req, res) => {
     const { id, tag } = req.body;
     const user_id = req.user.id;
     if (!id) {
@@ -31,7 +31,7 @@ router.post('/tag', authenticateToken, async (req, res) => {
     }
 })
 
-router.delete('/tag', authenticateToken, async (req, res) => {
+router.delete('/', authenticateToken, async (req, res) => {
     const { tag } = req.body;
     const user_id = req.user.id;
     if (!tag) {

@@ -6,12 +6,6 @@ const prisma = new PrismaClient({
     log: ['query', 'info', 'warn', 'error'],
 });
 const router = express.Router();
-prisma.$use(async (params, next) => {
-    console.log('Query:', params.action, params.model);
-    console.log('Params:', params.args);
-    const result = await next(params);
-    return result;
-});
 
 // Get all goals for a user
 router.get('/', authenticateToken, async (req, res) => {
