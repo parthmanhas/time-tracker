@@ -174,28 +174,28 @@ export function Timer({ timer, workerRef }: TimerProps) {
 
     React.useEffect(() => {
         const highlightTimerId = localStorage.getItem('highlightTimerId');
-        
+
         if (highlightTimerId === timer.id) {
             // Clear the stored ID
             localStorage.removeItem('highlightTimerId');
-            
+
             // Scroll into view
             timerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            
+
             // Add highlight effect
             setIsHighlighted(true);
-            
+
             // Remove highlight after animation
             const timeout = setTimeout(() => {
                 setIsHighlighted(false);
             }, 2000); // Duration matches the CSS animation
-            
+
             return () => clearTimeout(timeout);
         }
     }, [timer.id]);
 
     return (
-        <Card 
+        <Card
             ref={timerRef}
             className={cn(
                 "transition-all duration-300",
@@ -240,29 +240,25 @@ export function Timer({ timer, workerRef }: TimerProps) {
                     {timer.completedAt && <div className="text-sm text-muted-foreground mb-2">
                         Completed: {formatDate(timer.completedAt)}
                     </div>}
-                    <div className="flex flex-wrap gap-2 mb-4">
-                        {timer.status !== 'COMPLETED' &&
-                            <>
-                                <WithLoading isLoading={isLoading}>
+                    <WithLoading isLoading={isLoading}>
+                        <div className="flex flex-wrap gap-2 mb-4">
+                            {timer.status !== 'COMPLETED' &&
+                                <>
                                     <Button disabled={allTimers.findIndex(timer => timer.status === 'ACTIVE') > -1 && timer.status === 'PAUSED'} onClick={() => toggleTimer()} className="flex-grow">
                                         {timer.status === 'ACTIVE' ? <Pause className="mr-2 h-4 w-4" /> : <Play className="mr-2 h-4 w-4" />}
                                         {timer.status === 'ACTIVE' ? 'Pause' : 'Resume'}
                                     </Button>
                                     <Button onClick={() => {
-                                        markComplete(timer, setStatus);
+                                        markComplete(timer, setStatus, setIsLoading);
                                         workerRef.current?.postMessage({
                                             type: 'STOP_TIMER'
                                         })
                                     }}>Mark Complete</Button>
-                                </WithLoading>
-                            </>
-                        }
-                        {timer.status === 'COMPLETED' && <WithLoading isLoading={isLoading}>
-                            <Button onClick={addTime}>+ 10</Button>
-                        </WithLoading>}
-                    </div>
-                    <div className="flex gap-2">
-                        <WithLoading isLoading={isLoading}>
+                                </>
+                            }
+                            {timer.status === 'COMPLETED' && <Button onClick={addTime}>+ 10</Button>}
+                        </div>
+                        <div className="flex gap-2">
                             {/* input to add tags */}
                             <Input
                                 placeholder="Add new tag"
@@ -281,53 +277,51 @@ export function Timer({ timer, workerRef }: TimerProps) {
                                     <line x1="17" y1="12" x2="23" y2="12" stroke="currentColor" strokeWidth="2" />
                                 </svg>
                             </Button>
-                        </WithLoading>
-                    </div>
-                    <div>
-                        <Collapsible
-                            open={isCommentsOpen}
-                            onOpenChange={setIsCommentsOpen}
-                            className="mt-4 space-y-2"
-                        >
-                            <CollapsibleTrigger asChild>
-                                <Button variant="ghost" size="sm" className="w-full justify-between">
-                                    Comments ({timer.comments?.length || 0})
-                                    <MessageSquare className="h-4 w-4" />
-                                </Button>
-                            </CollapsibleTrigger>
-                            <CollapsibleContent className="space-y-2">
-                                {timer.comments?.map((comment, index) => (
-                                    <div
-                                        key={index}
-                                        className="rounded-md border p-2 text-sm"
-                                    >
-                                        <ReactMarkdown
-                                            remarkPlugins={[remarkGfm]}
-                                            className="prose prose-sm dark:prose-invert max-w-none"
+                        </div>
+                        <div>
+                            <Collapsible
+                                open={isCommentsOpen}
+                                onOpenChange={setIsCommentsOpen}
+                                className="mt-4 space-y-2"
+                            >
+                                <CollapsibleTrigger asChild>
+                                    <Button variant="ghost" size="sm" className="w-full justify-between">
+                                        Comments ({timer.comments?.length || 0})
+                                        <MessageSquare className="h-4 w-4" />
+                                    </Button>
+                                </CollapsibleTrigger>
+                                <CollapsibleContent className="space-y-2">
+                                    {timer.comments?.map((comment, index) => (
+                                        <div
+                                            key={index}
+                                            className="rounded-md border p-2 text-sm"
                                         >
-                                            {comment}
-                                        </ReactMarkdown>
-                                    </div>
-                                ))}
-                                <div className="flex gap-2">
-                                    <Textarea
-                                        placeholder="Add a comment..."
-                                        value={newComment}
-                                        onChange={(e) => setNewComment(e.target.value)}
-                                        onKeyDown={async (e) => {
-                                            if (e.key === 'Enter' && !e.shiftKey) {
-                                                e.preventDefault()
-                                                await addCommentToTimer()
-                                            }
-                                        }}
-                                    />
-                                    <WithLoading isLoading={isLoading}>
+                                            <ReactMarkdown
+                                                remarkPlugins={[remarkGfm]}
+                                                className="prose prose-sm dark:prose-invert max-w-none"
+                                            >
+                                                {comment}
+                                            </ReactMarkdown>
+                                        </div>
+                                    ))}
+                                    <div className="flex gap-2">
+                                        <Textarea
+                                            placeholder="Add a comment..."
+                                            value={newComment}
+                                            onChange={(e) => setNewComment(e.target.value)}
+                                            onKeyDown={async (e) => {
+                                                if (e.key === 'Enter' && !e.shiftKey) {
+                                                    e.preventDefault()
+                                                    await addCommentToTimer()
+                                                }
+                                            }}
+                                        />
                                         <Button onClick={addCommentToTimer} size="sm">Add</Button>
-                                    </WithLoading>
-                                </div>
-                            </CollapsibleContent>
-                        </Collapsible>
-                    </div>
+                                    </div>
+                                </CollapsibleContent>
+                            </Collapsible>
+                        </div>
+                    </WithLoading>
                 </div>
             </CardContent>
         </Card>

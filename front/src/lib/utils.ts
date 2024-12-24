@@ -7,8 +7,10 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export const markComplete = async (timer: Pick<TimerType, 'id' | 'status'>, setStatus: (id: string, status: TimerStatus) => void) => {
+export const markComplete = async (timer: Pick<TimerType, 'id' | 'status'>, setStatus: (id: string, status: TimerStatus) => void, setIsLoading?: React.Dispatch<React.SetStateAction<boolean>>) => {
   try {
+    setIsLoading?.(true);
+    await new Promise(resolve => setTimeout(resolve, 4000));
     await fetch(API.getUrl('TIMER'), {
       method: 'PATCH',
       credentials: 'include',
@@ -20,6 +22,8 @@ export const markComplete = async (timer: Pick<TimerType, 'id' | 'status'>, setS
     setStatus(timer.id, 'COMPLETED');
   } catch (e) {
     console.error(e);
+  } finally {
+    setIsLoading?.(false);
   }
 }
 

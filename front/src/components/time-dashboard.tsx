@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Plus, Calendar as CalendarIcon, Search, LayoutGrid, List } from 'lucide-react'
+import { Plus, Calendar as CalendarIcon, Search, LayoutGrid, List, CirclePlusIcon } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -138,7 +138,7 @@ export default function CountdownTimerDashboard() {
             setRemainingTime(id, remainingTime);
             break;
           case "TIMER_COMPLETED":
-            markComplete({ id, status: 'COMPLETED' }, setStatus);
+            markComplete({ id, status: 'COMPLETED' }, setStatus, setIsLoading);
             soundManager.playTimerComplete();
             workerRef?.current?.postMessage({
               type: 'STOP_TIMER'
@@ -288,14 +288,14 @@ export default function CountdownTimerDashboard() {
                     <Plus className="mr-2 h-4 w-4" /> Add Timer
                   </Button>
                 </DialogTrigger>
-                <DialogContent>
+                <DialogContent className="sm:max-w-[425px]">
                   <DialogHeader>
-                    <DialogTitle>Add New Timer</DialogTitle>
+                    <DialogTitle className='flex items-center gap-2'><CirclePlusIcon className='h-4 w-4' />Add New Timer</DialogTitle>
                   </DialogHeader>
                   <div>
                     <div className="grid gap-4 py-4">
-                      <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="name" className="text-right">
+                      <div className="flex flex-col items-start gap-2">
+                        <Label htmlFor="name">
                           Label
                         </Label>
                         <Input
@@ -305,8 +305,8 @@ export default function CountdownTimerDashboard() {
                           className="col-span-3"
                         />
                       </div>
-                      <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="duration" className="text-right">
+                      <div className="flex flex-col items-start gap-2">
+                        <Label htmlFor="duration">
                           Duration
                         </Label>
                         <Select onValueChange={setNewTimerDuration} value={newTimerDuration}>
@@ -322,7 +322,7 @@ export default function CountdownTimerDashboard() {
                           </SelectContent>
                         </Select>
                       </div>
-                      <div className="grid grid-cols-4 items-center gap-4">
+                      <div className="flex flex-col items-start gap-2">
                         <Label className="text-right">
                           Tags
                         </Label>
@@ -345,8 +345,8 @@ export default function CountdownTimerDashboard() {
                         </div>
                       </div>
                     </div>
-                    <div className='w-full flex justify-end gap-2'>
-                      <WithLoading isLoading={isLoading}>
+                    <div className='w-full flex justify-between gap-2'>
+                      <WithLoading isLoading={isLoading} addingTimer={true}>
                         <Button disabled={selectedTags.length === 0 || !newTimerTitle || !newTimerDuration} onClick={() => addTimer("ACTIVE")}>Start Now (Active)</Button>
                         <Button disabled={selectedTags.length === 0 || !newTimerTitle || !newTimerDuration} onClick={() => addTimer("PAUSED")}> Start Later (Queued)</Button>
                       </WithLoading>
