@@ -5,6 +5,7 @@ import { SciFiClock } from "./sci-fi-clock"
 import { cn } from "@/lib/utils"
 
 export function LandingPage() {
+
     return (
         <div className="min-h-screen bg-background">
             {/* Hero Section */}
