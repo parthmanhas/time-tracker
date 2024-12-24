@@ -49,11 +49,16 @@ export type JournalEntry = {
 
 export type GoalPriority = 'HIGH' | 'MEDIUM' | 'LOW';
 
+export type GoalType = 'TIME' | 'COUNT';
+
 export type Goal = {
   id: string;
   title: string;
   description?: string;
-  target_hours: number;
+  target_hours?: number;
+  target_count?: number;
+  current_count?: number;
+  type: GoalType;
   priority: GoalPriority;
   tags: string[];
   created_at: string;

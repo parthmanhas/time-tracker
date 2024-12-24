@@ -41,7 +41,7 @@ router.get('/', authenticateToken, async (req, res) => {
 
 // Create a new goal
 router.post('/', authenticateToken, async (req, res) => {
-    const { title, description, targetHours, priority, tags } = req.body;
+    const { title, description, target_hours, target_count, current_count, priority, tags, type } = req.body;
 
     try {
         if (priority === 'HIGH') {
@@ -50,7 +50,7 @@ router.post('/', authenticateToken, async (req, res) => {
                 return res.status(400).json({ error: 'You already have a high priority goal' });
             }
         }
-        const [goal] = await prisma.$queryRaw`INSERT INTO GOAL (title, description, target_hours, priority, user_id, is_active) values (${title}, ${description}, ${targetHours}, ${priority}::"GoalPriority", ${req.user.id}, true) RETURNING id, title, description, target_hours, priority, is_active, created_at`;
+        const [goal] = await prisma.$queryRaw`INSERT INTO GOAL (title, description, target_hours, target_count, current_count, priority, user_id, is_active, type) values (${title}, ${description}, ${target_hours}, ${target_count}, ${current_count}, ${priority}::"GoalPriority", ${req.user.id}, true, ${type}::"GoalType") RETURNING id, title, description, target_hours, target_count, current_count, priority, is_active, created_at, type`;
         for (let tag of tags) {
             await prisma.$queryRaw`UPDATE TAGS SET goal_id = ${goal.id} where user_id = ${req.user.id} and tag = ${tag}`;
         }

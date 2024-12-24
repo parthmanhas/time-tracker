@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
-import { Goal, GoalPriority, GoalProgress } from '@/types'
+import { Goal, GoalPriority, GoalProgress, GoalType } from '@/types'
 import { API } from '@/config/api'
 import { useTimerStore } from '@/store/useTimerStore'
 import { Progress } from "@/components/ui/progress"
@@ -22,7 +22,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog"
-import { Plus, Target, Tag, CheckCircle, LoaderCircle } from 'lucide-react'
+import { Plus, Target, Tag, CheckCircle, PlusCircle, MinusCircle } from 'lucide-react'
 import { Label } from './ui/label'
 import { format } from 'date-fns'
 import { differenceInDays } from 'date-fns'
@@ -30,6 +30,14 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { cn } from '@/lib/utils'
 import { toast } from '@/hooks/use-toast'
 import { WithLoading } from '@/hoc/hoc'
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { CompletedTimeGoal } from './completed-time-goal'
+import { CompletedCountGoal } from './completed-count-goal'
 
 export function Goals() {
     const [goals, setGoals] = React.useState<Goal[]>([])
@@ -37,14 +45,19 @@ export function Goals() {
     const [isDialogOpen, setIsDialogOpen] = React.useState(false)
     const { allTimers } = useTimerStore()
     const [isLoading, setIsLoading] = React.useState(true);
+    const [error, setError] = React.useState<string | null>(null);
 
     // Form state
     const [newGoal, setNewGoal] = React.useState({
         title: '',
         description: '',
-        targetHours: 0,
+        type: 'TIME' as GoalType,
         priority: 'MEDIUM' as GoalPriority,
         tags: [] as string[],
+        is_active: true,
+        target_count: 0,
+        target_hours: 0,
+        current_count: 0,
     })
 
     const uniqueTags = React.useMemo(() => {
@@ -114,6 +127,10 @@ export function Goals() {
         const progressData: Record<string, GoalProgress> = {};
 
         goals.forEach(goal => {
+            if (!goal.target_hours) {
+                console.error('Goal has no target hours:', goal);
+                return;
+            };
             let totalHours = 0;
 
             allTimers.forEach(timer => {
@@ -191,6 +208,44 @@ export function Goals() {
         }
     };
 
+    const quickIncrements = [
+        { label: '+10', value: 10 },
+        { label: '+20', value: 20 },
+        { label: '+50', value: 50 },
+    ];
+
+    const handleCountUpdate = async (goalId: string, increment: number) => {
+        try {
+            setIsLoading(true);
+            const goal = goals.find(g => g.id === goalId);
+            if (!goal) return;
+
+            const newCount = (goal.current_count || 0) + increment;
+            if (newCount < 0) return;
+
+            const response = await fetch(`${API.getUrl('GOALS')}/${goalId}`, {
+                method: 'PATCH',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    current_count: newCount,
+                    completed_at: newCount >= (goal.target_count || 0) ? new Date().toISOString() : null
+                })
+            });
+
+            if (!response.ok) throw new Error('Failed to update count');
+
+            const updatedGoal = await response.json();
+            setGoals(prev => prev.map(g => g.id === goalId ? updatedGoal : g));
+        } catch (error) {
+            console.error('Failed to update count:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     React.useEffect(() => {
         fetchGoals();
     }, []);
@@ -208,8 +263,24 @@ export function Goals() {
         }));
     };
 
-    const addGoal = async () => {
+    const addGoal = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        setError(null);
+        if (newGoal.type === 'TIME' && newGoal.target_hours <= 0) {
+            setError('Target hours must be greater than 0');
+            return;
+        }
+        if (newGoal.type === 'COUNT' && newGoal.target_count <= 0) {
+            setError('Target count must be greater than 0');
+            return;
+        }
+        if (newGoal.tags.length === 0) {
+            setError('Please select at least one tag');
+            return;
+        }
+
         try {
+            setIsLoading(true);
             const response = await fetch(API.getUrl('GOALS'), {
                 method: 'POST',
                 credentials: 'include',
@@ -219,9 +290,12 @@ export function Goals() {
                 body: JSON.stringify({
                     title: newGoal.title,
                     description: newGoal.description,
-                    targetHours: newGoal.targetHours,
+                    target_hours: newGoal.target_hours,
+                    target_count: newGoal.target_count,
+                    current_count: newGoal.current_count,
                     priority: newGoal.priority,
-                    tags: newGoal.tags
+                    tags: newGoal.tags,
+                    type: newGoal.type
                 })
             });
 
@@ -244,12 +318,18 @@ export function Goals() {
             setNewGoal({
                 title: '',
                 description: '',
-                targetHours: 0,
-                priority: 'MEDIUM',
-                tags: [],
+                type: 'TIME' as GoalType,
+                priority: 'MEDIUM' as GoalPriority,
+                tags: [] as string[],
+                is_active: true,
+                target_count: 0,
+                target_hours: 0,
+                current_count: 0,
             });
         } catch (error) {
             console.error('Failed to add goal:', error);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -282,10 +362,11 @@ export function Goals() {
                             <DialogHeader>
                                 <DialogTitle>Create New Goal</DialogTitle>
                             </DialogHeader>
-                            <div className="space-y-4">
+                            <form onSubmit={addGoal} className="space-y-4">
                                 <div className='flex flex-col gap-2'>
                                     <Label>Title</Label>
                                     <Input
+                                        required
                                         value={newGoal.title}
                                         onChange={(e) => setNewGoal(prev => ({ ...prev, title: e.target.value }))}
                                     />
@@ -298,13 +379,54 @@ export function Goals() {
                                     />
                                 </div>
                                 <div className='flex flex-col gap-2'>
-                                    <Label>Target Hours</Label>
-                                    <Input
-                                        type="number"
-                                        value={newGoal.targetHours}
-                                        onChange={(e) => setNewGoal(prev => ({ ...prev, targetHours: parseFloat(e.target.value) }))}
-                                    />
+                                    <Label>Type</Label>
+                                    <Select
+                                        required
+                                        value={newGoal.type}
+                                        onValueChange={(value: GoalType) => setNewGoal(prev => ({
+                                            ...prev,
+                                            type: value
+                                        }))}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="TIME">Time-based</SelectItem>
+                                            <SelectItem value="COUNT">Count-based</SelectItem>
+                                        </SelectContent>
+                                    </Select>
                                 </div>
+
+                                {newGoal.type === 'TIME' ? (
+                                    <div className='flex flex-col gap-2'>
+                                        <Label>Target Hours</Label>
+                                        <Input
+                                            type="number"
+                                            min={0}
+                                            required
+                                            value={newGoal.target_hours}
+                                            onChange={(e) => setNewGoal(prev => ({
+                                                ...prev,
+                                                target_hours: parseFloat(e.target.value)
+                                            }))}
+                                        />
+                                    </div>
+                                ) : (
+                                    <div className='flex flex-col gap-2'>
+                                        <Label>Target Count</Label>
+                                        <Input
+                                            required
+                                            type="number"
+                                            min={0}
+                                            value={newGoal.target_count}
+                                            onChange={(e) => setNewGoal(prev => ({
+                                                ...prev,
+                                                target_count: parseInt(e.target.value)
+                                            }))}
+                                        />
+                                    </div>
+                                )}
                                 <div className='flex flex-col gap-2'>
                                     <Label>Priority</Label>
                                     <Select
@@ -350,14 +472,18 @@ export function Goals() {
                                             ))}
                                     </div>
                                 </div>
-                                <Button
-                                    className="w-full"
-                                    onClick={addGoal}
-                                    disabled={!newGoal.title || !newGoal.targetHours || newGoal.tags.length === 0}
-                                >
-                                    Create Goal
-                                </Button>
-                            </div>
+                                <p className='text-red-500'>{error}</p>
+                                <WithLoading isLoading={isLoading} isScreen={false}>
+                                    <Button
+                                        type='submit'
+                                        className="w-full"
+
+                                    // disabled={newGoal.target_hours <= 0 || newGoal.target_count <= 0 || newGoal.tags.length === 0}
+                                    >
+                                        Create Goal
+                                    </Button>
+                                </WithLoading>
+                            </form>
                         </DialogContent>
                     </Dialog>
                 </div>
@@ -394,18 +520,23 @@ export function Goals() {
 
                                                 {completionDetails && (
                                                     <div className="space-y-1 mt-1 p-2 rounded-md bg-background">
-                                                        <span>
-                                                            First timer: {format(startDate, 'PPP')}<br></br>
-                                                            {startDate.getTime() !== new Date(goal.created_at).getTime() && (
-                                                                <span>Goal created: {format(new Date(goal.created_at), 'PPP')}</span>
-                                                            )}
-                                                        </span>
-                                                        <p>Completed on {format(new Date(goal.completed_at!), 'PPP')}</p>
-                                                        <p className="flex items-center gap-2">
-                                                            <span>Duration: {completionDetails.daysToComplete} days</span>
-                                                            <span>•</span>
-                                                            <span>Total: {completionDetails.totalHours.toFixed(1)} hours</span>
-                                                        </p>
+                                                        {goal.type === 'TIME' ? (
+                                                            <CompletedTimeGoal
+                                                                startDate={startDate}
+                                                                goalCreatedAt={goal.created_at}
+                                                                completedAt={goal.completed_at!}
+                                                                daysToComplete={completionDetails.daysToComplete}
+                                                                totalHours={completionDetails.totalHours}
+                                                            />
+                                                        ) : (
+                                                            <CompletedCountGoal
+                                                                createdAt={goal.created_at}
+                                                                completedAt={goal.completed_at!}
+                                                                daysToComplete={completionDetails.daysToComplete}
+                                                                currentCount={goal.current_count!}
+                                                                targetCount={goal.target_count!}
+                                                            />
+                                                        )}
                                                     </div>
                                                 )}
                                             </div>
@@ -431,13 +562,27 @@ export function Goals() {
                                                             <AlertDialogTitle>Complete Goal Early?</AlertDialogTitle>
                                                             <AlertDialogDescription>
                                                                 <div className="space-y-2">
-                                                                    <p>
-                                                                        This goal is at {Math.round(progress[goal.id]?.percentageComplete || 0)}% completion.
-                                                                    </p>
-                                                                    <Progress
-                                                                        value={progress[goal.id]?.percentageComplete || 0}
-                                                                        className="h-2"
-                                                                    />
+                                                                    {goal.type === 'TIME' ? (
+                                                                        <>
+                                                                            <p>
+                                                                                This goal is at {Math.round(progress[goal.id]?.percentageComplete || 0)}% completion.
+                                                                            </p>
+                                                                            <Progress
+                                                                                value={progress[goal.id]?.percentageComplete || 0}
+                                                                                className="h-2"
+                                                                            />
+                                                                        </>
+                                                                    ) : (
+                                                                        <>
+                                                                            <p>
+                                                                                Current progress: {goal.current_count} out of {goal.target_count} {goal.target_count === 1 ? 'count' : 'counts'}
+                                                                            </p>
+                                                                            <Progress
+                                                                                value={((goal.current_count || 0) / (goal.target_count || 1)) * 100}
+                                                                                className="h-2"
+                                                                            />
+                                                                        </>
+                                                                    )}
                                                                     <p className="text-sm mt-4">
                                                                         Are you sure you want to mark it as complete? This action cannot be undone.
                                                                     </p>
@@ -486,25 +631,79 @@ export function Goals() {
                                                 ))}
                                             </div>
                                         )}
-                                        <div className="space-y-2">
-                                            <div className="flex justify-between text-sm">
-                                                <span>Progress</span>
-                                                <span>
-                                                    {Math.round(progress[goal.id]?.currentHours || 0)}h / {goal.target_hours}h
-                                                </span>
-                                            </div>
-                                            <Progress
-                                                value={progress[goal.id]?.percentageComplete || 0}
-                                                className={cn(
-                                                    completionDetails && "opacity-75"
+                                        {goal.type === 'TIME' ? (
+                                            <div className="space-y-2">
+                                                <div className="flex justify-between text-sm">
+                                                    <span>Progress</span>
+                                                    <span>
+                                                        {Math.round(progress[goal.id]?.currentHours || 0)}h / {goal.target_hours}h
+                                                    </span>
+                                                </div>
+                                                <Progress
+                                                    value={progress[goal.id]?.percentageComplete || 0}
+                                                    className={cn(
+                                                        completionDetails && "opacity-75"
+                                                    )}
+                                                />
+                                                {!completionDetails && (
+                                                    <p className="text-sm text-muted-foreground">
+                                                        {progress[goal.id]?.remainingHours.toFixed(1)}h remaining
+                                                    </p>
                                                 )}
-                                            />
-                                            {!completionDetails && (
-                                                <p className="text-sm text-muted-foreground">
-                                                    {progress[goal.id]?.remainingHours.toFixed(1)}h remaining
-                                                </p>
-                                            )}
-                                        </div>
+                                            </div>
+                                        ) : (
+                                            <div className="space-y-2">
+                                                <div className="flex justify-between items-center">
+                                                    <span>Progress</span>
+                                                    <div className="flex items-center gap-2">
+                                                        {!completionDetails && (
+                                                            <>
+                                                                <Button
+                                                                    variant="outline"
+                                                                    size="icon"
+                                                                    onClick={() => handleCountUpdate(goal.id, -1)}
+                                                                >
+                                                                    <MinusCircle className="h-4 w-4" />
+                                                                </Button>
+                                                                <Button
+                                                                    variant="outline"
+                                                                    size="icon"
+                                                                    onClick={() => handleCountUpdate(goal.id, 1)}
+                                                                >
+                                                                    <PlusCircle className="h-4 w-4" />
+                                                                </Button>
+                                                                <DropdownMenu>
+                                                                    <DropdownMenuTrigger asChild>
+                                                                        <Button variant="outline" size="sm">
+                                                                            Add Multiple
+                                                                        </Button>
+                                                                    </DropdownMenuTrigger>
+                                                                    <DropdownMenuContent>
+                                                                        {quickIncrements.map(({ label, value }) => (
+                                                                            <DropdownMenuItem
+                                                                                key={value}
+                                                                                onClick={() => handleCountUpdate(goal.id, value)}
+                                                                            >
+                                                                                {label}
+                                                                            </DropdownMenuItem>
+                                                                        ))}
+                                                                    </DropdownMenuContent>
+                                                                </DropdownMenu>
+                                                            </>
+                                                        )}
+                                                        <span className="min-w-[80px] text-right">
+                                                            {goal.current_count || 0} / {goal.target_count}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <Progress
+                                                    value={((goal.current_count || 0) / (goal.target_count || 1)) * 100}
+                                                    className={cn(
+                                                        completionDetails && "opacity-75"
+                                                    )}
+                                                />
+                                            </div>
+                                        )}
                                     </div>
                                 </CardContent>
                             </Card>

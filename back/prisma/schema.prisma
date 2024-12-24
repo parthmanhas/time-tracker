@@ -66,6 +66,11 @@ enum GoalPriority {
   LOW
 }
 
+enum GoalType {
+  TIME
+  COUNT
+}
+
 model tags {
   id       Int    @id @default(autoincrement())
   tag      String
@@ -81,7 +86,10 @@ model goal {
   id           Int          @id @default(autoincrement())
   title        String
   description  String?
-  target_hours Float
+  target_hours Float?
+  target_count Int?
+  current_count Int?        @default(0)
+  type         GoalType     @default(TIME)
   priority     GoalPriority
   tags         tags[]
   user_id      String
