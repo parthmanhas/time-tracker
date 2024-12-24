@@ -13,6 +13,7 @@ import { ArrowUpDown } from "lucide-react"
 import { fetchAllTimers } from '@/lib/utils'
 import { useAuth } from '@/context/AuthContext'
 import { WithLoading } from '@/hoc/hoc'
+import { WithSidebarTrigger } from './WithSidebarTrigger'
 
 type SortOption = 'name' | 'timeAsc' | 'timeDesc'
 
@@ -75,7 +76,9 @@ export function TagStats() {
     <div className="container mx-auto p-6">
       <WithLoading isLoading={isLoading} isScreen={true}>
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Tag Statistics</h1>
+          <WithSidebarTrigger>
+            <h1 className="text-2xl font-bold">Tag Statistics</h1>
+          </WithSidebarTrigger>
           <div className="flex items-center gap-2">
             <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
             <Select

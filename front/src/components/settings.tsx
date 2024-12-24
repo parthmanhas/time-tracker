@@ -19,6 +19,7 @@ import { API } from '@/config/api'
 import { useAuth } from '@/context/AuthContext'
 import { Switch } from "@/components/ui/switch"
 import { WithLoading } from '@/hoc/hoc'
+import { WithSidebarTrigger } from './WithSidebarTrigger'
 
 export function Settings() {
   const { allTimers, setAllTimers } = useTimerStore()
@@ -73,7 +74,9 @@ export function Settings() {
   return (
     <div className="container mx-auto p-6">
       <WithLoading isLoading={isLoading} size={80} isScreen={true}>
-        <h1 className="text-2xl font-bold mb-6">Settings</h1>
+        <WithSidebarTrigger className='mb-6'>
+          <h1 className="text-2xl font-bold">Settings</h1>
+        </WithSidebarTrigger>
         <div className="grid gap-6">
           <Card>
             <CardHeader>

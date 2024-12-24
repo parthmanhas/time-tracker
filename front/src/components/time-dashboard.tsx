@@ -32,6 +32,7 @@ import { soundManager } from '@/lib/sound'
 import { useAuth } from '@/context/AuthContext'
 import { toast } from '@/hooks/use-toast'
 import { CompactTimer } from "./timer-compact"
+import { WithSidebarTrigger } from './WithSidebarTrigger'
 
 const timeOptions = [
   { value: '600', label: '10 minutes' },
@@ -220,7 +221,7 @@ export default function CountdownTimerDashboard() {
   const sortTimers = (timers: TimerType[]) => {
     return [...timers].sort((a, b) => {
       let comparison = 0;
-      
+
       switch (sortBy) {
         case 'created':
           comparison = new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
@@ -255,7 +256,9 @@ export default function CountdownTimerDashboard() {
       <WithLoading isLoading={isLoading} size={80} isScreen={true}>
         <div className="space-y-4">
           <div className="flex flex-wrap gap-2 justify-between items-center">
-            <h1 className="text-2xl font-bold">Countdown Timers</h1>
+            <WithSidebarTrigger>
+              <h1 className="text-2xl font-bold">Countdown Timers</h1>
+            </WithSidebarTrigger>
             <div className="flex flex-wrap gap-3">
               <Popover>
                 <PopoverTrigger asChild>
@@ -405,32 +408,36 @@ export default function CountdownTimerDashboard() {
             </div>
 
             {uniqueTags.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {uniqueTags.map(tag => (
-                  <Button
-                    key={tag}
-                    variant={selectedTag === tag ? "secondary" : "outline"}
-                    size="sm"
-                    onClick={() => setSelectedTag(tag === selectedTag ? null : tag)}
-                    className="h-7"
-                  >
-                    {tag}
-                  </Button>
-                ))}
-              </div>
+              <>
+                <h3 className='font-semibold sm:hidden'>Tags</h3>
+                <div className="flex flex-wrap gap-2">
+                  <h3 className='font-semibold hidden sm:block'>Tags</h3>
+                  {uniqueTags.map(tag => (
+                    <Button
+                      key={tag}
+                      variant={selectedTag === tag ? "secondary" : "outline"}
+                      size="sm"
+                      onClick={() => setSelectedTag(tag === selectedTag ? null : tag)}
+                      className="h-7"
+                    >
+                      {tag}
+                    </Button>
+                  ))}
+                </div>
+              </>
             )}
           </div>
 
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-semibold">
-              {selectedTag ? `${activeFilter} Timers - ${selectedTag}` : `${activeFilter} Timers`}
+              {selectedTag ? `${activeFilter.charAt(0) + activeFilter.slice(1).toLowerCase()} Timers - ${selectedTag}` : `${activeFilter.charAt(0).toUpperCase() + activeFilter.slice(1).toLocaleLowerCase()} Timers`}
             </h2>
             <h2 className="text-xl font-semibold">Time Spent: {getTimeSpent(activeFilter)}</h2>
             <span className="text-sm font-medium">
               Count: {filteredByTagTimers.length}
             </span>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row items-center gap-4">
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium">Sort by:</span>
               <Select value={sortBy} onValueChange={(value: 'created' | 'duration' | 'remaining') => setSortBy(value)}>
@@ -477,8 +484,8 @@ export default function CountdownTimerDashboard() {
             </div>
           </div>
           <div className={cn(
-            view === 'grid' 
-              ? "grid gap-4 md:grid-cols-2 lg:grid-cols-3" 
+            view === 'grid'
+              ? "grid gap-4 md:grid-cols-2 lg:grid-cols-3"
               : "flex flex-col gap-2"
           )}>
             {!selectedDate && activeFilter === 'ALL' &&
@@ -494,22 +501,31 @@ export default function CountdownTimerDashboard() {
               sortedAndFilteredTimers
                 .filter(timer => ['COMPLETED'].includes(timer.status))
                 .map(timer => (
-                  <Timer key={timer.id} timer={timer} workerRef={workerRef} />
-                ))
+                  view === 'grid' ? (
+                    <Timer key={timer.id} timer={timer} workerRef={workerRef} />
+                  ) : (
+                    <CompactTimer key={timer.id} timer={timer} workerRef={workerRef} />
+                  )))
             }
             {!selectedDate && activeFilter === 'QUEUED' &&
               sortedAndFilteredTimers
                 .filter(timer => ['PAUSED'].includes(timer.status))
                 .map(timer => (
-                  <Timer key={timer.id} timer={timer} workerRef={workerRef} />
-                ))
+                  view === 'grid' ? (
+                    <Timer key={timer.id} timer={timer} workerRef={workerRef} />
+                  ) : (
+                    <CompactTimer key={timer.id} timer={timer} workerRef={workerRef} />
+                  )))
             }
             {activeFilter === 'ACTIVE' &&
               sortedAndFilteredTimers
                 .filter(timer => ['ACTIVE'].includes(timer.status))
                 .map(timer => (
-                  <Timer key={timer.id} timer={timer} workerRef={workerRef} />
-                ))
+                  view === 'grid' ? (
+                    <Timer key={timer.id} timer={timer} workerRef={workerRef} />
+                  ) : (
+                    <CompactTimer key={timer.id} timer={timer} workerRef={workerRef} />
+                  )))
             }
             {selectedDate && activeFilter === 'COMPLETED' &&
               sortedAndFilteredTimers
@@ -518,8 +534,11 @@ export default function CountdownTimerDashboard() {
                 )
                 .filter(timer => ['COMPLETED'].includes(timer.status))
                 .map(timer => (
-                  <Timer key={timer.id} timer={timer} workerRef={workerRef} />
-                ))
+                  view === 'grid' ? (
+                    <Timer key={timer.id} timer={timer} workerRef={workerRef} />
+                  ) : (
+                    <CompactTimer key={timer.id} timer={timer} workerRef={workerRef} />
+                  )))
             }
             {selectedDate && activeFilter === 'QUEUED' &&
               sortedAndFilteredTimers
@@ -528,8 +547,11 @@ export default function CountdownTimerDashboard() {
                 )
                 .filter(timer => ['PAUSED'].includes(timer.status))
                 .map(timer => (
-                  <Timer key={timer.id} timer={timer} workerRef={workerRef} />
-                ))
+                  view === 'grid' ? (
+                    <Timer key={timer.id} timer={timer} workerRef={workerRef} />
+                  ) : (
+                    <CompactTimer key={timer.id} timer={timer} workerRef={workerRef} />
+                  )))
             }
           </div>
         </div>

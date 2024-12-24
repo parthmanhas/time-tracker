@@ -38,6 +38,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { CompletedTimeGoal } from './completed-time-goal'
 import { CompletedCountGoal } from './completed-count-goal'
+import { WithSidebarTrigger } from './WithSidebarTrigger'
 
 export function Goals() {
     const [goals, setGoals] = React.useState<Goal[]>([])
@@ -346,7 +347,9 @@ export function Goals() {
         <div className="container mx-auto p-6">
             <WithLoading isLoading={isLoading} isScreen={true}>
                 <div className="flex justify-between items-center mb-6">
-                    <h1 className="text-2xl font-bold">Goals</h1>
+                    <WithSidebarTrigger>
+                        <h1 className="text-2xl font-bold">Goals</h1>
+                    </WithSidebarTrigger>
                     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                         <DialogTrigger asChild>
                             <Button>

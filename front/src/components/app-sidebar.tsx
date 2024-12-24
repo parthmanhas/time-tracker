@@ -1,8 +1,9 @@
-import { Calendar, Home, Inbox, Search, Settings } from "lucide-react"
+import { BarChart2, BookOpen, Calendar, Clock, Home, Inbox, LogOut, Search, Settings, Tag, Target } from "lucide-react"
 
 import {
     Sidebar,
     SidebarContent,
+    SidebarFooter,
     SidebarGroup,
     SidebarGroupContent,
     SidebarGroupLabel,
@@ -10,37 +11,48 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import { useNavigate } from "react-router-dom"
+import { useAuth } from "@/context/AuthContext"
 
 // Menu items.
 const items = [
     {
-        title: "Home",
-        url: "#",
-        icon: Home,
+        title: "Timers",
+        url: "/",
+        icon: Clock,
     },
     {
-        title: "Inbox",
-        url: "#",
-        icon: Inbox,
+        title: "Stats",
+        url: "/stats",
+        icon: BarChart2,
     },
     {
-        title: "Calendar",
-        url: "#",
-        icon: Calendar,
+        title: "Tags",
+        url: "/tags",
+        icon: Tag,
     },
     {
-        title: "Search",
-        url: "#",
-        icon: Search,
+        title: "Journal",
+        url: "/journal",
+        icon: BookOpen,
     },
     {
-        title: "Settings",
-        url: "#",
-        icon: Settings,
+        title: "Goals",
+        url: "/goals",
+        icon: Target,
     },
+
 ]
 
+
+
 export function AppSidebar() {
+    const { logout } = useAuth()
+    const navigate = useNavigate()
+    const handleLogout = () => {
+        logout()
+        navigate('/login')
+    }
     return (
         <Sidebar>
             <SidebarContent>
@@ -62,6 +74,32 @@ export function AppSidebar() {
                     </SidebarGroupContent>
                 </SidebarGroup>
             </SidebarContent>
+            <SidebarFooter>
+                <SidebarContent>
+                    <SidebarGroup>
+                        <SidebarGroupContent>
+                            <SidebarMenu>
+                                <SidebarMenuItem key="settings">
+                                    <SidebarMenuButton asChild>
+                                        <a href="/settings">
+                                            <Settings />
+                                            <span>Settings</span>
+                                        </a>
+                                    </SidebarMenuButton>
+                                </SidebarMenuItem>
+                                <SidebarMenuItem key="logout">
+                                    <SidebarMenuButton asChild>
+                                        <button onClick={handleLogout}>
+                                            <LogOut />
+                                            <span>Logout</span>
+                                        </button>
+                                    </SidebarMenuButton>
+                                </SidebarMenuItem>
+                            </SidebarMenu>
+                        </SidebarGroupContent>
+                    </SidebarGroup>
+                </SidebarContent>
+            </SidebarFooter>
         </Sidebar>
     )
 }

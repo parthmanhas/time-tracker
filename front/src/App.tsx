@@ -15,51 +15,46 @@ import { ProtectedRoute } from './components/auth/protected-route'
 import { JournalDashboard } from './components/journal-dashboard'
 import { Goals } from './components/goals'
 import { Toaster } from './components/ui/toaster'
+import { SidebarProvider, SidebarTrigger } from './components/ui/sidebar'
+import { AppSidebar } from './components/app-sidebar'
 
 export default function App() {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
 
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          {/* Public routes */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
+      <SidebarProvider>
+        <BrowserRouter>
+          <Routes>
+            {/* Public routes */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
 
-          {/* Protected routes */}
-          <Route
-            path="/*"
-            element={
-              <ProtectedRoute>
-                <div className="flex h-screen">
-                  <Sidebar
-                    className="fixed left-0 top-0"
-                    onCollapsedChange={setSidebarCollapsed}
-                  />
-                  <div
-                    className={cn(
-                      "flex-1 transition-all duration-300",
-                      sidebarCollapsed ? "ml-16" : "ml-64"
-                    )}
-                  >
-                    <Routes>
-                      <Route path="/" element={<CountdownTimerDashboard />} />
-                      <Route path="/stats" element={<Stats />} />
-                      <Route path="/tags" element={<TagStats />} />
-                      <Route path="/journal" element={<JournalDashboard />} />
-                      <Route path="/goals" element={<Goals />} />
-                      <Route path="/settings" element={<Settings />} />
-                    </Routes>
+            {/* Protected routes */}
+            <Route
+              path="/*"
+              element={
+                <ProtectedRoute>
+                  <AppSidebar />
+                  <div className="flex h-screen w-screen">
+                    <div className='w-full h-full'>
+                      <Routes>
+                        <Route path="/" element={<CountdownTimerDashboard />} />
+                        <Route path="/stats" element={<Stats />} />
+                        <Route path="/tags" element={<TagStats />} />
+                        <Route path="/journal" element={<JournalDashboard />} />
+                        <Route path="/goals" element={<Goals />} />
+                        <Route path="/settings" element={<Settings />} />
+                      </Routes>
+                    </div>
                   </div>
-                </div>
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
-        <Toaster />
-      </BrowserRouter>
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+          <Toaster />
+        </BrowserRouter>
+      </SidebarProvider>
     </AuthProvider>
   )
 }

@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useAuth } from '@/context/AuthContext'
 import { LoaderCircle } from 'lucide-react'
 import { WithLoading } from '@/hoc/hoc'
+import { WithSidebarTrigger } from './WithSidebarTrigger'
 
 export function Stats() {
   const { allTimers, setAllTimers } = useTimerStore()
@@ -176,156 +177,158 @@ export function Stats() {
   return (
     <div className="container mx-auto p-6">
       <WithLoading isLoading={isLoading} size={80} isScreen={true}>
-          <h1 className="text-2xl font-bold mb-6">Statistics</h1>
-          <div className="grid gap-6">
-            {/* 30 Day History */}
-            <Card>
-              <CardHeader>
-                <CardTitle>30 Day History</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-[300px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={getLast30DaysData()}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis
-                        dataKey="date"
-                        angle={-45}
-                        textAnchor="end"
-                        height={70}
-                      />
-                      <YAxis
-                        yAxisId="left"
-                        allowDecimals={false}
-                        label={{
-                          value: 'Completed Timers',
-                          angle: -90,
-                          position: 'insideLeft'
-                        }}
-                      />
-                      <YAxis
-                        yAxisId="right"
-                        orientation="right"
-                        label={{
-                          value: 'Hours',
-                          angle: 90,
-                          position: 'insideRight'
-                        }}
-                      />
-                      <Tooltip content={<CustomTooltip />} />
+        <WithSidebarTrigger className='mb-6'>
+          <h1 className="text-2xl font-bold">Statistics</h1>
+        </WithSidebarTrigger>
+        <div className="grid gap-6">
+          {/* 30 Day History */}
+          <Card>
+            <CardHeader>
+              <CardTitle>30 Day History</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[300px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={getLast30DaysData()}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis
+                      dataKey="date"
+                      angle={-45}
+                      textAnchor="end"
+                      height={70}
+                    />
+                    <YAxis
+                      yAxisId="left"
+                      allowDecimals={false}
+                      label={{
+                        value: 'Completed Timers',
+                        angle: -90,
+                        position: 'insideLeft'
+                      }}
+                    />
+                    <YAxis
+                      yAxisId="right"
+                      orientation="right"
+                      label={{
+                        value: 'Hours',
+                        angle: 90,
+                        position: 'insideRight'
+                      }}
+                    />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Bar
+                      yAxisId="left"
+                      dataKey="completed"
+                      fill="currentColor"
+                      radius={[4, 4, 0, 0]}
+                      className="fill-primary"
+                      barSize={30}
+                    />
+                    <Bar
+                      yAxisId="right"
+                      dataKey="hours"
+                      fill="currentColor"
+                      radius={[4, 4, 0, 0]}
+                      className="fill-secondary"
+                      opacity={0.5}
+                      barSize={30}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Time per Tag stats */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Time per Tag</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Tabs defaultValue="day">
+                <TabsList className="mb-4">
+                  <TabsTrigger value="day">Last 24h</TabsTrigger>
+                  <TabsTrigger value="threeDays">Last 3 Days</TabsTrigger>
+                  <TabsTrigger value="week">Last Week</TabsTrigger>
+                  <TabsTrigger value="month">This Month</TabsTrigger>
+                </TabsList>
+
+                {Object.entries(timeRanges).map(([range, data]) => (
+                  <TabsContent key={range} value={range} className="h-[300px]">
+                    {data.length > 0 ? (
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={data}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="tag" />
+                          <YAxis
+                            label={{
+                              value: 'Hours',
+                              angle: -90,
+                              position: 'insideLeft'
+                            }}
+                          />
+                          <Tooltip />
+                          <Bar
+                            dataKey="hours"
+                            fill="currentColor"
+                            radius={[4, 4, 0, 0]}
+                            className="fill-primary"
+                            barSize={30}
+                          />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <div className="h-full flex items-center justify-center text-muted-foreground">
+                        No data available for this period
+                      </div>
+                    )}
+                  </TabsContent>
+                ))}
+              </Tabs>
+            </CardContent>
+          </Card>
+
+          {/* 30 Day Tag History */}
+          <Card>
+            <CardHeader>
+              <CardTitle>30 Day Tag History</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[400px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={tagHistoryData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis
+                      dataKey="date"
+                      angle={-45}
+                      textAnchor="end"
+                      height={70}
+                    />
+                    <YAxis
+                      label={{
+                        value: 'Hours',
+                        angle: -90,
+                        position: 'insideLeft'
+                      }}
+                    />
+                    <Tooltip content={<TagHistoryTooltip />} />
+                    <Legend />
+                    {uniqueTags.map((tag, index) => (
                       <Bar
-                        yAxisId="left"
-                        dataKey="completed"
-                        fill="currentColor"
-                        radius={[4, 4, 0, 0]}
-                        className="fill-primary"
+                        key={tag}
+                        dataKey={tag}
+                        stackId="a"
+                        fill={`hsl(${index * (360 / uniqueTags.length)}, 70%, 50%)`}
+                        radius={[index === uniqueTags.length - 1 ? 4 : 0, index === uniqueTags.length - 1 ? 4 : 0, 0, 0]}
                         barSize={30}
                       />
-                      <Bar
-                        yAxisId="right"
-                        dataKey="hours"
-                        fill="currentColor"
-                        radius={[4, 4, 0, 0]}
-                        className="fill-secondary"
-                        opacity={0.5}
-                        barSize={30}
-                      />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Time per Tag stats */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Time per Tag</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Tabs defaultValue="day">
-                  <TabsList className="mb-4">
-                    <TabsTrigger value="day">Last 24h</TabsTrigger>
-                    <TabsTrigger value="threeDays">Last 3 Days</TabsTrigger>
-                    <TabsTrigger value="week">Last Week</TabsTrigger>
-                    <TabsTrigger value="month">This Month</TabsTrigger>
-                  </TabsList>
-
-                  {Object.entries(timeRanges).map(([range, data]) => (
-                    <TabsContent key={range} value={range} className="h-[300px]">
-                      {data.length > 0 ? (
-                        <ResponsiveContainer width="100%" height="100%">
-                          <BarChart data={data}>
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="tag" />
-                            <YAxis
-                              label={{
-                                value: 'Hours',
-                                angle: -90,
-                                position: 'insideLeft'
-                              }}
-                            />
-                            <Tooltip />
-                            <Bar
-                              dataKey="hours"
-                              fill="currentColor"
-                              radius={[4, 4, 0, 0]}
-                              className="fill-primary"
-                              barSize={30}
-                            />
-                          </BarChart>
-                        </ResponsiveContainer>
-                      ) : (
-                        <div className="h-full flex items-center justify-center text-muted-foreground">
-                          No data available for this period
-                        </div>
-                      )}
-                    </TabsContent>
-                  ))}
-                </Tabs>
-              </CardContent>
-            </Card>
-
-            {/* 30 Day Tag History */}
-            <Card>
-              <CardHeader>
-                <CardTitle>30 Day Tag History</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-[400px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={tagHistoryData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis
-                        dataKey="date"
-                        angle={-45}
-                        textAnchor="end"
-                        height={70}
-                      />
-                      <YAxis
-                        label={{
-                          value: 'Hours',
-                          angle: -90,
-                          position: 'insideLeft'
-                        }}
-                      />
-                      <Tooltip content={<TagHistoryTooltip />} />
-                      <Legend />
-                      {uniqueTags.map((tag, index) => (
-                        <Bar
-                          key={tag}
-                          dataKey={tag}
-                          stackId="a"
-                          fill={`hsl(${index * (360 / uniqueTags.length)}, 70%, 50%)`}
-                          radius={[index === uniqueTags.length - 1 ? 4 : 0, index === uniqueTags.length - 1 ? 4 : 0, 0, 0]}
-                          barSize={30}
-                        />
-                      ))}
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+                    ))}
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </WithLoading>
     </div>
   )

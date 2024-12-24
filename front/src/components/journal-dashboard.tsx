@@ -5,8 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { JournalEntry } from '@/types'
 import { API } from '@/config/api'
 import { format } from 'date-fns'
-import { Pencil, Trash, Save, X, LoaderCircle } from 'lucide-react'
+import { Pencil, Trash, Save, X } from 'lucide-react'
 import { WithLoading } from '@/hoc/hoc'
+import { WithSidebarTrigger } from './WithSidebarTrigger'
 
 export function JournalDashboard() {
     const [entries, setEntries] = React.useState<JournalEntry[]>([])
@@ -106,8 +107,9 @@ export function JournalDashboard() {
     return (
         <div className="container mx-auto p-6">
             <WithLoading isLoading={isLoading} isScreen={true}>
-                <h1 className="text-2xl font-bold mb-6">Journal</h1>
-
+                <WithSidebarTrigger className='mb-6'>
+                    <h1 className="text-2xl font-bold">Journal</h1>
+                </WithSidebarTrigger>
                 <Card className="mb-6">
                     <CardHeader>
                         <CardTitle className="text-lg">New Entry</CardTitle>
