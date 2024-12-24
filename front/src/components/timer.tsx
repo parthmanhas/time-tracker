@@ -159,6 +159,10 @@ export function Timer({ timer, workerRef }: TimerProps) {
                     'Content-Type': 'application/json'
                 }
             })
+            workerRef.current?.postMessage({
+                type: 'START_TIMER',
+                payload: { id: timer.id, remainingTime: timer.remainingTime + 600 },
+            });
         } catch (e) {
             console.error(e);
         } finally {
