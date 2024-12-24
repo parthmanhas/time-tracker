@@ -8,7 +8,7 @@ import { useAuth } from "@/context/AuthContext"
 
 export function LandingPage() {
 
-    const {isAuthenticated} = useAuth()
+    const { isAuthenticated } = useAuth()
     const navigate = useNavigate()
 
     useEffect(() => {
@@ -21,11 +21,13 @@ export function LandingPage() {
         <div className="min-h-screen bg-background">
             {/* Hero Section */}
             <div className="container flex flex-col items-center justify-center h-screen mx-auto px-6 py-16 text-center relative overflow-hidden">
-                <SciFiClock />
-                <div className="absolute top-[50%] left-0 w-full h-full">
+                <div className="absolute top-[5%] left-[50%] w-full h-full">
                     <SciFiClock />
                 </div>
-                <div className="absolute top-[90%] left-[80%] w-full h-full">
+                <div className="absolute hidden sm:block top-[50%] left-0 w-full h-full">
+                    <SciFiClock />
+                </div>
+                <div className="absolute hidden sm:block top-[90%] left-[80%] w-full h-full">
                     <SciFiClock />
                 </div>
                 <div

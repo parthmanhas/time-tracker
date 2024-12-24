@@ -26,7 +26,7 @@ import { Plus, Target, Tag, CheckCircle, PlusCircle, MinusCircle } from 'lucide-
 import { Label } from './ui/label'
 import { differenceInDays } from 'date-fns'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
-import { cn } from '@/lib/utils'
+import { cn, fetchAllTimers } from '@/lib/utils'
 import { toast } from '@/hooks/use-toast'
 import { WithLoading } from '@/hoc/hoc'
 import {
@@ -38,14 +38,20 @@ import {
 import { CompletedTimeGoal } from './completed-time-goal'
 import { CompletedCountGoal } from './completed-count-goal'
 import { WithSidebarTrigger } from './WithSidebarTrigger'
+import { useAuth } from '@/context/AuthContext'
 
 export function Goals() {
     const [goals, setGoals] = React.useState<Goal[]>([])
     const [progress, setProgress] = React.useState<Record<string, GoalProgress>>({})
     const [isDialogOpen, setIsDialogOpen] = React.useState(false)
-    const { allTimers } = useTimerStore()
+    const { allTimers, setAllTimers } = useTimerStore()
     const [isLoading, setIsLoading] = React.useState(true);
     const [error, setError] = React.useState<string | null>(null);
+    const { logout } = useAuth();
+
+    React.useEffect(() => {
+        fetchAllTimers(setAllTimers, logout, setIsLoading);
+      }, [])
 
     // Form state
     const [newGoal, setNewGoal] = React.useState({
@@ -349,6 +355,7 @@ export function Goals() {
                     <WithSidebarTrigger>
                         <h1 className="text-2xl font-bold">Goals</h1>
                     </WithSidebarTrigger>
+                    {/* add goal dialog */}
                     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                         <DialogTrigger asChild>
                             <Button>
@@ -482,7 +489,7 @@ export function Goals() {
                         </DialogContent>
                     </Dialog>
                 </div>
-
+                {/* goals display */}
                 <div className="grid gap-6">
                     {goals?.map(goal => {
                         const completionDetails = getCompletionDetails(goal);
@@ -496,7 +503,7 @@ export function Goals() {
                                 )}
                             >
                                 <CardHeader>
-                                    <div className="flex items-center justify-between">
+                                    <div className="flex flex-col gap-2 items-start sm:flex-row sm:items-center justify-between">
                                         <div className="space-y-1">
                                             <CardTitle className="flex items-center gap-2">
                                                 {completionDetails ? (
