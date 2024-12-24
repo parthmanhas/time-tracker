@@ -108,3 +108,19 @@
 .prose ol {
   @apply list-decimal list-inside;
 }
+
+@keyframes highlight {
+  0% {
+    background-color: transparent;
+  }
+  50% {
+    background-color: hsl(var(--primary) / 0.1);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+.animate-highlight {
+  animation: highlight 500ms normal;
+}

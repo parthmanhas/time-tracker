@@ -18,6 +18,7 @@ import { API } from '@/config/api'
 import { WithLoading } from "@/hoc/hoc"
 import { useAuth } from "@/context/AuthContext"
 import { Textarea } from "./ui/textarea"
+import { cn } from "@/lib/utils"
 
 type TimerProps = {
     timer: TimerType,
@@ -40,6 +41,8 @@ export function Timer({ timer, workerRef }: TimerProps) {
     const [newComment, setNewComment] = React.useState('');
     const [isCommentsOpen, setIsCommentsOpen] = React.useState(false);
     const [isLoading, setIsLoading] = React.useState(false);
+    const [isHighlighted, setIsHighlighted] = React.useState(false);
+    const timerRef = React.useRef<HTMLDivElement>(null);
 
     React.useEffect(() => {
         if (timer.status === 'COMPLETED') {
@@ -169,8 +172,36 @@ export function Timer({ timer, workerRef }: TimerProps) {
         setNewComment('')
     }
 
+    React.useEffect(() => {
+        const highlightTimerId = localStorage.getItem('highlightTimerId');
+        
+        if (highlightTimerId === timer.id) {
+            // Clear the stored ID
+            localStorage.removeItem('highlightTimerId');
+            
+            // Scroll into view
+            timerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            // Add highlight effect
+            setIsHighlighted(true);
+            
+            // Remove highlight after animation
+            const timeout = setTimeout(() => {
+                setIsHighlighted(false);
+            }, 2000); // Duration matches the CSS animation
+            
+            return () => clearTimeout(timeout);
+        }
+    }, [timer.id]);
+
     return (
-        <Card key={timer.id}>
+        <Card 
+            ref={timerRef}
+            className={cn(
+                "transition-all duration-300",
+                isHighlighted && "animate-highlight"
+            )}
+        >
             <CardContent className="p-4 flex flex-col justify-between h-full">
                 <div>
                     <div className="flex justify-between items-center mb-2">

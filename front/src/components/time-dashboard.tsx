@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Plus, Calendar as CalendarIcon, Search, LoaderIcon, Loader2Icon, LoaderCircle } from 'lucide-react'
+import { Plus, Calendar as CalendarIcon, Search, LoaderIcon, Loader2Icon, LoaderCircle, LayoutGrid, List } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -31,6 +31,7 @@ import { WithLoading } from '@/hoc/hoc'
 import { soundManager } from '@/lib/sound'
 import { useAuth } from '@/context/AuthContext'
 import { toast } from '@/hooks/use-toast'
+import { CompactTimer } from "./timer-compact"
 
 const timeOptions = [
   { value: '600', label: '10 minutes' },
@@ -49,6 +50,7 @@ export default function CountdownTimerDashboard() {
   const [isLoading, setIsLoading] = React.useState(true);
   const [sortBy, setSortBy] = React.useState<'created' | 'duration' | 'remaining'>('created')
   const [sortOrder, setSortOrder] = React.useState<'asc' | 'desc'>('desc')
+  const [view, setView] = React.useState<'grid' | 'list'>('grid')
 
   const {
     setAllTimers,
@@ -238,6 +240,15 @@ export default function CountdownTimerDashboard() {
   const sortedAndFilteredTimers = React.useMemo(() => {
     return sortTimers(filteredByTagTimers);
   }, [filteredByTagTimers, sortBy, sortOrder]);
+
+  React.useEffect(() => {
+    const handleSwitchView = () => {
+      setView('grid');
+    };
+
+    window.addEventListener('switchToGridView', handleSwitchView);
+    return () => window.removeEventListener('switchToGridView', handleSwitchView);
+  }, []);
 
   return (
     <div className="container mx-auto p-6">
@@ -447,10 +458,36 @@ export default function CountdownTimerDashboard() {
               </Select>
             </div>
           </div>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-2">
+              <Button
+                variant={view === 'grid' ? 'secondary' : 'ghost'}
+                size="icon"
+                onClick={() => setView('grid')}
+              >
+                <LayoutGrid className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={view === 'list' ? 'secondary' : 'ghost'}
+                size="icon"
+                onClick={() => setView('list')}
+              >
+                <List className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+          <div className={cn(
+            view === 'grid' 
+              ? "grid gap-4 md:grid-cols-2 lg:grid-cols-3" 
+              : "flex flex-col gap-2"
+          )}>
             {!selectedDate && activeFilter === 'ALL' &&
               sortedAndFilteredTimers.map(timer => (
-                <Timer key={timer.id} timer={timer} workerRef={workerRef} />
+                view === 'grid' ? (
+                  <Timer key={timer.id} timer={timer} workerRef={workerRef} />
+                ) : (
+                  <CompactTimer key={timer.id} timer={timer} workerRef={workerRef} />
+                )
               ))
             }
             {!selectedDate && activeFilter === 'COMPLETED' &&
