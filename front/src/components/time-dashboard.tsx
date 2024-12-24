@@ -31,6 +31,7 @@ import { API } from '@/config/api'
 import { WithLoading } from '@/hoc/hoc'
 import { soundManager } from '@/lib/sound'
 import { useAuth } from '@/context/AuthContext'
+import { toast } from '@/hooks/use-toast'
 
 const timeOptions = [
   { value: '600', label: '10 minutes' },
@@ -123,6 +124,12 @@ export default function CountdownTimerDashboard() {
         const { type, id, remainingTime } = event.data;
 
         switch (type) {
+          case "TIMER_STARTED":
+            toast({
+              title: 'Timer Started',
+              description: `Timer has been started.`,
+            });
+            break;
           case "TIMER_UPDATE":
             setRemainingTime(id, remainingTime);
             break;
@@ -131,6 +138,10 @@ export default function CountdownTimerDashboard() {
             soundManager.playTimerComplete();
             workerRef?.current?.postMessage({
               type: 'STOP_TIMER'
+            });
+            toast({
+              title: 'Timer Completed',
+              description: `Timer has been completed.`,
             });
             break;
           default:

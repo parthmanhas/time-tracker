@@ -51,7 +51,7 @@ export function Timer({ timer, workerRef }: TimerProps) {
             });
         }
 
-    }, [setRemainingTime, timer.duration, timer.id, timer.remainingTime, timer.status, workerRef]);
+    }, []);
 
     const completeAt = Date.now() + Math.abs(timer.remainingTime) * 1000;
 

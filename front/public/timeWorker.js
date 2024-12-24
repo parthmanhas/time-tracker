@@ -6,12 +6,16 @@ self.onmessage = (event) => {
     switch (type) {
         case "START_TIMER":
             // Start a timer with a specified duration
+            if (intervalId) break;
+            self.postMessage({
+                type: "TIMER_STARTED"
+            });
             startTimer(payload.id, payload.remainingTime);
             break;
 
         case "STOP_TIMER":
             // Stop the timer
-            clearInterval(intervalId);
+            stopTimer();
             break;
 
         default:
@@ -20,7 +24,9 @@ self.onmessage = (event) => {
 }
 
 function startTimer(id, remainingTime) {
-    if (intervalId) clearInterval(intervalId);
+    if (intervalId) {
+        stopTimer();
+    }
     intervalId = setInterval(() => {
         remainingTime -= 1;
         if (remainingTime < 0) {
@@ -41,5 +47,6 @@ function startTimer(id, remainingTime) {
 }
 
 function stopTimer() {
-    console.log('timer stopped');
+    clearInterval(intervalId);
+    intervalId = null;
 }
