@@ -127,10 +127,6 @@ export function Goals() {
         const progressData: Record<string, GoalProgress> = {};
 
         goals.forEach(goal => {
-            if (!goal.target_hours) {
-                console.error('Goal has no target hours:', goal);
-                return;
-            };
             let totalHours = 0;
 
             allTimers.forEach(timer => {
@@ -476,10 +472,7 @@ export function Goals() {
                                 <WithLoading isLoading={isLoading} isScreen={false}>
                                     <Button
                                         type='submit'
-                                        className="w-full"
-
-                                    // disabled={newGoal.target_hours <= 0 || newGoal.target_count <= 0 || newGoal.tags.length === 0}
-                                    >
+                                        className="w-full"                                    >
                                         Create Goal
                                     </Button>
                                 </WithLoading>
@@ -492,7 +485,6 @@ export function Goals() {
                     {goals?.map(goal => {
                         const completionDetails = getCompletionDetails(goal);
                         const startDate = getGoalStartDate(goal);
-
                         return (
                             <Card
                                 key={goal.id}
