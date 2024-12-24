@@ -1,5 +1,5 @@
 import * as React from "react"
-import { useNavigate, Link, useLocation } from "react-router-dom"
+import { useNavigate, Link } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -37,7 +37,7 @@ export function Login() {
 
       const data = await response.json()
       login(data.user)
-      navigate('/app')
+      navigate('/timers')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed')
     } finally {

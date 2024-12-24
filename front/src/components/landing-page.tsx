@@ -1,10 +1,21 @@
 import { Button } from "./ui/button"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { Timer, Target, Calendar, BookOpen, BarChart2, Tags } from "lucide-react"
 import { SciFiClock } from "./sci-fi-clock"
 import { cn } from "@/lib/utils"
+import { useEffect } from "react"
+import { useAuth } from "@/context/AuthContext"
 
 export function LandingPage() {
+
+    const {isAuthenticated} = useAuth()
+    const navigate = useNavigate()
+
+    useEffect(() => {
+        if (isAuthenticated) {
+            navigate('/timers');
+        }
+    }, [isAuthenticated, navigate]);
 
     return (
         <div className="min-h-screen bg-background">

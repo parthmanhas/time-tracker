@@ -31,14 +31,14 @@ export default function App() {
 
             {/* Protected routes */}
             <Route
-              path="/app/*"
+              path="/*"
               element={
                 <ProtectedRoute>
                   <AppSidebar />
                   <div className="flex h-screen w-screen">
                     <div className='w-full h-full'>
                       <Routes>
-                        <Route path="/" element={<CountdownTimerDashboard />} />
+                        <Route path="/timers" element={<CountdownTimerDashboard />} />
                         <Route path="/stats" element={<Stats />} />
                         <Route path="/tags" element={<TagStats />} />
                         <Route path="/journal" element={<JournalDashboard />} />

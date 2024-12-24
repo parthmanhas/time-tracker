@@ -18,7 +18,7 @@ import { useAuth } from "@/context/AuthContext"
 const items = [
     {
         title: "Timers",
-        url: "/",
+        url: "/timers",
         icon: Clock,
     },
     {
