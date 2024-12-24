@@ -14,6 +14,7 @@ import { Goals } from './components/goals'
 import { Toaster } from './components/ui/toaster'
 import { SidebarProvider } from './components/ui/sidebar'
 import { AppSidebar } from './components/app-sidebar'
+import { LandingPage } from './components/landing-page'
 
 export default function App() {
 
@@ -23,13 +24,14 @@ export default function App() {
         <BrowserRouter>
           <Routes>
             {/* Public routes */}
+            <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
 
             {/* Protected routes */}
             <Route
-              path="/*"
+              path="/app/*"
               element={
                 <ProtectedRoute>
                   <AppSidebar />

@@ -63,6 +63,83 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				}
+			},
+			animation: {
+				'spin-slow': 'spin 20s linear infinite',
+				'scan': 'scan 3s linear infinite',
+				'assemble': 'assemble 2s ease-out forwards',
+				'fade-in': 'fadeIn 2s ease-out forwards',
+				'slide-in': 'slideIn 2s ease-out forwards',
+			},
+			keyframes: {
+				scan: {
+					'0%': { transform: 'translateY(0)' },
+					'100%': { transform: 'translateY(100vh)' },
+				},
+				assemble: {
+					'0%': { 
+						opacity: '0',
+						transform: 'translate(-150%, -150%) scale(1.2)'
+					},
+					'100%': { 
+						opacity: '1',
+						transform: 'translate(-50%, -50%) scale(1)'
+					}
+				},
+				assembleInner: {
+					'0%': { 
+						opacity: '0',
+						transform: 'translate(50%, 50%) scale(1.2)'
+					},
+					'100%': { 
+						opacity: '1',
+						transform: 'translate(-50%, -50%) scale(1)'
+					}
+				},
+				hourHand: {
+					'0%': { 
+						opacity: '0',
+						transform: 'translate(-150%, 50%) rotate(var(--rotate))'
+					},
+					'100%': { 
+						opacity: '1',
+						transform: 'translate(-50%, 0) rotate(var(--rotate))'
+					}
+				},
+				minuteHand: {
+					'0%': { 
+						opacity: '0',
+						transform: 'translate(50%, -150%) rotate(var(--rotate))'
+					},
+					'100%': { 
+						opacity: '1',
+						transform: 'translate(-50%, 0) rotate(var(--rotate))'
+					}
+				},
+				secondHand: {
+					'0%': { 
+						opacity: '0',
+						transform: 'translate(-50%, 100%) rotate(var(--rotate))'
+					},
+					'100%': { 
+						opacity: '1',
+						transform: 'translate(-50%, 0) rotate(var(--rotate))'
+					}
+				},
+				fadeIn: {
+					'0%': { opacity: '0' },
+					'100%': { opacity: '1' }
+				},
+				slideIn: {
+					'0%': { 
+						opacity: '0',
+						transform: 'translate(-50%, -50%) rotate(var(--rotate)) translateY(-100vh)'
+					},
+					'100%': { 
+						opacity: '1',
+						transform: 'translate(-50%, -50%) rotate(var(--rotate)) translateY(0)'
+					}
+				}
 			}
 		}
 	},
