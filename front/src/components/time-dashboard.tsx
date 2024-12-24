@@ -47,6 +47,8 @@ export default function CountdownTimerDashboard() {
   const [selectedTags, setSelectedTags] = React.useState<string[]>([])
   const [newTag, setNewTag] = React.useState('')
   const [isLoading, setIsLoading] = React.useState(true);
+  const [sortBy, setSortBy] = React.useState<'created' | 'duration' | 'remaining'>('created')
+  const [sortOrder, setSortOrder] = React.useState<'asc' | 'desc'>('desc')
 
   const {
     setAllTimers,
@@ -212,6 +214,30 @@ export default function CountdownTimerDashboard() {
       return [...prevTags, tag]
     })
   }
+
+  const sortTimers = (timers: TimerType[]) => {
+    return [...timers].sort((a, b) => {
+      let comparison = 0;
+      
+      switch (sortBy) {
+        case 'created':
+          comparison = new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          break;
+        case 'duration':
+          comparison = b.duration - a.duration;
+          break;
+        case 'remaining':
+          comparison = b.remainingTime - a.remainingTime;
+          break;
+      }
+
+      return sortOrder === 'desc' ? comparison : -comparison;
+    });
+  };
+
+  const sortedAndFilteredTimers = React.useMemo(() => {
+    return sortTimers(filteredByTagTimers);
+  }, [filteredByTagTimers, sortBy, sortOrder]);
 
   return (
     <div className="container mx-auto p-6">
@@ -393,35 +419,63 @@ export default function CountdownTimerDashboard() {
               Count: {filteredByTagTimers.length}
             </span>
           </div>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium">Sort by:</span>
+              <Select value={sortBy} onValueChange={(value: 'created' | 'duration' | 'remaining') => setSortBy(value)}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="created">Creation Date</SelectItem>
+                  <SelectItem value="duration">Duration</SelectItem>
+                  <SelectItem value="remaining">Remaining Time</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium">Order:</span>
+              <Select value={sortOrder} onValueChange={(value: 'asc' | 'desc') => setSortOrder(value)}>
+                <SelectTrigger className="w-[120px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="desc">Descending</SelectItem>
+                  <SelectItem value="asc">Ascending</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {!selectedDate && activeFilter === 'ALL' &&
-              filteredByTagTimers.map(timer => (
+              sortedAndFilteredTimers.map(timer => (
                 <Timer key={timer.id} timer={timer} workerRef={workerRef} />
               ))
             }
             {!selectedDate && activeFilter === 'COMPLETED' &&
-              filteredByTagTimers
+              sortedAndFilteredTimers
                 .filter(timer => ['COMPLETED'].includes(timer.status))
                 .map(timer => (
                   <Timer key={timer.id} timer={timer} workerRef={workerRef} />
                 ))
             }
             {!selectedDate && activeFilter === 'QUEUED' &&
-              filteredByTagTimers
+              sortedAndFilteredTimers
                 .filter(timer => ['PAUSED'].includes(timer.status))
                 .map(timer => (
                   <Timer key={timer.id} timer={timer} workerRef={workerRef} />
                 ))
             }
             {activeFilter === 'ACTIVE' &&
-              filteredByTagTimers
+              sortedAndFilteredTimers
                 .filter(timer => ['ACTIVE'].includes(timer.status))
                 .map(timer => (
                   <Timer key={timer.id} timer={timer} workerRef={workerRef} />
                 ))
             }
             {selectedDate && activeFilter === 'COMPLETED' &&
-              filteredByTagTimers
+              sortedAndFilteredTimers
                 .filter(timer =>
                   timer.completedAt?.split('T')[0] === convertToISODate(selectedDate.toLocaleDateString())
                 )
@@ -431,7 +485,7 @@ export default function CountdownTimerDashboard() {
                 ))
             }
             {selectedDate && activeFilter === 'QUEUED' &&
-              filteredByTagTimers
+              sortedAndFilteredTimers
                 .filter(timer =>
                   timer.createdAt.split('T')[0] === convertToISODate(selectedDate.toLocaleDateString())
                 )
