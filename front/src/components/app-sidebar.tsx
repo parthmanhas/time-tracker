@@ -1,4 +1,4 @@
-import { BarChart2, BookOpen, Calendar, Clock, Home, Inbox, LogOut, Search, Settings, Tag, Target } from "lucide-react"
+import { BarChart2, BookOpen, Clock, LogOut, Settings, Tag, Target } from "lucide-react"
 
 import {
     Sidebar,

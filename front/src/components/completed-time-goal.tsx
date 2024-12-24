@@ -1,5 +1,4 @@
 import { format } from 'date-fns'
-import { Badge } from './ui/badge'
 
 type CompletedTimeGoalProps = {
   startDate: Date

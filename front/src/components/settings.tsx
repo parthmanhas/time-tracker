@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { LoaderCircle, Tag, Trash2, Volume2 } from "lucide-react"
+import { Tag, Trash2, Volume2 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { useTimerStore } from '@/store/useTimerStore'
 import {

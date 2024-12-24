@@ -24,7 +24,6 @@ import {
 } from "@/components/ui/dialog"
 import { Plus, Target, Tag, CheckCircle, PlusCircle, MinusCircle } from 'lucide-react'
 import { Label } from './ui/label'
-import { format } from 'date-fns'
 import { differenceInDays } from 'date-fns'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { cn } from '@/lib/utils'
@@ -139,7 +138,7 @@ export function Goals() {
                 }
             });
 
-            const percentageComplete = Math.min((totalHours / goal.target_hours) * 100, 100);
+            const percentageComplete = Math.min((totalHours / (goal.target_hours || 0)) * 100, 100);
 
             if (percentageComplete >= 100 && !goal.completed_at) {
                 updateGoalCompletion(goal.id);
@@ -149,7 +148,7 @@ export function Goals() {
                 goalId: goal.id,
                 currentHours: totalHours,
                 percentageComplete: goal.completed_at ? 100 : percentageComplete,
-                remainingHours: Math.max(goal.target_hours - totalHours, 0)
+                remainingHours: Math.max((goal.target_hours || 0) - totalHours, 0)
             };
         });
 

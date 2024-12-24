@@ -6,7 +6,6 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Toolti
 import { subDays, startOfMonth, eachDayOfInterval, format } from 'date-fns'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useAuth } from '@/context/AuthContext'
-import { LoaderCircle } from 'lucide-react'
 import { WithLoading } from '@/hoc/hoc'
 import { WithSidebarTrigger } from './WithSidebarTrigger'
 

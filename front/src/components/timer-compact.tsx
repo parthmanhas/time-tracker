@@ -1,4 +1,4 @@
-import { Pause, Play, MessageSquare, CheckCircle, MoreVertical } from "lucide-react"
+import { Pause, Play, CheckCircle, MoreVertical } from "lucide-react"
 import { Card, CardContent } from "./ui/card"
 import { Button } from './ui/button'
 import { Badge } from "./ui/badge"
@@ -55,7 +55,6 @@ export function CompactTimer({ timer, workerRef }: TimerProps) {
                 size="icon" 
                 className="h-8 w-8 flex-shrink-0"
                 onClick={toggleTimer}
-                disabled={timer.status === 'COMPLETED'}
               >
                 {timer.status === 'ACTIVE' ? (
                   <Pause className="h-4 w-4" />

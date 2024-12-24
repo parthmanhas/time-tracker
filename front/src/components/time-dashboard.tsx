@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Plus, Calendar as CalendarIcon, Search, LoaderIcon, Loader2Icon, LoaderCircle, LayoutGrid, List } from 'lucide-react'
+import { Plus, Calendar as CalendarIcon, Search, LayoutGrid, List } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
