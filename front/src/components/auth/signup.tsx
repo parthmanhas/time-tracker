@@ -6,7 +6,6 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { API } from "@/config/api"
 import { SciFiClock } from "../sci-fi-clock"
-import { cn } from "@/lib/utils"
 
 export function Signup() {
   const [name, setName] = React.useState("")

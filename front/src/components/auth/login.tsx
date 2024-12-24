@@ -7,7 +7,6 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { API } from "@/config/api"
 import { useAuth } from '@/context/AuthContext'
 import { SciFiClock } from "../sci-fi-clock"
-import { cn } from "@/lib/utils"
 
 export function Login() {
   const [email, setEmail] = React.useState("")
