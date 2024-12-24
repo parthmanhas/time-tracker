@@ -14,8 +14,6 @@ export function Login() {
   const [isLoading, setIsLoading] = React.useState(false)
   const navigate = useNavigate()
   const { login } = useAuth()
-  const location = useLocation()
-  const from = location.state?.from?.pathname || '/'
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -39,7 +37,7 @@ export function Login() {
 
       const data = await response.json()
       login(data.user)
-      navigate(from)
+      navigate('/app')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed')
     } finally {
