@@ -23,20 +23,27 @@ export const markComplete = async (timer: Pick<TimerType, 'id' | 'status'>, setS
   }
 }
 
-export const fetchAllTimers = async (setAllTimers: (timers: TimerType[]) => void) => {
-  const response = await fetch(API.getUrl('TIMERS'), {
-    method: 'GET',
-    credentials: 'include',
-  });
-  const jsonResponse = await response.json() as TimerResponseType[];
-  const dbTimers: TimerType[] = jsonResponse.map(timer => ({
-    ...timer,
-    status: timer.status === 'ACTIVE' ? 'PAUSED' : timer.status,
-    remainingTime: timer.remaining_time,
-    createdAt: timer.created_at,
-    completedAt: timer.completed_at,
-    dueAt: timer.due_at,
-    comments: (timer.comments || [])?.filter(Boolean).length > 0 ? timer.comments : []
-  }))
-  setAllTimers(dbTimers);
+export const fetchAllTimers = async (setAllTimers: (timers: TimerType[]) => void, logout: () => void) => {
+  try {
+    const response = await fetch(API.getUrl('TIMERS'), {
+      method: 'GET',
+      credentials: 'include',
+    });
+    if(response.status === 401) {
+      logout();
+    }
+    const jsonResponse = await response.json() as TimerResponseType[];
+    const dbTimers: TimerType[] = jsonResponse.map(timer => ({
+      ...timer,
+      status: timer.status === 'ACTIVE' ? 'PAUSED' : timer.status,
+      remainingTime: timer.remaining_time,
+      createdAt: timer.created_at,
+      completedAt: timer.completed_at,
+      dueAt: timer.due_at,
+      comments: (timer.comments || [])?.filter(Boolean).length > 0 ? timer.comments : []
+    }))
+    setAllTimers(dbTimers);
+  } catch (e) {
+    console.error(e);
+  }
 }

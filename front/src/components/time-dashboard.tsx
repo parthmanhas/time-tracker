@@ -30,6 +30,7 @@ import { Badge } from "@/components/ui/badge"
 import { API } from '@/config/api'
 import { WithLoading } from '@/hoc/hoc'
 import { soundManager } from '@/lib/sound'
+import { useAuth } from '@/context/AuthContext'
 
 const timeOptions = [
   { value: '600', label: '10 minutes' },
@@ -61,8 +62,10 @@ export default function CountdownTimerDashboard() {
     setStatus,
   } = useTimerStore();
 
+  const { logout } = useAuth();
+
   React.useEffect(() => {
-    fetchAllTimers(setAllTimers);
+    fetchAllTimers(setAllTimers, logout);
   }, [])
 
   const convertToISODate = (localDateString: string | undefined) => {

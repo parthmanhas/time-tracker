@@ -44,8 +44,14 @@ router.post('/', authenticateToken, async (req, res) => {
     const { title, description, targetHours, priority, tags } = req.body;
 
     try {
+        if (priority === 'HIGH') {
+            const [goal] = await prisma.$queryRaw`SELECT * FROM GOAL WHERE priority = 'HIGH' AND user_id = ${req.user.id} AND completed_at is null`;
+            if (goal) {
+                return res.status(400).json({ error: 'You already have a high priority goal' });
+            }
+        }
         const [goal] = await prisma.$queryRaw`INSERT INTO GOAL (title, description, target_hours, priority, user_id, is_active) values (${title}, ${description}, ${targetHours}, ${priority}::"GoalPriority", ${req.user.id}, true) RETURNING id, title, description, target_hours, priority, is_active, created_at`;
-        for(let tag of tags) {
+        for (let tag of tags) {
             await prisma.$queryRaw`UPDATE TAGS SET goal_id = ${goal.id} where user_id = ${req.user.id} and tag = ${tag}`;
         }
         // Transform the response

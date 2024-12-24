@@ -14,6 +14,7 @@ import { AuthProvider } from './context/AuthContext'
 import { ProtectedRoute } from './components/auth/protected-route'
 import { JournalDashboard } from './components/journal-dashboard'
 import { Goals } from './components/goals'
+import { Toaster } from './components/ui/toaster'
 
 export default function App() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
@@ -57,6 +58,7 @@ export default function App() {
             }
           />
         </Routes>
+        <Toaster />
       </BrowserRouter>
     </AuthProvider>
   )

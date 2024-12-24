@@ -28,6 +28,7 @@ import { format } from 'date-fns'
 import { differenceInDays } from 'date-fns'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { cn } from '@/lib/utils'
+import { toast } from '@/hooks/use-toast'
 
 export function Goals() {
     const [goals, setGoals] = React.useState<Goal[]>([])
@@ -218,12 +219,21 @@ export function Goals() {
                 })
             });
 
+            // show a toast if already a high priority goal
+            if(response.status === 400) {
+                toast({
+                    title: 'You already have a high priority goal',
+                    variant: 'destructive',
+                });
+                return;
+            }
+
             if (!response.ok) {
                 throw new Error('Failed to create goal');
             }
 
             const data = await response.json();
-            setGoals(prev => [...prev, data].sort((a, b) => (b.completed_at ? 1 : 0) - (a.completed_at ? 1 : 0) || new Date(b.created_at).getTime() - new Date(a.created_at).getTime()));
+            setGoals(prev => [...prev, data]);
             setIsDialogOpen(false);
             setNewGoal({
                 title: '',
@@ -236,6 +246,10 @@ export function Goals() {
             console.error('Failed to add goal:', error);
         }
     };
+
+    React.useEffect(() => {
+        setGoals(goals.sort((a, b) =>(b.priority === 'HIGH' ? 1 : 0) - (a.priority === 'HIGH' ? 1 : 0) || (b.completed_at ? 0 : 1) - (a.completed_at ? 0 : 1) || new Date(b.created_at).getTime() - new Date(a.created_at).getTime()));
+    }, [goals]);
 
     const getPriorityColor = (priority: GoalPriority) => {
         switch (priority) {
@@ -342,7 +356,7 @@ export function Goals() {
             </div>
 
             <div className="grid gap-6">
-                {goals.map(goal => {
+                {goals?.map(goal => {
                     const completionDetails = getCompletionDetails(goal);
                     const startDate = getGoalStartDate(goal);
 

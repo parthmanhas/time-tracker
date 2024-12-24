@@ -27,9 +27,10 @@ export function Settings() {
   });
 
   const { id: userId } = useAuth()?.user || {};
+  const { logout } = useAuth();
 
   React.useEffect(() => {
-    fetchAllTimers(setAllTimers);
+    fetchAllTimers(setAllTimers, logout);
   }, [])
 
 

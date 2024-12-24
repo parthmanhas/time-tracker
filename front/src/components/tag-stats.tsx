@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/select"
 import { ArrowUpDown } from "lucide-react"
 import { fetchAllTimers } from '@/lib/utils'
+import { useAuth } from '@/context/AuthContext'
 
 type SortOption = 'name' | 'timeAsc' | 'timeDesc'
 
@@ -21,9 +22,11 @@ export function TagStats() {
   const {
     setAllTimers
   } = useTimerStore();
+  
+  const { logout } = useAuth();
 
   React.useEffect(() => {
-    fetchAllTimers(setAllTimers);
+    fetchAllTimers(setAllTimers, logout);
   }, [])
 
   const tagStats = React.useMemo(() => {

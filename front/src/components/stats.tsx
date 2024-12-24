@@ -5,12 +5,14 @@ import { fetchAllTimers } from '@/lib/utils'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip, Legend } from 'recharts'
 import { subDays, startOfMonth, eachDayOfInterval, format } from 'date-fns'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useAuth } from '@/context/AuthContext'
 
 export function Stats() {
   const { allTimers, setAllTimers } = useTimerStore()
+  const { logout } = useAuth();
 
   React.useEffect(() => {
-    fetchAllTimers(setAllTimers);
+    fetchAllTimers(setAllTimers, logout);
   }, [])
 
   // Get time spent per tag for a given time period

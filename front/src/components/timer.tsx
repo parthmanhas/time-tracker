@@ -192,7 +192,8 @@ export function Timer({ timer, workerRef }: TimerProps) {
                 </div>
                 <div>
                     <div className="text-sm text-muted-foreground mb-2">
-                        Created: {formatDate(timer.createdAt)}
+                        <p>Created: {formatDate(timer.createdAt)}</p>
+                        {timer.status !== 'COMPLETED' && <p className="font-semibold">Days Active: <Badge variant="outline">{Math.floor((Date.now() - new Date(timer.createdAt).getTime()) / (1000 * 60 * 60 * 24))}</Badge></p>}
                     </div>
                     <div className="text-sm mb-2 flex gap-1">
                         Tags: {timer.tags?.length ? (
