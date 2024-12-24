@@ -23,8 +23,9 @@ export const markComplete = async (timer: Pick<TimerType, 'id' | 'status'>, setS
   }
 }
 
-export const fetchAllTimers = async (setAllTimers: (timers: TimerType[]) => void, logout: () => void) => {
+export const fetchAllTimers = async (setAllTimers: (timers: TimerType[]) => void, logout: () => void, setIsLoading: React.Dispatch<React.SetStateAction<boolean>>) => {
   try {
+    setIsLoading(true);
     const response = await fetch(API.getUrl('TIMERS'), {
       method: 'GET',
       credentials: 'include',
@@ -45,5 +46,7 @@ export const fetchAllTimers = async (setAllTimers: (timers: TimerType[]) => void
     setAllTimers(dbTimers);
   } catch (e) {
     console.error(e);
+  } finally {
+    setIsLoading(false);
   }
 }

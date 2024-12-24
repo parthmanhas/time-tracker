@@ -22,19 +22,21 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog"
-import { Plus, Target, Tag, CheckCircle } from 'lucide-react'
+import { Plus, Target, Tag, CheckCircle, LoaderCircle } from 'lucide-react'
 import { Label } from './ui/label'
 import { format } from 'date-fns'
 import { differenceInDays } from 'date-fns'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { cn } from '@/lib/utils'
 import { toast } from '@/hooks/use-toast'
+import { WithLoading } from '@/hoc/hoc'
 
 export function Goals() {
     const [goals, setGoals] = React.useState<Goal[]>([])
     const [progress, setProgress] = React.useState<Record<string, GoalProgress>>({})
     const [isDialogOpen, setIsDialogOpen] = React.useState(false)
     const { allTimers } = useTimerStore()
+    const [isLoading, setIsLoading] = React.useState(true);
 
     // Form state
     const [newGoal, setNewGoal] = React.useState({
@@ -55,6 +57,7 @@ export function Goals() {
 
     const fetchGoals = async () => {
         try {
+            setIsLoading(true);
             const response = await fetch(API.getUrl('GOALS'), {
                 credentials: 'include'
             });
@@ -62,7 +65,10 @@ export function Goals() {
             setGoals(data);
         } catch (error) {
             console.error('Failed to fetch goals:', error);
+        } finally {
+            setIsLoading(false);
         }
+
     };
 
     const isGoalCompleted = (goalId: string) => {
@@ -220,7 +226,7 @@ export function Goals() {
             });
 
             // show a toast if already a high priority goal
-            if(response.status === 400) {
+            if (response.status === 400) {
                 toast({
                     title: 'You already have a high priority goal',
                     variant: 'destructive',
@@ -248,7 +254,7 @@ export function Goals() {
     };
 
     React.useEffect(() => {
-        setGoals(goals.sort((a, b) =>(b.priority === 'HIGH' ? 1 : 0) - (a.priority === 'HIGH' ? 1 : 0) || (b.completed_at ? 0 : 1) - (a.completed_at ? 0 : 1) || new Date(b.created_at).getTime() - new Date(a.created_at).getTime()));
+        setGoals(goals.sort((a, b) => (b.priority === 'HIGH' ? 1 : 0) - (a.priority === 'HIGH' ? 1 : 0) || (b.completed_at ? 0 : 1) - (a.completed_at ? 0 : 1) || new Date(b.created_at).getTime() - new Date(a.created_at).getTime()));
     }, [goals]);
 
     const getPriorityColor = (priority: GoalPriority) => {
@@ -262,248 +268,250 @@ export function Goals() {
 
     return (
         <div className="container mx-auto p-6">
-            <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-bold">Goals</h1>
-                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                    <DialogTrigger asChild>
-                        <Button>
-                            <Plus className="mr-2 h-4 w-4" />
-                            Add Goal
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                        <DialogHeader>
-                            <DialogTitle>Create New Goal</DialogTitle>
-                        </DialogHeader>
-                        <div className="space-y-4">
-                            <div className='flex flex-col gap-2'>
-                                <Label>Title</Label>
-                                <Input
-                                    value={newGoal.title}
-                                    onChange={(e) => setNewGoal(prev => ({ ...prev, title: e.target.value }))}
-                                />
-                            </div>
-                            <div className='flex flex-col gap-2'>
-                                <Label>Description</Label>
-                                <Textarea
-                                    value={newGoal.description}
-                                    onChange={(e) => setNewGoal(prev => ({ ...prev, description: e.target.value }))}
-                                />
-                            </div>
-                            <div className='flex flex-col gap-2'>
-                                <Label>Target Hours</Label>
-                                <Input
-                                    type="number"
-                                    value={newGoal.targetHours}
-                                    onChange={(e) => setNewGoal(prev => ({ ...prev, targetHours: parseFloat(e.target.value) }))}
-                                />
-                            </div>
-                            <div className='flex flex-col gap-2'>
-                                <Label>Priority</Label>
-                                <Select
-                                    value={newGoal.priority}
-                                    onValueChange={(value: GoalPriority) =>
-                                        setNewGoal(prev => ({ ...prev, priority: value }))
-                                    }
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="HIGH">High</SelectItem>
-                                        <SelectItem value="MEDIUM">Medium</SelectItem>
-                                        <SelectItem value="LOW">Low</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            <div className='flex flex-col gap-2'>
-                                <Label>Tags</Label>
-                                <div className="flex flex-wrap gap-2 mb-2">
-                                    {uniqueTags.map(tag => (
-                                        <Badge
-                                            key={tag}
-                                            variant={newGoal.tags.includes(tag) ? "default" : "outline"}
-                                            className="cursor-pointer"
-                                            onClick={() => handleTagToggle(tag)}
-                                        >
-                                            {tag}
-                                        </Badge>
-                                    ))}
-                                    {newGoal.tags
-                                        .filter(tag => !uniqueTags.includes(tag))
-                                        .map(tag => (
+            <WithLoading isLoading={isLoading} isScreen={true}>
+                <div className="flex justify-between items-center mb-6">
+                    <h1 className="text-2xl font-bold">Goals</h1>
+                    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                        <DialogTrigger asChild>
+                            <Button>
+                                <Plus className="mr-2 h-4 w-4" />
+                                Add Goal
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>Create New Goal</DialogTitle>
+                            </DialogHeader>
+                            <div className="space-y-4">
+                                <div className='flex flex-col gap-2'>
+                                    <Label>Title</Label>
+                                    <Input
+                                        value={newGoal.title}
+                                        onChange={(e) => setNewGoal(prev => ({ ...prev, title: e.target.value }))}
+                                    />
+                                </div>
+                                <div className='flex flex-col gap-2'>
+                                    <Label>Description</Label>
+                                    <Textarea
+                                        value={newGoal.description}
+                                        onChange={(e) => setNewGoal(prev => ({ ...prev, description: e.target.value }))}
+                                    />
+                                </div>
+                                <div className='flex flex-col gap-2'>
+                                    <Label>Target Hours</Label>
+                                    <Input
+                                        type="number"
+                                        value={newGoal.targetHours}
+                                        onChange={(e) => setNewGoal(prev => ({ ...prev, targetHours: parseFloat(e.target.value) }))}
+                                    />
+                                </div>
+                                <div className='flex flex-col gap-2'>
+                                    <Label>Priority</Label>
+                                    <Select
+                                        value={newGoal.priority}
+                                        onValueChange={(value: GoalPriority) =>
+                                            setNewGoal(prev => ({ ...prev, priority: value }))
+                                        }
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="HIGH">High</SelectItem>
+                                            <SelectItem value="MEDIUM">Medium</SelectItem>
+                                            <SelectItem value="LOW">Low</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className='flex flex-col gap-2'>
+                                    <Label>Tags</Label>
+                                    <div className="flex flex-wrap gap-2 mb-2">
+                                        {uniqueTags.map(tag => (
                                             <Badge
                                                 key={tag}
-                                                variant="default"
+                                                variant={newGoal.tags.includes(tag) ? "default" : "outline"}
                                                 className="cursor-pointer"
                                                 onClick={() => handleTagToggle(tag)}
                                             >
                                                 {tag}
                                             </Badge>
                                         ))}
-                                </div>
-                            </div>
-                            <Button
-                                className="w-full"
-                                onClick={addGoal}
-                                disabled={!newGoal.title || !newGoal.targetHours || newGoal.tags.length === 0}
-                            >
-                                Create Goal
-                            </Button>
-                        </div>
-                    </DialogContent>
-                </Dialog>
-            </div>
-
-            <div className="grid gap-6">
-                {goals?.map(goal => {
-                    const completionDetails = getCompletionDetails(goal);
-                    const startDate = getGoalStartDate(goal);
-
-                    return (
-                        <Card
-                            key={goal.id}
-                            className={cn(
-                                "transition-all duration-200",
-                                completionDetails && "bg-muted/50"
-                            )}
-                        >
-                            <CardHeader>
-                                <div className="flex items-center justify-between">
-                                    <div className="space-y-1">
-                                        <CardTitle className="flex items-center gap-2">
-                                            {completionDetails ? (
-                                                <CheckCircle className="h-5 w-5 text-green-500" />
-                                            ) : (
-                                                <Target className="h-5 w-5" />
-                                            )}
-                                            <span className={cn(
-                                                completionDetails && "text-muted-foreground"
-                                            )}>
-                                                {goal.title}
-                                            </span>
-                                        </CardTitle>
-                                        <div className="flex flex-col gap-1 text-sm text-muted-foreground">
-
-                                            {completionDetails && (
-                                                <div className="space-y-1 mt-1 p-2 rounded-md bg-background">
-                                                    <span>
-                                                        First timer: {format(startDate, 'PPP')}<br></br>
-                                                        {startDate.getTime() !== new Date(goal.created_at).getTime() && (
-                                                            <span>Goal created: {format(new Date(goal.created_at), 'PPP')}</span>
-                                                        )}
-                                                    </span>
-                                                    <p>Completed on {format(new Date(goal.completed_at!), 'PPP')}</p>
-                                                    <p className="flex items-center gap-2">
-                                                        <span>Duration: {completionDetails.daysToComplete} days</span>
-                                                        <span>•</span>
-                                                        <span>Total: {completionDetails.totalHours.toFixed(1)} hours</span>
-                                                    </p>
-                                                </div>
-                                            )}
-                                        </div>
-                                        {goal.description && (
-                                            <p className={cn(
-                                                "text-sm mt-2",
-                                                completionDetails ? "text-muted-foreground" : "text-foreground"
-                                            )}>
-                                                {goal.description}
-                                            </p>
-                                        )}
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        {!completionDetails && (
-                                            <AlertDialog>
-                                                <AlertDialogTrigger asChild>
-                                                    <Button variant="outline" size="sm">
-                                                        Complete Goal
-                                                    </Button>
-                                                </AlertDialogTrigger>
-                                                <AlertDialogContent>
-                                                    <AlertDialogHeader>
-                                                        <AlertDialogTitle>Complete Goal Early?</AlertDialogTitle>
-                                                        <AlertDialogDescription>
-                                                            <div className="space-y-2">
-                                                                <p>
-                                                                    This goal is at {Math.round(progress[goal.id]?.percentageComplete || 0)}% completion.
-                                                                </p>
-                                                                <Progress
-                                                                    value={progress[goal.id]?.percentageComplete || 0}
-                                                                    className="h-2"
-                                                                />
-                                                                <p className="text-sm mt-4">
-                                                                    Are you sure you want to mark it as complete? This action cannot be undone.
-                                                                </p>
-                                                            </div>
-                                                        </AlertDialogDescription>
-                                                    </AlertDialogHeader>
-                                                    <AlertDialogFooter>
-                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                        <AlertDialogAction
-                                                            onClick={() => handleCompleteGoal(goal.id)}
-                                                        >
-                                                            Complete Goal
-                                                        </AlertDialogAction>
-                                                    </AlertDialogFooter>
-                                                </AlertDialogContent>
-                                            </AlertDialog>
-                                        )}
-                                        <Badge
-                                            className={cn(
-                                                getPriorityColor(goal.priority),
-                                                "text-white",
-                                                completionDetails && "opacity-75"
-                                            )}
-                                        >
-                                            {goal.priority}
-                                        </Badge>
-                                    </div>
-                                </div>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="space-y-4">
-                                    {goal.tags && goal.tags.length > 0 && (
-                                        <div className="flex flex-wrap gap-2">
-                                            {goal.tags.map(tag => (
+                                        {newGoal.tags
+                                            .filter(tag => !uniqueTags.includes(tag))
+                                            .map(tag => (
                                                 <Badge
                                                     key={tag}
-                                                    variant={completionDetails ? "outline" : "secondary"}
-                                                    className={cn(
-                                                        "flex items-center gap-1",
-                                                        completionDetails && "opacity-75"
-                                                    )}
+                                                    variant="default"
+                                                    className="cursor-pointer"
+                                                    onClick={() => handleTagToggle(tag)}
                                                 >
-                                                    <Tag className="h-3 w-3" />
                                                     {tag}
                                                 </Badge>
                                             ))}
-                                        </div>
-                                    )}
-                                    <div className="space-y-2">
-                                        <div className="flex justify-between text-sm">
-                                            <span>Progress</span>
-                                            <span>
-                                                {Math.round(progress[goal.id]?.currentHours || 0)}h / {goal.target_hours}h
-                                            </span>
-                                        </div>
-                                        <Progress
-                                            value={progress[goal.id]?.percentageComplete || 0}
-                                            className={cn(
-                                                completionDetails && "opacity-75"
-                                            )}
-                                        />
-                                        {!completionDetails && (
-                                            <p className="text-sm text-muted-foreground">
-                                                {progress[goal.id]?.remainingHours.toFixed(1)}h remaining
-                                            </p>
-                                        )}
                                     </div>
                                 </div>
-                            </CardContent>
-                        </Card>
-                    );
-                })}
-            </div>
+                                <Button
+                                    className="w-full"
+                                    onClick={addGoal}
+                                    disabled={!newGoal.title || !newGoal.targetHours || newGoal.tags.length === 0}
+                                >
+                                    Create Goal
+                                </Button>
+                            </div>
+                        </DialogContent>
+                    </Dialog>
+                </div>
+
+                <div className="grid gap-6">
+                    {goals?.map(goal => {
+                        const completionDetails = getCompletionDetails(goal);
+                        const startDate = getGoalStartDate(goal);
+
+                        return (
+                            <Card
+                                key={goal.id}
+                                className={cn(
+                                    "transition-all duration-200",
+                                    completionDetails && "bg-muted/50"
+                                )}
+                            >
+                                <CardHeader>
+                                    <div className="flex items-center justify-between">
+                                        <div className="space-y-1">
+                                            <CardTitle className="flex items-center gap-2">
+                                                {completionDetails ? (
+                                                    <CheckCircle className="h-5 w-5 text-green-500" />
+                                                ) : (
+                                                    <Target className="h-5 w-5" />
+                                                )}
+                                                <span className={cn(
+                                                    completionDetails && "text-muted-foreground"
+                                                )}>
+                                                    {goal.title}
+                                                </span>
+                                            </CardTitle>
+                                            <div className="flex flex-col gap-1 text-sm text-muted-foreground">
+
+                                                {completionDetails && (
+                                                    <div className="space-y-1 mt-1 p-2 rounded-md bg-background">
+                                                        <span>
+                                                            First timer: {format(startDate, 'PPP')}<br></br>
+                                                            {startDate.getTime() !== new Date(goal.created_at).getTime() && (
+                                                                <span>Goal created: {format(new Date(goal.created_at), 'PPP')}</span>
+                                                            )}
+                                                        </span>
+                                                        <p>Completed on {format(new Date(goal.completed_at!), 'PPP')}</p>
+                                                        <p className="flex items-center gap-2">
+                                                            <span>Duration: {completionDetails.daysToComplete} days</span>
+                                                            <span>•</span>
+                                                            <span>Total: {completionDetails.totalHours.toFixed(1)} hours</span>
+                                                        </p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            {goal.description && (
+                                                <p className={cn(
+                                                    "text-sm mt-2",
+                                                    completionDetails ? "text-muted-foreground" : "text-foreground"
+                                                )}>
+                                                    {goal.description}
+                                                </p>
+                                            )}
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            {!completionDetails && (
+                                                <AlertDialog>
+                                                    <AlertDialogTrigger asChild>
+                                                        <Button variant="outline" size="sm">
+                                                            Complete Goal
+                                                        </Button>
+                                                    </AlertDialogTrigger>
+                                                    <AlertDialogContent>
+                                                        <AlertDialogHeader>
+                                                            <AlertDialogTitle>Complete Goal Early?</AlertDialogTitle>
+                                                            <AlertDialogDescription>
+                                                                <div className="space-y-2">
+                                                                    <p>
+                                                                        This goal is at {Math.round(progress[goal.id]?.percentageComplete || 0)}% completion.
+                                                                    </p>
+                                                                    <Progress
+                                                                        value={progress[goal.id]?.percentageComplete || 0}
+                                                                        className="h-2"
+                                                                    />
+                                                                    <p className="text-sm mt-4">
+                                                                        Are you sure you want to mark it as complete? This action cannot be undone.
+                                                                    </p>
+                                                                </div>
+                                                            </AlertDialogDescription>
+                                                        </AlertDialogHeader>
+                                                        <AlertDialogFooter>
+                                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                            <AlertDialogAction
+                                                                onClick={() => handleCompleteGoal(goal.id)}
+                                                            >
+                                                                Complete Goal
+                                                            </AlertDialogAction>
+                                                        </AlertDialogFooter>
+                                                    </AlertDialogContent>
+                                                </AlertDialog>
+                                            )}
+                                            <Badge
+                                                className={cn(
+                                                    getPriorityColor(goal.priority),
+                                                    "text-white",
+                                                    completionDetails && "opacity-75"
+                                                )}
+                                            >
+                                                {goal.priority}
+                                            </Badge>
+                                        </div>
+                                    </div>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="space-y-4">
+                                        {goal.tags && goal.tags.length > 0 && (
+                                            <div className="flex flex-wrap gap-2">
+                                                {goal.tags.map(tag => (
+                                                    <Badge
+                                                        key={tag}
+                                                        variant={completionDetails ? "outline" : "secondary"}
+                                                        className={cn(
+                                                            "flex items-center gap-1",
+                                                            completionDetails && "opacity-75"
+                                                        )}
+                                                    >
+                                                        <Tag className="h-3 w-3" />
+                                                        {tag}
+                                                    </Badge>
+                                                ))}
+                                            </div>
+                                        )}
+                                        <div className="space-y-2">
+                                            <div className="flex justify-between text-sm">
+                                                <span>Progress</span>
+                                                <span>
+                                                    {Math.round(progress[goal.id]?.currentHours || 0)}h / {goal.target_hours}h
+                                                </span>
+                                            </div>
+                                            <Progress
+                                                value={progress[goal.id]?.percentageComplete || 0}
+                                                className={cn(
+                                                    completionDetails && "opacity-75"
+                                                )}
+                                            />
+                                            {!completionDetails && (
+                                                <p className="text-sm text-muted-foreground">
+                                                    {progress[goal.id]?.remainingHours.toFixed(1)}h remaining
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        );
+                    })}
+                </div>
+            </WithLoading>
         </div>
     )
 } 

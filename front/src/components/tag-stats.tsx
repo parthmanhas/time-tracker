@@ -12,26 +12,28 @@ import {
 import { ArrowUpDown } from "lucide-react"
 import { fetchAllTimers } from '@/lib/utils'
 import { useAuth } from '@/context/AuthContext'
+import { WithLoading } from '@/hoc/hoc'
 
 type SortOption = 'name' | 'timeAsc' | 'timeDesc'
 
 export function TagStats() {
   const { allTimers } = useTimerStore()
   const [sortBy, setSortBy] = React.useState<SortOption>('name')
+  const [isLoading, setIsLoading] = React.useState(true);
 
   const {
     setAllTimers
   } = useTimerStore();
-  
+
   const { logout } = useAuth();
 
   React.useEffect(() => {
-    fetchAllTimers(setAllTimers, logout);
+    fetchAllTimers(setAllTimers, logout, setIsLoading);
   }, [])
 
   const tagStats = React.useMemo(() => {
     const stats = new Map<string, { count: number; timeSpent: number }>()
-    
+
     allTimers.forEach(timer => {
       timer.tags?.forEach(tag => {
         const current = stats.get(tag) || { count: 0, timeSpent: 0 }
@@ -71,51 +73,53 @@ export function TagStats() {
 
   return (
     <div className="container mx-auto p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Tag Statistics</h1>
-        <div className="flex items-center gap-2">
-          <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
-          <Select
-            value={sortBy}
-            onValueChange={(value: SortOption) => setSortBy(value)}
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Sort by..." />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="name">Tag Name</SelectItem>
-              <SelectItem value="timeAsc">Least Time Spent</SelectItem>
-              <SelectItem value="timeDesc">Most Time Spent</SelectItem>
-            </SelectContent>
-          </Select>
+      <WithLoading isLoading={isLoading} isScreen={true}>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold">Tag Statistics</h1>
+          <div className="flex items-center gap-2">
+            <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+            <Select
+              value={sortBy}
+              onValueChange={(value: SortOption) => setSortBy(value)}
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Sort by..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="name">Tag Name</SelectItem>
+                <SelectItem value="timeAsc">Least Time Spent</SelectItem>
+                <SelectItem value="timeDesc">Most Time Spent</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
-      </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {tagStats.map(({ tag, count, timeSpent }) => (
-          <Card key={tag}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-base font-medium">
-                <Badge variant={tag ? "default" : "destructive"} className="mr-2">
-                  {tag || 'UNTAGGED'}
-                </Badge>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex justify-between items-center">
-                <div>
-                  <p className="text-sm text-muted-foreground">Completed</p>
-                  <p className="text-2xl font-bold">{count}</p>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {tagStats.map(({ tag, count, timeSpent }) => (
+            <Card key={tag}>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-base font-medium">
+                  <Badge variant={tag ? "default" : "destructive"} className="mr-2">
+                    {tag || 'UNTAGGED'}
+                  </Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Completed</p>
+                    <p className="text-2xl font-bold">{count}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm text-muted-foreground">Time Spent</p>
+                    <p className="text-2xl font-bold">{formatTime(timeSpent)}</p>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-sm text-muted-foreground">Time Spent</p>
-                  <p className="text-2xl font-bold">{formatTime(timeSpent)}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </WithLoading>
     </div>
   )
 } 
