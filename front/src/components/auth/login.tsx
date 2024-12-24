@@ -52,20 +52,17 @@ export function Login() {
       {/* Background elements */}
       <div className="absolute inset-0 overflow-hidden">
         {/* Background text */}
-        <div className="absolute top-[60%] left-[20%] inset-0 flex items-center justify-center select-none pointer-events-none">
+        <div className="absolute top-[-80%] left-[20%] inset-0 flex items-center justify-center select-none pointer-events-none">
           <p className="text-[15vw] font-bold text-primary/[0.02] leading-none tracking-tighter">TIME</p>
         </div>
-        <div className="absolute top-[-50%] left-[60%] inset-0 flex items-center justify-center select-none pointer-events-none">
+        <div className="absolute top-[-30%] left-[70%] inset-0 flex items-center justify-center select-none pointer-events-none">
           <p className="text-[15vw] font-bold text-primary/[0.02] leading-none tracking-tighter">FLOW</p>
         </div>
-        <div className="absolute top-[-90%] left-[-60%] inset-0 flex items-center justify-center select-none pointer-events-none">
+        <div className="absolute top-[20%] left-[-20%] inset-0 flex items-center justify-center select-none pointer-events-none">
           <p className="text-[10vw] font-bold text-primary/[0.02] leading-none tracking-tighter">PRODUCTIVITY</p>
         </div>
-        <div className="absolute top-[20%] left-[-60%] inset-0 flex items-center justify-center select-none pointer-events-none">
-          <p className="text-[10vw] font-bold text-primary/[0.02] leading-none tracking-tighter">ACHIEVE</p>
-        </div>
-        <div className="absolute top-[80%] left-[-60%] inset-0 flex items-center justify-center select-none pointer-events-none">
-          <p className="text-[10vw] font-bold text-primary/[0.02] leading-none tracking-tighter">MASTER</p>
+        <div className="absolute top-[70%] left-[20%] inset-0 flex items-center justify-center select-none pointer-events-none">
+          <p className="text-[15vw] font-bold text-primary/[0.02] leading-none tracking-tighter">ACHIEVE</p>
         </div>
 
         {/* Existing background elements */}
