@@ -100,7 +100,21 @@ export default function DashboardHeader({
                             })()}
                         </p>
                         <h2 className="text-lg font-semibold text-slate-800">
-                            {filteredByTagTimers.length} {filteredByTagTimers.length === 1 ? 'Timer' : 'Timers'}
+
+                            {(() => {
+                                const getTimerCount = () => {
+                                    if (activeFilter === 'ALL') {
+                                        return filteredByTagTimers.length;
+                                    }
+                                    return filteredByTagTimers.filter(timer => 
+                                        timer.status === (activeFilter === 'QUEUED' ? 'PAUSED' : activeFilter)
+                                    ).length;
+                                };
+
+                                const timerCount = getTimerCount();
+                                const timerLabel = timerCount === 1 ? 'Timer' : 'Timers';
+                                return `${timerCount} ${timerLabel}`;
+                            })()}
                         </h2>
                     </div>
                 </div>

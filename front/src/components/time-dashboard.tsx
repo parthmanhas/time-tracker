@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Plus, Search, LayoutGrid, List, CirclePlusIcon } from 'lucide-react'
+import { Plus, Search, LayoutGrid, List, CirclePlusIcon, Clock } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -31,9 +31,7 @@ import { toast } from '@/hooks/use-toast'
 import { CompactTimer } from "./timer-compact"
 import { WithSidebarTrigger } from './WithSidebarTrigger'
 import DashboardHeader from './dashboard-header'
-import { Separator } from "@/components/ui/separator"
 import { isSameDay } from 'date-fns'
-import { SidebarSeparator } from './ui/sidebar'
 
 const timeOptions = [
   { value: '600', label: '10 minutes' },
@@ -252,159 +250,157 @@ export default function CountdownTimerDashboard() {
   return (
     <div className="container mx-auto p-6">
       <WithLoading isLoading={isLoading} size={80} isScreen={true}>
-        <div className="space-y-4">
-          <div className="flex flex-wrap gap-2 justify-between items-center">
+        <div className="space-y-6">
+          {/* Header Section */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <WithSidebarTrigger>
-              <h1 className="text-2xl font-bold">Countdown Timers</h1>
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-purple-100 rounded-lg">
+                  <Clock className="h-5 w-5 text-purple-600" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-slate-800">Countdown Timers</h1>
+                  <p className="text-sm text-slate-500">Manage and track your time effectively</p>
+                </div>
+              </div>
             </WithSidebarTrigger>
-            <div className="flex flex-wrap gap-3 w-full mt-3 sm:mt-0 sm:w-auto">
-              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button className='w-full' disabled={allTimers.findIndex(timer => timer.status === 'ACTIVE') > -1}>
-                    <Plus className="mr-2 h-4 w-4" /> Add Timer
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[425px]">
-                  <DialogHeader>
-                    <DialogTitle className='flex items-center gap-2'><CirclePlusIcon className='h-4 w-4' />Add New Timer</DialogTitle>
-                  </DialogHeader>
-                  <div>
-                    <div className="grid gap-4 py-4">
-                      <div className="flex flex-col items-start gap-2">
-                        <Label htmlFor="name">
-                          Label
-                        </Label>
-                        <Input
-                          id="name"
-                          value={newTimerTitle}
-                          onChange={(e) => setNewTimerTitle(e.target.value)}
-                          className="col-span-3"
-                        />
-                      </div>
-                      <div className="flex flex-col items-start gap-2">
-                        <Label htmlFor="duration">
-                          Duration
-                        </Label>
-                        <Select onValueChange={setNewTimerDuration} value={newTimerDuration}>
-                          <SelectTrigger className="col-span-3">
-                            <SelectValue placeholder="Select duration" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {timeOptions.map(option => (
-                              <SelectItem key={option.value} value={option.value}>
-                                {option.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="flex flex-col items-start gap-2">
-                        <Label className="text-right">
-                          Tags
-                        </Label>
-                        <div className="col-span-3">
-                          <div className="flex flex-wrap gap-2 mb-2">
-                            {uniqueTags.map(tag => (
-                              <Badge
-                                key={tag}
-                                variant={selectedTags.includes(tag) ? "default" : "outline"}
-                                className="flex items-center gap-1 cursor-pointer"
-                                onClick={() => handleTagSelect(tag)}>
-                                {tag}
-                              </Badge>
-                            ))}
-                          </div>
-                          <div className="flex gap-2">
-                            <Input placeholder="Add new tag" value={newTag} onChange={(e) => setNewTag(e.target.value)} />
-                            <Button onClick={() => handleTagSelect(newTag)}>Add</Button>
-                          </div>
+
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button 
+                  className="w-full sm:w-auto bg-purple-600 hover:bg-purple-700" 
+                  disabled={allTimers.findIndex(timer => timer.status === 'ACTIVE') > -1}
+                >
+                  <Plus className="mr-2 h-4 w-4" /> Add Timer
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle className='flex items-center gap-2'><CirclePlusIcon className='h-4 w-4' />Add New Timer</DialogTitle>
+                </DialogHeader>
+                <div>
+                  <div className="grid gap-4 py-4">
+                    <div className="flex flex-col items-start gap-2">
+                      <Label htmlFor="name">
+                        Label
+                      </Label>
+                      <Input
+                        id="name"
+                        value={newTimerTitle}
+                        onChange={(e) => setNewTimerTitle(e.target.value)}
+                        className="col-span-3"
+                      />
+                    </div>
+                    <div className="flex flex-col items-start gap-2">
+                      <Label htmlFor="duration">
+                        Duration
+                      </Label>
+                      <Select onValueChange={setNewTimerDuration} value={newTimerDuration}>
+                        <SelectTrigger className="col-span-3">
+                          <SelectValue placeholder="Select duration" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {timeOptions.map(option => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="flex flex-col items-start gap-2">
+                      <Label className="text-right">
+                        Tags
+                      </Label>
+                      <div className="col-span-3">
+                        <div className="flex flex-wrap gap-2 mb-2">
+                          {uniqueTags.map(tag => (
+                            <Badge
+                              key={tag}
+                              variant={selectedTags.includes(tag) ? "default" : "outline"}
+                              className="flex items-center gap-1 cursor-pointer"
+                              onClick={() => handleTagSelect(tag)}>
+                              {tag}
+                            </Badge>
+                          ))}
+                        </div>
+                        <div className="flex gap-2">
+                          <Input placeholder="Add new tag" value={newTag} onChange={(e) => setNewTag(e.target.value)} />
+                          <Button onClick={() => handleTagSelect(newTag)}>Add</Button>
                         </div>
                       </div>
                     </div>
-                    <div className='w-full flex justify-between gap-2'>
-                      <WithLoading isLoading={isLoading} addingTimer={true}>
-                        <Button disabled={selectedTags.length === 0 || !newTimerTitle || !newTimerDuration} onClick={() => addTimer("ACTIVE")}>Start Now (Active)</Button>
-                        <Button disabled={selectedTags.length === 0 || !newTimerTitle || !newTimerDuration} onClick={() => addTimer("PAUSED")}> Start Later (Queued)</Button>
-                      </WithLoading>
-                    </div>
                   </div>
-                </DialogContent>
-              </Dialog>
-            </div>
-          </div>
-
-          <div className="relative">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search timers..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-8"
-            />
-          </div>
-          <div className="flex flex-col gap-4">
-            <div className="flex flex-wrap gap-2">
-              <Button
-                variant={activeFilter === 'ALL' ? "secondary" : "outline"}
-                onClick={() => {
-                  setActiveFilter('ALL')
-                  setSelectedTag(null)
-                }}
-              >
-                All
-              </Button>
-              <Button
-                variant={activeFilter === 'ACTIVE' ? "secondary" : "outline"}
-                onClick={() => {
-                  setActiveFilter('ACTIVE')
-                  setSelectedTag(null)
-                }}
-              >
-                Active (In progress)
-              </Button>
-              <Button
-                variant={activeFilter === 'QUEUED' ? "secondary" : "outline"}
-                onClick={() => {
-                  setActiveFilter('QUEUED')
-                  setSelectedTag(null)
-                }}
-              >
-                Queued
-              </Button>
-              <Button
-                variant={activeFilter === 'COMPLETED' ? "secondary" : "outline"}
-                onClick={() => {
-                  setActiveFilter('COMPLETED')
-                  setSelectedTag(null)
-                }}
-              >
-                Completed
-              </Button>
-            </div>
-            <Separator /> 
-
-            {uniqueTags.length > 0 && (
-              <>
-                <h3 className='font-semibold sm:hidden'>Tags</h3>
-                <div className="flex flex-wrap gap-2">
-                  <h3 className='font-semibold hidden sm:block'>Tags</h3>
-                  {uniqueTags.map(tag => (
-                    <Button
-                      key={tag}
-                      variant={selectedTag === tag ? "secondary" : "outline"}
-                      size="sm"
-                      onClick={() => setSelectedTag(tag === selectedTag ? null : tag)}
-                      className="h-7"
-                    >
-                      {tag}
-                    </Button>
-                  ))}
+                  <div className='w-full flex justify-between gap-2'>
+                    <WithLoading isLoading={isLoading} addingTimer={true}>
+                      <Button disabled={selectedTags.length === 0 || !newTimerTitle || !newTimerDuration} onClick={() => addTimer("ACTIVE")}>Start Now (Active)</Button>
+                      <Button disabled={selectedTags.length === 0 || !newTimerTitle || !newTimerDuration} onClick={() => addTimer("PAUSED")}> Start Later (Queued)</Button>
+                    </WithLoading>
+                  </div>
                 </div>
-              </>
-            )}
+              </DialogContent>
+            </Dialog>
           </div>
-          <Separator /> 
 
+          {/* Search and Filters Section */}
+          <div className="space-y-4 bg-white p-4 rounded-lg border shadow-sm">
+            <div className="relative">
+              <Search className="absolute left-2 top-2.5 h-4 w-4 text-slate-400" />
+              <Input
+                placeholder="Search timers..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-8 border-slate-200 focus:border-purple-200 focus:ring-purple-200"
+              />
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex flex-wrap gap-2">
+                {['ALL', 'ACTIVE', 'QUEUED', 'COMPLETED'].map((filter) => (
+                  <Button
+                    key={filter}
+                    variant={activeFilter === filter ? "secondary" : "outline"}
+                    onClick={() => {
+                      setActiveFilter(filter)
+                      setSelectedTag(null)
+                    }}
+                    className={cn(
+                      "transition-all",
+                      activeFilter === filter && "bg-purple-100 text-purple-700 border-purple-200"
+                    )}
+                  >
+                    {filter === 'ALL' ? 'All' : 
+                     filter === 'ACTIVE' ? 'Active (In progress)' :
+                     filter === 'QUEUED' ? 'Queued' : 'Completed'}
+                  </Button>
+                ))}
+              </div>
+
+              {uniqueTags.length > 0 && (
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium text-slate-700">Tags</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {uniqueTags.map(tag => (
+                      <Button
+                        key={tag}
+                        variant={selectedTag === tag ? "secondary" : "outline"}
+                        size="sm"
+                        onClick={() => setSelectedTag(tag === selectedTag ? null : tag)}
+                        className={cn(
+                          "h-7",
+                          selectedTag === tag && "bg-purple-100 text-purple-700 border-purple-200"
+                        )}
+                      >
+                        {tag}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Dashboard Header */}
           <DashboardHeader 
             selectedTag={selectedTag} 
             activeFilter={activeFilter} 
@@ -412,59 +408,66 @@ export default function CountdownTimerDashboard() {
             filteredByTagTimers={filteredByTagTimers}
             getTotalTimeRemaining={getTotalTimeRemaining}
           />
-          <Separator />                
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium w-[50px]">Sort by:</span>
-              <Select value={sortBy} onValueChange={(value: 'created' | 'duration' | 'remaining') => setSortBy(value)}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="created">Creation Date</SelectItem>
-                  <SelectItem value="duration">Duration</SelectItem>
-                  <SelectItem value="remaining">Remaining Time</SelectItem>
-                </SelectContent>
-              </Select>
+
+          {/* Controls Section */}
+          <div className="bg-white p-4 rounded-lg border shadow-sm space-y-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+              <div className="flex items-center gap-2 flex-1">
+                <span className="text-sm font-medium text-slate-600 w-16">Sort by:</span>
+                <Select value={sortBy} onValueChange={(value: 'created' | 'duration' | 'remaining') => setSortBy(value)}>
+                  <SelectTrigger className="flex-1 border-slate-200">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="created">Creation Date</SelectItem>
+                    <SelectItem value="duration">Duration</SelectItem>
+                    <SelectItem value="remaining">Remaining Time</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex items-center gap-2 flex-1">
+                <span className="text-sm font-medium text-slate-600 w-16">Order:</span>
+                <Select value={sortOrder} onValueChange={(value: 'asc' | 'desc') => setSortOrder(value)}>
+                  <SelectTrigger className="flex-1 border-slate-200">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="desc">Descending</SelectItem>
+                    <SelectItem value="asc">Ascending</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium w-[50px]">Order:</span>
-              <Select value={sortOrder} onValueChange={(value: 'asc' | 'desc') => setSortOrder(value)}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="desc">Descending</SelectItem>
-                  <SelectItem value="asc">Ascending</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="flex justify-between items-center">
+              <div className="flex items-center gap-2 bg-slate-50 p-1 rounded-lg">
+                <Button
+                  variant={view === 'grid' ? 'secondary' : 'ghost'}
+                  size="icon"
+                  onClick={() => setView('grid')}
+                  className={cn(view === 'grid' && "bg-white shadow-sm")}
+                >
+                  <LayoutGrid className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant={view === 'list' ? 'secondary' : 'ghost'}
+                  size="icon"
+                  onClick={() => setView('list')}
+                  className={cn(view === 'list' && "bg-white shadow-sm")}
+                >
+                  <List className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           </div>
-          <Separator /> 
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <Button
-                variant={view === 'grid' ? 'secondary' : 'ghost'}
-                size="icon"
-                onClick={() => setView('grid')}
-              >
-                <LayoutGrid className="h-4 w-4" />
-              </Button>
-              <Button
-                variant={view === 'list' ? 'secondary' : 'ghost'}
-                size="icon"
-                onClick={() => setView('list')}
-              >
-                <List className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-          <Separator /> 
+
+          {/* Timers Grid/List */}
           <div className={cn(
+            "gap-4",
             view === 'grid'
-              ? "grid gap-4 md:grid-cols-2 lg:grid-cols-3"
-              : "flex flex-col gap-2"
+              ? "grid md:grid-cols-2 lg:grid-cols-3"
+              : "flex flex-col"
           )}>
             {sortedAndFilteredTimers
               .filter(timer => {
