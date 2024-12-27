@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Plus, Search, LayoutGrid, List, CirclePlusIcon, Clock } from 'lucide-react'
+import { Plus, Search, LayoutGrid, List, CirclePlusIcon, Clock, Play } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -268,73 +268,119 @@ export default function CountdownTimerDashboard() {
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
                 <Button 
-                  className="w-full sm:w-auto bg-purple-600 hover:bg-purple-700" 
+                  className="w-full sm:w-auto bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white shadow-sm" 
                   disabled={allTimers.findIndex(timer => timer.status === 'ACTIVE') > -1}
                 >
                   <Plus className="mr-2 h-4 w-4" /> Add Timer
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                  <DialogTitle className='flex items-center gap-2'><CirclePlusIcon className='h-4 w-4' />Add New Timer</DialogTitle>
+              <DialogContent className="sm:max-w-[425px] p-0">
+                <DialogHeader className="p-6 pb-0">
+                  <DialogTitle className="flex items-center gap-3 text-xl">
+                    <div className="p-2 bg-purple-100 rounded-lg">
+                      <CirclePlusIcon className="h-5 w-5 text-purple-600" />
+                    </div>
+                    Add New Timer
+                  </DialogTitle>
                 </DialogHeader>
-                <div>
-                  <div className="grid gap-4 py-4">
-                    <div className="flex flex-col items-start gap-2">
-                      <Label htmlFor="name">
-                        Label
+                <div className="p-6 space-y-6">
+                  {/* Timer Details Section */}
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="name" className="text-sm font-medium text-slate-700">
+                        Timer Label
                       </Label>
                       <Input
                         id="name"
                         value={newTimerTitle}
                         onChange={(e) => setNewTimerTitle(e.target.value)}
-                        className="col-span-3"
+                        className="border-slate-200 focus:border-purple-200 focus:ring-purple-200"
+                        placeholder="Enter timer name..."
                       />
                     </div>
-                    <div className="flex flex-col items-start gap-2">
-                      <Label htmlFor="duration">
+
+                    <div className="space-y-2">
+                      <Label htmlFor="duration" className="text-sm font-medium text-slate-700">
                         Duration
                       </Label>
                       <Select onValueChange={setNewTimerDuration} value={newTimerDuration}>
-                        <SelectTrigger className="col-span-3">
+                        <SelectTrigger className="w-full border-slate-200 focus:border-purple-200 focus:ring-purple-200">
                           <SelectValue placeholder="Select duration" />
                         </SelectTrigger>
                         <SelectContent>
                           {timeOptions.map(option => (
-                            <SelectItem key={option.value} value={option.value}>
+                            <SelectItem 
+                              key={option.value} 
+                              value={option.value}
+                              className="focus:bg-purple-50"
+                            >
                               {option.label}
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                     </div>
-                    <div className="flex flex-col items-start gap-2">
-                      <Label className="text-right">
-                        Tags
-                      </Label>
-                      <div className="col-span-3">
-                        <div className="flex flex-wrap gap-2 mb-2">
-                          {uniqueTags.map(tag => (
-                            <Badge
-                              key={tag}
-                              variant={selectedTags.includes(tag) ? "default" : "outline"}
-                              className="flex items-center gap-1 cursor-pointer"
-                              onClick={() => handleTagSelect(tag)}>
-                              {tag}
-                            </Badge>
-                          ))}
-                        </div>
-                        <div className="flex gap-2">
-                          <Input placeholder="Add new tag" value={newTag} onChange={(e) => setNewTag(e.target.value)} />
-                          <Button onClick={() => handleTagSelect(newTag)}>Add</Button>
-                        </div>
+                  </div>
+
+                  {/* Tags Section */}
+                  <div className="space-y-3">
+                    <Label className="text-sm font-medium text-slate-700">
+                      Tags
+                    </Label>
+                    {uniqueTags.length > 0 && (
+                      <div className="flex flex-wrap gap-2 p-3 bg-slate-50 rounded-lg border border-slate-200">
+                        {uniqueTags.map(tag => (
+                          <Badge
+                            key={tag}
+                            variant={selectedTags.includes(tag) ? "default" : "outline"}
+                            className={cn(
+                              "cursor-pointer transition-all",
+                              selectedTags.includes(tag) 
+                                ? "bg-purple-100 text-purple-700 hover:bg-purple-200" 
+                                : "hover:border-purple-200"
+                            )}
+                            onClick={() => handleTagSelect(tag)}
+                          >
+                            {tag}
+                          </Badge>
+                        ))}
                       </div>
+                    )}
+                    <div className="flex gap-2">
+                      <Input 
+                        placeholder="Add new tag" 
+                        value={newTag} 
+                        onChange={(e) => setNewTag(e.target.value)}
+                        className="border-slate-200 focus:border-purple-200 focus:ring-purple-200"
+                      />
+                      <Button 
+                        onClick={() => handleTagSelect(newTag)}
+                        variant="outline"
+                        className="border-slate-200 hover:bg-purple-50 hover:text-purple-600"
+                      >
+                        Add
+                      </Button>
                     </div>
                   </div>
-                  <div className='w-full flex justify-between gap-2'>
+
+                  {/* Action Buttons */}
+                  <div className="flex flex-col gap-2 pt-4 border-t">
                     <WithLoading isLoading={isLoading} addingTimer={true}>
-                      <Button disabled={selectedTags.length === 0 || !newTimerTitle || !newTimerDuration} onClick={() => addTimer("ACTIVE")}>Start Now (Active)</Button>
-                      <Button disabled={selectedTags.length === 0 || !newTimerTitle || !newTimerDuration} onClick={() => addTimer("PAUSED")}> Start Later (Queued)</Button>
+                      <Button 
+                        disabled={selectedTags.length === 0 || !newTimerTitle || !newTimerDuration} 
+                        onClick={() => addTimer("ACTIVE")}
+                        className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800"
+                      >
+                        <Play className="mr-2 h-4 w-4" /> Start Now (Active)
+                      </Button>
+                      <Button 
+                        disabled={selectedTags.length === 0 || !newTimerTitle || !newTimerDuration} 
+                        onClick={() => addTimer("PAUSED")}
+                        variant="outline"
+                        className="w-full border-purple-200 text-purple-700 hover:bg-purple-50"
+                      >
+                        <Clock className="mr-2 h-4 w-4" /> Start Later (Queued)
+                      </Button>
                     </WithLoading>
                   </div>
                 </div>
