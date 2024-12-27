@@ -1,4 +1,4 @@
-import { Pause, Play, MessageSquare, CheckCircle } from "lucide-react"
+import { Pause, Play, MessageSquare, CheckCircle, Clock, Calendar, Tag, Timer as TimerIcon } from "lucide-react"
 import { Card, CardContent } from "./ui/card"
 import { Button } from './ui/button'
 import React from "react"
@@ -202,129 +202,199 @@ export function Timer({ timer, workerRef }: TimerProps) {
         <Card
             ref={timerRef}
             className={cn(
-                "transition-all duration-300",
+                "transition-all duration-300 overflow-hidden",
+                "bg-gradient-to-br from-white to-slate-50",
+                "hover:shadow-lg border-slate-200",
                 isHighlighted && "animate-highlight"
             )}
         >
-            <CardContent className="p-4 flex flex-col justify-between h-full">
-                <div>
-                    <div className="flex justify-between items-center mb-2">
-                        <div>
-                            {<span className="text-lg font-semibold">{timer.title}</span>}
+            <CardContent className="p-6 flex flex-col justify-between h-full gap-4">
+                <div className="space-y-4">
+                    {/* Header */}
+                    <div className="flex justify-between items-start gap-2">
+                        <div className="flex-1">
+                            <h3 className="text-lg font-semibold text-slate-800 line-clamp-2">
+                                {timer.title}
+                            </h3>
                         </div>
-                        <div className="flex h-full items-start">
-                            {timer.status === 'COMPLETED' && <CheckCircle className="h-5 w-5 text-green-500" />}
+                        <div className="flex items-center gap-2">
+                            {timer.status === 'COMPLETED' && (
+                                <div className="bg-green-100 p-1.5 rounded-full">
+                                    <CheckCircle className="h-4 w-4 text-green-600" />
+                                </div>
+                            )}
+                            {timer.status === 'ACTIVE' && (
+                                <div className="bg-blue-100 p-1.5 rounded-full animate-pulse">
+                                    <TimerIcon className="h-4 w-4 text-blue-600" />
+                                </div>
+                            )}
                         </div>
                     </div>
-                    <div className="mb-4">
-                        <div className="flex w-full justify-between font-semibold">
-                            Duration
-                            <p>{formatTime(timer.duration)}</p>
+
+                    {/* Timer Stats */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="flex items-center gap-2 bg-slate-50 p-2 rounded-lg">
+                            <Clock className="h-4 w-4 text-slate-500" />
+                            <div className="flex flex-col">
+                                <span className="text-xs text-slate-500">Duration</span>
+                                <span className="font-medium">{formatTime(timer.duration)}</span>
+                            </div>
                         </div>
-                        <div className="flex w-full justify-between font-semibold">
-                            Time Remaining
-                            <p>{formatTime(timer.remainingTime)}</p>
+                        <div className="flex items-center gap-2 bg-slate-50 p-2 rounded-lg">
+                            <TimerIcon className="h-4 w-4 text-slate-500" />
+                            <div className="flex flex-col">
+                                <span className="text-xs text-slate-500">Remaining</span>
+                                <span className="font-medium">{formatTime(timer.remainingTime)}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div>
-                    <div className="text-sm text-muted-foreground mb-2">
-                        <p>Created: {formatDate(timer.createdAt)}</p>
-                        {timer.status !== 'COMPLETED' && <div className="font-semibold">Days Active: <Badge variant="outline">{Math.floor((Date.now() - new Date(timer.createdAt).getTime()) / (1000 * 60 * 60 * 24))}</Badge></div>}
-                    </div>
-                    <div className="text-sm mb-2 flex gap-1">
-                        Tags: {timer.tags?.length ? (
-                            timer.tags.map((tag, index) => (
-                                <Badge key={index} variant="secondary">{tag}</Badge>
-                            ))
-                        ) : (
-                            <Badge variant="secondary" className="opacity-50">Untagged</Badge>
+
+                <div className="space-y-4">
+                    {/* Metadata */}
+                    <div className="flex flex-col gap-2">
+                        <div className="flex items-center gap-2 text-sm text-slate-600">
+                            <Calendar className="h-4 w-4" />
+                            <span>Created: {formatDate(timer.createdAt)}</span>
+                        </div>
+                        {timer.status !== 'COMPLETED' && (
+                            <div className="flex items-center gap-2 text-sm">
+                                <Badge variant="outline" className="bg-slate-50">
+                                    {Math.floor((Date.now() - new Date(timer.createdAt).getTime()) / (1000 * 60 * 60 * 24))} days active
+                                </Badge>
+                            </div>
                         )}
                     </div>
-                    {timer.completedAt && <div className="text-sm text-muted-foreground mb-2">
-                        Completed: {formatDate(timer.completedAt)}
-                    </div>}
-                    <WithLoading isLoading={isLoading}>
-                        <div className="flex flex-wrap gap-2 mb-4">
-                            {timer.status !== 'COMPLETED' &&
-                                <>
-                                    <Button disabled={allTimers.findIndex(timer => timer.status === 'ACTIVE') > -1 && timer.status === 'PAUSED'} onClick={() => toggleTimer()} className="flex-grow">
-                                        {timer.status === 'ACTIVE' ? <Pause className="mr-2 h-4 w-4" /> : <Play className="mr-2 h-4 w-4" />}
-                                        {timer.status === 'ACTIVE' ? 'Pause' : 'Resume'}
-                                    </Button>
-                                    <Button className="flex-grow" onClick={() => {
-                                        markComplete(timer, setStatus, setIsLoading);
-                                        workerRef.current?.postMessage({
-                                            type: 'STOP_TIMER'
-                                        })
-                                    }}>Mark Complete</Button>
-                                </>
-                            }
-                            {timer.status === 'COMPLETED' && <Button onClick={addTime}>+ 10</Button>}
+
+                    {/* Tags */}
+                    <div className="flex flex-wrap gap-2 items-center">
+                        <Tag className="h-4 w-4 text-slate-400" />
+                        {timer.tags?.length ? (
+                            timer.tags.map((tag, index) => (
+                                <Badge key={index} variant="secondary" className="bg-slate-100 hover:bg-slate-200">
+                                    {tag}
+                                </Badge>
+                            ))
+                        ) : (
+                            <Badge variant="secondary" className="opacity-50 bg-slate-100">
+                                Untagged
+                            </Badge>
+                        )}
+                    </div>
+
+                    {timer.completedAt && (
+                        <div className="flex items-center gap-2 text-sm text-slate-600">
+                            <CheckCircle className="h-4 w-4" />
+                            <span>Completed: {formatDate(timer.completedAt)}</span>
                         </div>
+                    )}
+
+                    <WithLoading isLoading={isLoading}>
+                        {/* Actions */}
+                        <div className="flex flex-wrap gap-2">
+                            {timer.status !== 'COMPLETED' ? (
+                                <>
+                                    <Button 
+                                        className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white"
+                                        disabled={allTimers.findIndex(t => t.status === 'ACTIVE') > -1 && timer.status === 'PAUSED'}
+                                        onClick={toggleTimer}
+                                    >
+                                        {timer.status === 'ACTIVE' ? (
+                                            <><Pause className="mr-2 h-4 w-4" /> Pause</>
+                                        ) : (
+                                            <><Play className="mr-2 h-4 w-4" /> Resume</>
+                                        )}
+                                    </Button>
+                                    <Button 
+                                        onClick={() => {
+                                            markComplete(timer, setStatus, setIsLoading);
+                                            workerRef.current?.postMessage({ type: 'STOP_TIMER' })
+                                        }}
+                                        className="flex-1 bg-green-500 hover:bg-green-600 text-white"
+                                    >
+                                        Mark Complete
+                                    </Button>
+                                </>
+                            ) : (
+                                <Button 
+                                    onClick={addTime}
+                                    className="bg-purple-500 hover:bg-purple-600 text-white"
+                                >
+                                    + 10 Minutes
+                                </Button>
+                            )}
+                        </div>
+
+                        {/* Tag Input */}
                         <div className="flex gap-2">
-                            {/* input to add tags */}
                             <Input
                                 placeholder="Add new tag"
                                 value={newTag}
-                                onChange={(e) => setNewTag(e.target.value)} />
-                            <Button variant="outline" size="icon" onClick={async () => {
-                                await addTagDB(timer.id, newTag);
-                                addTag(timer.id, newTag);
-                                setNewTag('');
-                            }}>
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="-5 0 36 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-tag-with-plus !h-[2rem] !w-[1.75rem]">
-                                    <path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z" />
-                                    <circle cx="7.5" cy="7.5" r=".5" fill="currentColor" />
-                                    <circle cx="20" cy="12" r="6" fill="white" stroke="currentColor" />
-                                    <line x1="20" y1="9" x2="20" y2="15" stroke="currentColor" strokeWidth="2" />
-                                    <line x1="17" y1="12" x2="23" y2="12" stroke="currentColor" strokeWidth="2" />
-                                </svg>
+                                onChange={(e) => setNewTag(e.target.value)}
+                                className="bg-slate-50"
+                            />
+                            <Button 
+                                variant="outline"
+                                size="icon"
+                                onClick={async () => {
+                                    await addTagDB(timer.id, newTag);
+                                    addTag(timer.id, newTag);
+                                    setNewTag('');
+                                }}
+                            >
+                                <Tag className="h-4 w-4" />
                             </Button>
                         </div>
-                        <div>
-                            <Collapsible
-                                open={isCommentsOpen}
-                                onOpenChange={setIsCommentsOpen}
-                                className="mt-4 space-y-2"
-                            >
-                                <CollapsibleTrigger asChild>
-                                    <Button variant="ghost" size="sm" className="w-full justify-between">
-                                        Comments ({timer.comments?.length || 0})
-                                        <MessageSquare className="h-4 w-4" />
-                                    </Button>
-                                </CollapsibleTrigger>
-                                <CollapsibleContent className="space-y-2">
-                                    {timer.comments?.map((comment, index) => (
-                                        <div
-                                            key={index}
-                                            className="rounded-md border p-2 text-sm"
+
+                        {/* Comments Section */}
+                        <Collapsible
+                            open={isCommentsOpen}
+                            onOpenChange={setIsCommentsOpen}
+                            className="mt-4 space-y-2"
+                        >
+                            <CollapsibleTrigger asChild>
+                                <Button variant="ghost" size="sm" className="w-full justify-between hover:bg-slate-100">
+                                    Comments ({timer.comments?.length || 0})
+                                    <MessageSquare className="h-4 w-4" />
+                                </Button>
+                            </CollapsibleTrigger>
+                            <CollapsibleContent className="space-y-2">
+                                {timer.comments?.map((comment, index) => (
+                                    <div
+                                        key={index}
+                                        className="rounded-lg border p-3 bg-slate-50"
+                                    >
+                                        <ReactMarkdown
+                                            remarkPlugins={[remarkGfm]}
+                                            className="prose prose-sm dark:prose-invert max-w-none"
                                         >
-                                            <ReactMarkdown
-                                                remarkPlugins={[remarkGfm]}
-                                                className="prose prose-sm dark:prose-invert max-w-none"
-                                            >
-                                                {comment}
-                                            </ReactMarkdown>
-                                        </div>
-                                    ))}
-                                    <div className="flex gap-2">
-                                        <Textarea
-                                            placeholder="Add a comment..."
-                                            value={newComment}
-                                            onChange={(e) => setNewComment(e.target.value)}
-                                            onKeyDown={async (e) => {
-                                                if (e.key === 'Enter' && !e.shiftKey) {
-                                                    e.preventDefault()
-                                                    await addCommentToTimer()
-                                                }
-                                            }}
-                                        />
-                                        <Button onClick={addCommentToTimer} size="sm">Add</Button>
+                                            {comment}
+                                        </ReactMarkdown>
                                     </div>
-                                </CollapsibleContent>
-                            </Collapsible>
-                        </div>
+                                ))}
+                                <div className="flex gap-2">
+                                    <Textarea
+                                        placeholder="Add a comment..."
+                                        value={newComment}
+                                        onChange={(e) => setNewComment(e.target.value)}
+                                        onKeyDown={async (e) => {
+                                            if (e.key === 'Enter' && !e.shiftKey) {
+                                                e.preventDefault()
+                                                await addCommentToTimer()
+                                            }
+                                        }}
+                                        className="bg-slate-50 min-h-[80px]"
+                                    />
+                                    <Button 
+                                        onClick={addCommentToTimer}
+                                        size="sm"
+                                        className="self-start"
+                                    >
+                                        Add
+                                    </Button>
+                                </div>
+                            </CollapsibleContent>
+                        </Collapsible>
                     </WithLoading>
                 </div>
             </CardContent>
