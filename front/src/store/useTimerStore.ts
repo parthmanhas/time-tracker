@@ -1,8 +1,8 @@
 import { TimerType } from '@/types';
 import { create } from 'zustand';
 
-type ActiveFilter = 'ALL' | 'ACTIVE' | 'QUEUED' | 'COMPLETED';
-type TimerStatus = 'ACTIVE' | 'PAUSED' | 'COMPLETED';
+export type ActiveFilter = 'ALL' | 'ACTIVE' | 'QUEUED' | 'COMPLETED';
+export type TimerStatus = 'ACTIVE' | 'PAUSED' | 'COMPLETED';
 
 type TimerStoreStateType = {
     allTimers: TimerType[],

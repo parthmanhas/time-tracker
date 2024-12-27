@@ -21,7 +21,7 @@ import {
 import { cn, fetchAllTimers, markComplete } from "@/lib/utils"
 import { Timer } from './timer'
 import { TimerType } from '@/types'
-import { useTimerStore } from '@/store/useTimerStore'
+import { ActiveFilter, useTimerStore } from '@/store/useTimerStore'
 import { Badge } from "@/components/ui/badge"
 import { API } from '@/config/api'
 import { WithLoading } from '@/hoc/hoc'
@@ -407,7 +407,7 @@ export default function CountdownTimerDashboard() {
                     key={filter}
                     variant={activeFilter === filter ? "secondary" : "outline"}
                     onClick={() => {
-                      setActiveFilter(filter)
+                      setActiveFilter(filter as ActiveFilter)
                       setSelectedTag(null)
                     }}
                     className={cn(

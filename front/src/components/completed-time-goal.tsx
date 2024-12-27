@@ -1,5 +1,5 @@
 import { format } from 'date-fns'
-import { CalendarDays, Clock, Trophy, Target, Calendar } from 'lucide-react'
+import { Trophy, Target, Calendar } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Badge } from './ui/badge'
 

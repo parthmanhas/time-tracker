@@ -1,6 +1,6 @@
 import { format } from 'date-fns'
 import { Badge } from './ui/badge'
-import { Calendar, CheckCircle, Target, TrendingUp } from 'lucide-react'
+import { Calendar, Target, TrendingUp } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 type CompletedCountGoalProps = {
