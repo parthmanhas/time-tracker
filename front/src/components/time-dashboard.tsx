@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Plus, Calendar as CalendarIcon, Search, LayoutGrid, List, CirclePlusIcon } from 'lucide-react'
+import { Plus, Search, LayoutGrid, List, CirclePlusIcon } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -18,10 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Calendar } from "@/components/ui/calendar"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { cn, fetchAllTimers, markComplete } from "@/lib/utils"
-import { format } from "date-fns"
 import { Timer } from './timer'
 import { TimerType } from '@/types'
 import { useTimerStore } from '@/store/useTimerStore'
@@ -34,6 +31,9 @@ import { toast } from '@/hooks/use-toast'
 import { CompactTimer } from "./timer-compact"
 import { WithSidebarTrigger } from './WithSidebarTrigger'
 import DashboardHeader from './dashboard-header'
+import { Separator } from "@/components/ui/separator"
+import { isSameDay } from 'date-fns'
+import { SidebarSeparator } from './ui/sidebar'
 
 const timeOptions = [
   { value: '600', label: '10 minutes' },
@@ -44,7 +44,6 @@ const timeOptions = [
 
 export default function CountdownTimerDashboard() {
   const [isDialogOpen, setIsDialogOpen] = React.useState(false)
-  const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(undefined)
   const [searchQuery, setSearchQuery] = React.useState('')
   const [selectedTag, setSelectedTag] = React.useState<string | null>(null)
   const [selectedTags, setSelectedTags] = React.useState<string[]>([])
@@ -73,12 +72,6 @@ export default function CountdownTimerDashboard() {
   React.useEffect(() => {
     fetchAllTimers(setAllTimers, logout, setIsLoading);
   }, [])
-
-  const convertToISODate = (localDateString: string | undefined) => {
-    if (!localDateString) return;
-    const [month, day, year] = localDateString.split('/'); // Assuming the format is MM/DD/YYYY
-    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-  }
 
   const addTimerDB = async (timer: TimerType | undefined) => {
     if (!timer) {
@@ -163,13 +156,8 @@ export default function CountdownTimerDashboard() {
 
   const getTimeSpent = (activeFilter: string) => {
     if (activeFilter === 'COMPLETED') {
-      let seconds;
-      const completedTimers = allTimers.filter(timer => timer.status === 'COMPLETED');
-      if (selectedDate) {
-        seconds = completedTimers.filter(timer => timer.completedAt?.split('T')[0] === convertToISODate(selectedDate?.toLocaleDateString())).reduce((acc, curr) => acc += curr.duration, 0);
-      } else {
-        seconds = completedTimers.reduce((acc, curr) => acc += curr.duration, 0);
-      }
+      const completedTimers = allTimers.filter(timer => timer.status === 'COMPLETED' && timer.completedAt && isSameDay(new Date(timer.completedAt), new Date()));
+      const seconds = completedTimers.filter(timer => timer.completedAt === new Date().toISOString()).reduce((acc, curr) => acc += curr.duration, 0);
       const hours = Math.floor(seconds / 3600);
       const minutes = Math.floor((seconds % 3600) / 60);
       return `${hours} hrs : ${minutes} min`
@@ -179,8 +167,16 @@ export default function CountdownTimerDashboard() {
       const minutes = Math.floor((seconds % 3600) / 60);
       return `${hours} hrs : ${minutes} min`
     }
-    return 0;
+    return '0';
   }
+
+  const getTotalTimeRemaining = React.useCallback(() => {
+    const queuedTimers = allTimers.filter(timer => timer.status === 'PAUSED');
+    const totalSeconds = queuedTimers.reduce((acc, curr) => acc + curr.remainingTime, 0);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    return `${hours} hrs : ${minutes} min`;
+  }, [allTimers]);
 
   const filteredTimers = React.useMemo(() => {
     return allTimers.filter(timer =>
@@ -251,6 +247,7 @@ export default function CountdownTimerDashboard() {
     window.addEventListener('switchToGridView', handleSwitchView);
     return () => window.removeEventListener('switchToGridView', handleSwitchView);
   }, []);
+  
 
   return (
     <div className="container mx-auto p-6">
@@ -260,32 +257,10 @@ export default function CountdownTimerDashboard() {
             <WithSidebarTrigger>
               <h1 className="text-2xl font-bold">Countdown Timers</h1>
             </WithSidebarTrigger>
-            <div className="flex flex-wrap gap-3">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant={"outline"}
-                    className={cn(
-                      "w-[240px] justify-start text-left font-normal",
-                      !selectedDate && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {selectedDate ? format(selectedDate, "PPP") : <span>Pick a date</span>}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={selectedDate}
-                    onSelect={setSelectedDate}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
+            <div className="flex flex-wrap gap-3 w-full mt-3 sm:mt-0 sm:w-auto">
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button disabled={allTimers.findIndex(timer => timer.status === 'ACTIVE') > -1}>
+                  <Button className='w-full' disabled={allTimers.findIndex(timer => timer.status === 'ACTIVE') > -1}>
                     <Plus className="mr-2 h-4 w-4" /> Add Timer
                   </Button>
                 </DialogTrigger>
@@ -367,7 +342,6 @@ export default function CountdownTimerDashboard() {
               className="pl-8"
             />
           </div>
-
           <div className="flex flex-col gap-4">
             <div className="flex flex-wrap gap-2">
               <Button
@@ -407,6 +381,7 @@ export default function CountdownTimerDashboard() {
                 Completed
               </Button>
             </div>
+            <Separator /> 
 
             {uniqueTags.length > 0 && (
               <>
@@ -428,12 +403,19 @@ export default function CountdownTimerDashboard() {
               </>
             )}
           </div>
+          <Separator /> 
 
-          <DashboardHeader selectedTag={selectedTag} activeFilter={activeFilter} getTimeSpent={getTimeSpent} filteredByTagTimers={filteredByTagTimers} />
-          
-          <div className="flex flex-col sm:flex-row items-center gap-4">
+          <DashboardHeader 
+            selectedTag={selectedTag} 
+            activeFilter={activeFilter} 
+            getTimeSpent={getTimeSpent} 
+            filteredByTagTimers={filteredByTagTimers}
+            getTotalTimeRemaining={getTotalTimeRemaining}
+          />
+          <Separator />                
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
             <div className="flex items-center gap-2">
-              <span className="text-sm font-medium">Sort by:</span>
+              <span className="text-sm font-medium w-[50px]">Sort by:</span>
               <Select value={sortBy} onValueChange={(value: 'created' | 'duration' | 'remaining') => setSortBy(value)}>
                 <SelectTrigger className="w-[180px]">
                   <SelectValue />
@@ -447,9 +429,9 @@ export default function CountdownTimerDashboard() {
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="text-sm font-medium">Order:</span>
+              <span className="text-sm font-medium w-[50px]">Order:</span>
               <Select value={sortOrder} onValueChange={(value: 'asc' | 'desc') => setSortOrder(value)}>
-                <SelectTrigger className="w-[120px]">
+                <SelectTrigger className="w-[180px]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -459,6 +441,7 @@ export default function CountdownTimerDashboard() {
               </Select>
             </div>
           </div>
+          <Separator /> 
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
               <Button
@@ -477,75 +460,34 @@ export default function CountdownTimerDashboard() {
               </Button>
             </div>
           </div>
+          <Separator /> 
           <div className={cn(
             view === 'grid'
               ? "grid gap-4 md:grid-cols-2 lg:grid-cols-3"
               : "flex flex-col gap-2"
           )}>
-            {!selectedDate && activeFilter === 'ALL' &&
-              sortedAndFilteredTimers.map(timer => (
-                view === 'grid' ? (
-                  <Timer key={timer.id} timer={timer} workerRef={workerRef} />
-                ) : (
-                  <CompactTimer key={timer.id} timer={timer} workerRef={workerRef} />
-                )
+            {sortedAndFilteredTimers
+              .filter(timer => {
+              switch (activeFilter) {
+                case 'ALL':
+                return true;
+                case 'COMPLETED':
+                return timer.status === 'COMPLETED';
+                case 'QUEUED':
+                return timer.status === 'PAUSED';
+                case 'ACTIVE':
+                return timer.status === 'ACTIVE';
+                default:
+                return false;
+              }
+              })
+              .map(timer => (
+              view === 'grid' ? (
+                <Timer key={timer.id} timer={timer} workerRef={workerRef} />
+              ) : (
+                <CompactTimer key={timer.id} timer={timer} workerRef={workerRef} />
+              )
               ))
-            }
-            {!selectedDate && activeFilter === 'COMPLETED' &&
-              sortedAndFilteredTimers
-                .filter(timer => ['COMPLETED'].includes(timer.status))
-                .map(timer => (
-                  view === 'grid' ? (
-                    <Timer key={timer.id} timer={timer} workerRef={workerRef} />
-                  ) : (
-                    <CompactTimer key={timer.id} timer={timer} workerRef={workerRef} />
-                  )))
-            }
-            {!selectedDate && activeFilter === 'QUEUED' &&
-              sortedAndFilteredTimers
-                .filter(timer => ['PAUSED'].includes(timer.status))
-                .map(timer => (
-                  view === 'grid' ? (
-                    <Timer key={timer.id} timer={timer} workerRef={workerRef} />
-                  ) : (
-                    <CompactTimer key={timer.id} timer={timer} workerRef={workerRef} />
-                  )))
-            }
-            {activeFilter === 'ACTIVE' &&
-              sortedAndFilteredTimers
-                .filter(timer => ['ACTIVE'].includes(timer.status))
-                .map(timer => (
-                  view === 'grid' ? (
-                    <Timer key={timer.id} timer={timer} workerRef={workerRef} />
-                  ) : (
-                    <CompactTimer key={timer.id} timer={timer} workerRef={workerRef} />
-                  )))
-            }
-            {selectedDate && activeFilter === 'COMPLETED' &&
-              sortedAndFilteredTimers
-                .filter(timer =>
-                  timer.completedAt?.split('T')[0] === convertToISODate(selectedDate.toLocaleDateString())
-                )
-                .filter(timer => ['COMPLETED'].includes(timer.status))
-                .map(timer => (
-                  view === 'grid' ? (
-                    <Timer key={timer.id} timer={timer} workerRef={workerRef} />
-                  ) : (
-                    <CompactTimer key={timer.id} timer={timer} workerRef={workerRef} />
-                  )))
-            }
-            {selectedDate && activeFilter === 'QUEUED' &&
-              sortedAndFilteredTimers
-                .filter(timer =>
-                  timer.createdAt.split('T')[0] === convertToISODate(selectedDate.toLocaleDateString())
-                )
-                .filter(timer => ['PAUSED'].includes(timer.status))
-                .map(timer => (
-                  view === 'grid' ? (
-                    <Timer key={timer.id} timer={timer} workerRef={workerRef} />
-                  ) : (
-                    <CompactTimer key={timer.id} timer={timer} workerRef={workerRef} />
-                  )))
             }
           </div>
         </div>

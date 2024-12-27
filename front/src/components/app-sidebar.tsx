@@ -57,12 +57,12 @@ export function AppSidebar() {
         <Sidebar>
             <SidebarContent>
                 <SidebarGroup>
-                    <SidebarGroupLabel>Application</SidebarGroupLabel>
+                    <SidebarGroupLabel className="text-md">Menu</SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
                             {items.map((item) => (
                                 <SidebarMenuItem key={item.title}>
-                                    <SidebarMenuButton asChild>
+                                    <SidebarMenuButton className="text-lg" asChild>
                                         <a href={item.url}>
                                             <item.icon />
                                             <span>{item.title}</span>
@@ -80,7 +80,7 @@ export function AppSidebar() {
                         <SidebarGroupContent>
                             <SidebarMenu>
                                 <SidebarMenuItem key="settings">
-                                    <SidebarMenuButton asChild>
+                                    <SidebarMenuButton className="text-lg" asChild>
                                         <a href="/settings">
                                             <Settings />
                                             <span>Settings</span>
@@ -88,7 +88,7 @@ export function AppSidebar() {
                                     </SidebarMenuButton>
                                 </SidebarMenuItem>
                                 <SidebarMenuItem key="logout">
-                                    <SidebarMenuButton asChild>
+                                    <SidebarMenuButton className="text-lg" asChild>
                                         <button onClick={handleLogout}>
                                             <LogOut />
                                             <span>Logout</span>

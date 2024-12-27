@@ -252,7 +252,7 @@ export function Timer({ timer, workerRef }: TimerProps) {
                                         {timer.status === 'ACTIVE' ? <Pause className="mr-2 h-4 w-4" /> : <Play className="mr-2 h-4 w-4" />}
                                         {timer.status === 'ACTIVE' ? 'Pause' : 'Resume'}
                                     </Button>
-                                    <Button onClick={() => {
+                                    <Button className="flex-grow" onClick={() => {
                                         markComplete(timer, setStatus, setIsLoading);
                                         workerRef.current?.postMessage({
                                             type: 'STOP_TIMER'
