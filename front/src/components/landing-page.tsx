@@ -1,6 +1,6 @@
 import { Button } from "./ui/button"
 import { Link, useNavigate } from "react-router-dom"
-import { Timer, Target, Calendar, BookOpen, BarChart2, Tags } from "lucide-react"
+import { Timer, Target, Calendar, BookOpen, BarChart2, Tags, Sparkles, ArrowRight } from "lucide-react"
 import { SciFiClock } from "./sci-fi-clock"
 import { cn } from "@/lib/utils"
 import { useEffect } from "react"
@@ -18,9 +18,15 @@ export function LandingPage() {
     }, [isAuthenticated, navigate]);
 
     return (
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen bg-background relative overflow-hidden">
+            {/* Background Effects */}
+            <div className="fixed inset-0 z-0">
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/10 via-background to-background" />
+                <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f4f4f12_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f12_1px,transparent_1px)] bg-[size:14px_24px]" />
+            </div>
+
             {/* Hero Section */}
-            <div className="container flex flex-col items-center justify-center h-screen mx-auto px-6 py-16 text-center relative overflow-hidden">
+            <div className="container flex flex-col items-center justify-center min-h-screen mx-auto px-6 py-16 text-center relative overflow-hidden">
                 <div className="absolute top-[5%] left-[50%] w-full h-full">
                     <SciFiClock />
                 </div>
@@ -30,34 +36,58 @@ export function LandingPage() {
                 <div className="absolute hidden sm:block top-[90%] left-[80%] w-full h-full">
                     <SciFiClock />
                 </div>
-                <div
-                    className={cn(
-                        "absolute z-30 animate-scan top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/20 to-transparent",
-                    )}
-                />
-                <div className="relative z-10">
-                    <h1 className="text-8xl md:text-9xl font-bold mb-6">
-                        Track Your Time, <span className="text-primary">Achieve Your Goals</span>
+
+                {/* Scanning Lines */}
+                <div className={cn(
+                    "absolute z-30 animate-scan top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/20 to-transparent"
+                )} />
+                <div className={cn(
+                    "absolute z-30 animate-scan-reverse left-0 w-1 h-full bg-gradient-to-b from-transparent via-primary/20 to-transparent delay-1000"
+                )} />
+
+                <div className="relative h-screen z-10 max-w-5xl space-y-8">
+                    {/* Hero Badge */}
+                    <div className="hidden sm:inline-block animate-fade-in">
+                        <div className="relative">
+                            <div className="absolute inset-0 bg-primary/20 blur-xl opacity-50 rounded-full" />
+                            <span className="relative inline-block px-4 py-1 text-sm font-medium text-primary border border-primary/50 rounded-full">
+                                Welcome to the Future of Time Management
+                            </span>
+                        </div>
+                    </div>
+
+                    {/* Hero Title */}
+                    <h1 className="text-8xl md:text-9xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-foreground via-primary to-foreground animate-fade-in-up">
+                        Track Your Time, Achieve Your Goals
                     </h1>
-                    <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+
+                    <p className="text-xl text-muted-foreground max-w-2xl mx-auto animate-fade-in-up delay-200">
                         A comprehensive time tracking and goal management solution that helps you stay focused,
                         measure progress, and accomplish more.
                     </p>
-                    <div className="flex gap-4 justify-center">
+
+                    <div className="flex gap-4 justify-center animate-fade-in-up delay-300">
                         <Link to="/signup">
-                            <Button size="lg">Get Started Free</Button>
+                            <Button size="lg" className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary group relative">
+                                <span className="absolute inset-0 bg-primary/20 blur-sm group-hover:blur-md transition-all" />
+                                <span className="relative flex items-center gap-2">
+                                    Get Started Free <Sparkles className="w-4 h-4 animate-pulse" />
+                                </span>
+                            </Button>
                         </Link>
                         <Link to="/login">
-                            <Button size="lg" variant="outline">Sign In</Button>
+                            <Button size="lg" variant="outline" className="backdrop-blur-sm bg-background/50">
+                                Sign In <ArrowRight className="w-4 h-4 ml-2" />
+                            </Button>
                         </Link>
                     </div>
                 </div>
             </div>
 
             {/* Features Grid */}
-            <div className="bg-muted py-16">
+            <div className="relative bg-muted/50 backdrop-blur-sm py-16">
                 <div className="container mx-auto px-6">
-                    <h2 className="text-3xl font-bold text-center mb-12">
+                    <h2 className="text-4xl leading-[50px] font-bold text-center mb-12 bg-clip-text text-transparent bg-gradient-to-r from-foreground to-primary">
                         Everything you need to stay productive
                     </h2>
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -96,22 +126,28 @@ export function LandingPage() {
             </div>
 
             {/* Call to Action */}
-            <div className="container mx-auto px-6 py-16 text-center">
-                <h2 className="text-3xl font-bold mb-6">
-                    Ready to boost your productivity?
-                </h2>
-                <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-                    Join thousands of users who are already tracking their time more effectively.
-                </p>
-                <Link to="/signup">
-                    <Button size="lg" className="px-8">
-                        Start Your Free Account
-                    </Button>
-                </Link>
+            <div className="container mx-auto px-6 py-16 text-center relative">
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/5 to-transparent" />
+                <div className="relative">
+                    <h2 className="text-4xl leading-[50px] font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-foreground to-primary">
+                        Ready to boost your productivity?
+                    </h2>
+                    <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+                        Join thousands of users who are already tracking their time more effectively.
+                    </p>
+                    <Link to="/signup">
+                        <Button size="lg" className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary group relative px-8">
+                            <span className="absolute inset-0 bg-primary/20 blur-sm group-hover:blur-md transition-all" />
+                            <span className="relative flex items-center gap-2">
+                                Start Your Free Account <ArrowRight className="w-4 h-4" />
+                            </span>
+                        </Button>
+                    </Link>
+                </div>
             </div>
 
             {/* Footer */}
-            <footer className="bg-muted py-8">
+            <footer className="relative bg-muted/50 backdrop-blur-sm py-8">
                 <div className="container mx-auto px-6">
                     <div className="flex flex-col md:flex-row justify-between items-center">
                         <p className="text-sm text-muted-foreground">
@@ -145,7 +181,7 @@ function FeatureCard({
         <div className="bg-background p-6 rounded-lg shadow-sm border hover:shadow-md transition-shadow">
             <div className="text-primary mb-4">{icon}</div>
             <h3 className="text-xl font-semibold mb-2">{title}</h3>
-            <p className="text-muted-foreground">{description}</p>
+                <p className="text-muted-foreground">{description}</p>
         </div>
     )
-} 
+}

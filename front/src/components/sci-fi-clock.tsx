@@ -45,7 +45,7 @@ export function SciFiClock() {
             />
 
             {/* create filled circle that expands and is smaller than inner ring */}
-            <div className="absolute z-10 top-1/2 left-1/2 w-[65vh] h-[65vh] rounded-full bg-white animate-[assembleInner_2.2s_ease-out_forwards]"></div>
+            <div className="absolute z-10 top-1/2 left-1/2 w-[65vh] h-[65vh] rounded-full bg-gray-100 animate-[assembleInner_2.2s_ease-out_forwards]"></div>
 
             {/* Hour markers */}
             {[...Array(12)].map((_, i) => (
@@ -101,44 +101,6 @@ export function SciFiClock() {
                     "absolute z-20 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-primary/80 rounded-full",
                 )}
             />
-
-            {/* Scanning line */}
-            
-
-        </div>
-
-
-    )
-
-    return (
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-
-
-
-
-
-
-            {/* Digital time display */}
-            {/* <div
-                className={cn(
-                    "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 font-mono text-primary text-8xl tracking-widest",
-                    isVisible ? "animate-[fade-in_1s_ease-out_2.5s_forwards]" : "opacity-0"
-                )}
-            >
-                {`${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`}
-            </div> */}
-
-
-
-
-
-
-
-
-
-
-
-
         </div>
     )
 } 
