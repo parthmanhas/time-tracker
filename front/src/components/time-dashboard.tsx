@@ -33,6 +33,7 @@ import { useAuth } from '@/context/AuthContext'
 import { toast } from '@/hooks/use-toast'
 import { CompactTimer } from "./timer-compact"
 import { WithSidebarTrigger } from './WithSidebarTrigger'
+import DashboardHeader from './dashboard-header'
 
 const timeOptions = [
   { value: '600', label: '10 minutes' },
@@ -428,15 +429,8 @@ export default function CountdownTimerDashboard() {
             )}
           </div>
 
-          <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold">
-              {selectedTag ? `${activeFilter.charAt(0) + activeFilter.slice(1).toLowerCase()} Timers - ${selectedTag}` : `${activeFilter.charAt(0).toUpperCase() + activeFilter.slice(1).toLocaleLowerCase()} Timers`}
-            </h2>
-            <h2 className="text-xl font-semibold">Time Spent: {getTimeSpent(activeFilter)}</h2>
-            <span className="text-sm font-medium">
-              Count: {filteredByTagTimers.length}
-            </span>
-          </div>
+          <DashboardHeader selectedTag={selectedTag} activeFilter={activeFilter} getTimeSpent={getTimeSpent} filteredByTagTimers={filteredByTagTimers} />
+          
           <div className="flex flex-col sm:flex-row items-center gap-4">
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium">Sort by:</span>
