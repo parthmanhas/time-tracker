@@ -38,7 +38,7 @@ export function Login() {
 
       const data = await response.json()
       login(data.user)
-      navigate('/timers')
+      navigate('/welcome')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed')
     } finally {
