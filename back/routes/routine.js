@@ -16,6 +16,29 @@ router.get('/', authenticateToken, async (req, res) => {
             },
             orderBy: {
                 created_at: 'desc'
+            },
+            include: { routine_progress: true }
+        });
+
+        const transformedRoutines = routines.map(routine => ({
+            ...routine,
+            progress: routine.routine_progress, // Rename routine_progress to progress
+            routine_progress: undefined, // Remove the original field (optional)
+        }));
+
+        res.json(transformedRoutines);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Could not fetch routines' });
+    }
+});
+
+router.get('/:id/progress', authenticateToken, async (req, res) => {
+    try {
+        const routines = await prisma.routine_progress.findMany({
+            where: {
+                routine_id: parseInt(req.params.id),
+                user_id: req.user.id
             }
         });
 
@@ -55,12 +78,21 @@ router.patch('/:id', authenticateToken, async (req, res) => {
     const updates = req.body;
 
     try {
+        // update last completed date
         const routine = await prisma.routine.update({
             where: {
                 id: parseInt(id),
                 user_id: req.user.id
             },
             data: updates
+        });
+
+        // update routine progress
+        await prisma.routine_progress.create({
+            data: {
+                routine_id: parseInt(id),
+                user_id: req.user.id
+            }
         });
 
         res.json(routine);
@@ -93,7 +125,7 @@ router.patch('/:id/complete', authenticateToken, async (req, res) => {
         // If this is the first completion or it was completed yesterday, increment streak
         if (!lastCompleted || isYesterday(lastCompleted)) {
             newStreak += 1;
-        } 
+        }
         // If it wasn't completed yesterday, reset streak to 1
         else if (!isToday(lastCompleted)) {
             newStreak = 1;

@@ -10,11 +10,10 @@ export interface Routine {
   streak: number;
   last_completed_at: Date | null;
   created_at: Date;
-  progress: number;
+  progress: RoutineProgress[];
 }
 
 export interface RoutineProgress {
   date: Date;
   completed: boolean;
-  value: number;
 }

@@ -9,12 +9,12 @@ interface RoutineHeatmapProps {
 export function RoutineHeatmap({ progress }: RoutineHeatmapProps) {
   return (
     <Card className="p-4">
-      <ContributionGraph 
-        data={progress.map(day => ({
-          date: day.date,
+      <ContributionGraph
+        data={(progress).map(day => ({
+          date: new Date(day.date),
           value: day.completed ? 1 : 0,
         }))}
-        colorScale={(value) => value ? 'bg-green-600' : 'bg-secondary'}
+        colorScale={(value) => value ? 'bg-green-500' : 'bg-secondary'}
       />
     </Card>
   );

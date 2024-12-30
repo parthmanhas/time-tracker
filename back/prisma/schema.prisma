@@ -51,6 +51,8 @@ model user {
   updated_at         DateTime  @updatedAt
   tags               tags[]
   paid               Boolean   @default(false)
+
+  routine_progress routine_progress[]
 }
 
 // Add journal model
@@ -109,4 +111,14 @@ model routine {
   last_completed_at DateTime?
   user_id           String
   created_at        DateTime  @default(now())
+  routine_progress routine_progress[]
+}
+
+model routine_progress {
+  id           Int      @id @default(autoincrement())
+  routine_id   Int
+  user_id      String
+  completed_at DateTime @default(now())
+  fk_routine   routine  @relation(fields: [routine_id], references: [id])
+  fk_user      user     @relation(fields: [user_id], references: [id])
 }
