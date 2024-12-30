@@ -15,7 +15,7 @@ export function RoutineDashboard() {
   return (
     <WithLoading isLoading={loading} isScreen={true}>
       <div className="container mx-auto p-8 space-y-8 max-w-7xl">
-        <div className="flex justify-between items-center bg-gradient-to-r from-teal-50 to-teal-100 dark:from-teal-950/20 dark:to-teal-900/20 p-6 rounded-lg shadow-sm border border-teal-200/50 dark:border-teal-800/50">
+        <div className="flex flex-col sm:flex-row gap-4 sm:gap-0 justify-between items-center bg-gradient-to-r from-teal-50 to-teal-100 dark:from-teal-950/20 dark:to-teal-900/20 p-6 rounded-lg shadow-sm border border-teal-200/50 dark:border-teal-800/50">
           <div className="space-y-1">
             <WithSidebarTrigger>
               <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-teal-600 to-teal-500 bg-clip-text text-transparent dark:from-teal-400 dark:to-teal-300">
@@ -27,7 +27,7 @@ export function RoutineDashboard() {
           <Button 
             onClick={() => setShowCreateDialog(true)} 
             size="lg" 
-            className="bg-teal-600 hover:bg-teal-700 text-white shadow-md hover:shadow-lg transition-all dark:bg-teal-700 dark:hover:bg-teal-600"
+            className="w-full sm:w-auto bg-teal-600 hover:bg-teal-700 text-white shadow-md hover:shadow-lg transition-all dark:bg-teal-700 dark:hover:bg-teal-600"
           >
             <Plus className="mr-2 h-5 w-5" /> New Routine
           </Button>
