@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Check } from "lucide-react"
 import { PaymentService } from "@/services/payment"
-import { useSubscription } from "@/context/subscription-context"
+// import { useSubscription } from "@/context/subscription-context"
 import { PricingPlan } from "@/types/payment"
 
 const plans: PricingPlan[] = [
@@ -25,19 +25,18 @@ const plans: PricingPlan[] = [
 ];
 
 export function PricingPage() {
-  const { subscription, daysLeftInTrial } = useSubscription();
-
+  // const { subscription, daysLeftInTrial } = useSubscription();
   return (
     <div className="container mx-auto py-12">
       <div className="text-center mb-12">
         <h1 className="text-4xl font-bold mb-4">Simple, Transparent Pricing</h1>
-        {!subscription?.status && (
+        {/* {!subscription?.status && (
           <p className="text-xl text-muted-foreground">
             {daysLeftInTrial > 0 
               ? `${daysLeftInTrial} days left in your trial` 
               : 'Start your 30-day free trial today'}
           </p>
-        )}
+        )} */}
       </div>
 
       <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">

@@ -1,11 +1,13 @@
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
-import { useSubscription } from "@/context/subscription-context"
+// import { useSubscription } from "@/context/subscription-context"
 import { Link } from "react-router-dom"
 import { Clock } from "lucide-react"
 
 export function TrialBanner() {
-  const { daysLeftInTrial, isTrialExpired } = useSubscription();
+  // const { daysLeftInTrial, isTrialExpired } = useSubscription();
+  const daysLeftInTrial = 0;
+  const isTrialExpired = false;
 
   if (!isTrialExpired && daysLeftInTrial > 7) return null;
 

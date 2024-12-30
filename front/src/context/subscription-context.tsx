@@ -1,13 +1,13 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { Subscription } from '@/types/payment';
+// import { Subscription } from '@/types/payment';
 // import { PaymentService } from '@/services/payment';
 import { useAuth } from './auth-context';
 
 interface SubscriptionContextType {
-  subscription: Subscription | null;
+  // subscription: Subscription | null;
   isLoading: boolean;
-  isTrialExpired: boolean;
-  daysLeftInTrial: number;
+  // isTrialExpired: boolean;
+  // daysLeftInTrial: number;
   refreshSubscription: () => Promise<void>;
   isFirstTimeUser: boolean;
 }
@@ -15,7 +15,7 @@ interface SubscriptionContextType {
 const SubscriptionContext = createContext<SubscriptionContextType | undefined>(undefined);
 
 export function SubscriptionProvider({ children }: { children: React.ReactNode }) {
-  const [subscription, setSubscription] = useState<Subscription | null>(null);
+  // const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isFirstTimeUser, setIsFirstTimeUser] = useState(true);
   const { isAuthenticated } = useAuth();
@@ -45,20 +45,20 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
     }
   }, [isAuthenticated]);
 
-  const isTrialExpired = subscription?.trialEndsAt 
-    ? new Date(subscription.trialEndsAt) < new Date() 
-    : false;
+  // const isTrialExpired = subscription?.trialEndsAt 
+  //   ? new Date(subscription.trialEndsAt) < new Date() 
+  //   : false;
 
-  const daysLeftInTrial = subscription?.trialEndsAt 
-    ? Math.max(0, Math.ceil((new Date(subscription.trialEndsAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
-    : 0;
+  // const daysLeftInTrial = subscription?.trialEndsAt 
+  //   ? Math.max(0, Math.ceil((new Date(subscription.trialEndsAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+  //   : 0;
 
   return (
     <SubscriptionContext.Provider value={{
-      subscription,
+      // subscription,
       isLoading,
-      isTrialExpired,
-      daysLeftInTrial,
+      // isTrialExpired,
+      // daysLeftInTrial,
       refreshSubscription: fetchSubscription,
       isFirstTimeUser,
     }}>
