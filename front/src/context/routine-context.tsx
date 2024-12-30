@@ -1,5 +1,5 @@
 import React, { createContext, useEffect, useState } from 'react';
-import { Routine, RoutineProgress } from '@/types/routine';
+import { Routine, RoutineProgress, RoutineResponse } from '@/types/routine';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from './auth-context';
 import { API } from '@/config/api';
@@ -22,17 +22,17 @@ export function RoutineProvider({ children }: { children: React.ReactNode }) {
   const { toast } = useToast();
   const { user } = useAuth();
 
-  const add15DatesEitherSideOfToday = (routine: Routine): Routine => {
+  const add15DatesEitherSideOfToday = (routine: RoutineResponse): Routine => {
     const progress: RoutineProgress[] = [];
     const today = new Date();
-
     //create an array of {date, completed} objects for the +- 15 days from today
     for (let i = 15; i >= -15; i--) {
       const date = new Date(today);
       date.setDate(date.getDate() - i);
+      
       progress.push({
         date,
-        completed: routine.progress.some((p: RoutineProgress) => isSameDay(new Date(p.completed_at), date))
+        completed: routine.progress.some(p => isSameDay(new Date(p.completed_at), date))
       });
     }
     return { ...routine, progress };
@@ -47,7 +47,7 @@ export function RoutineProvider({ children }: { children: React.ReactNode }) {
       });
       if (!response.ok) throw new Error('Failed to fetch routines');
 
-      const routines = (await response.json() as Routine[]).map(add15DatesEitherSideOfToday);
+      const routines = (await response.json() as RoutineResponse[]).map(add15DatesEitherSideOfToday);
       setRoutines(routines);
       localStorage.setItem('cached_routines', JSON.stringify({
         timestamp: Date.now(),
@@ -126,7 +126,7 @@ export function RoutineProvider({ children }: { children: React.ReactNode }) {
 
       const savedRoutine = await response.json() as Routine;
 
-      setRoutines(prev => [...prev, add15DatesEitherSideOfToday({...savedRoutine, progress: []})]);
+      setRoutines(prev => [...prev, add15DatesEitherSideOfToday({ ...savedRoutine, progress: [] })]);
 
       // Update cache with new routine
       const cached = localStorage.getItem('cached_routines');
@@ -154,85 +154,34 @@ export function RoutineProvider({ children }: { children: React.ReactNode }) {
 
   };
 
-  const updateProgress = async (routineId: string, progress: number) => {
-    setRoutines(prev => prev.map(routine => {
-      if (routine.id !== routineId) return routine;
-
-      const today = new Date();
-      const lastCompleted = routine.last_completed_at ? new Date(routine.last_completed_at) : null;
-      let newStreak = routine.streak;
-
-      // Reset streak if more than 1 day has passed
-      if (lastCompleted &&
-        Math.floor((today.getTime() - lastCompleted.getTime()) / (1000 * 60 * 60 * 24)) > 1) {
-        newStreak = 0;
-      }
-      // Increment streak if progress is complete and it's a new day
-      else if (progress >= 1 &&
-        (!lastCompleted ||
-          lastCompleted.toDateString() !== today.toDateString())) {
-        newStreak += 1;
-      }
-
-      return {
-        ...routine,
-        progress,
-        streak: newStreak,
-        lastCompleted: progress >= 1 ? today : routine.last_completed_at,
-      };
-    }));
-  };
-
   const handleComplete = async (routineId: string) => {
     setLoading(true);
     try {
       await fetch(`${API.getUrl('ROUTINES')}/${routineId}`, {
         method: 'PATCH',
         credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({ last_completed_at: new Date().toISOString() }),
       });
+      setRoutines(prev => prev.map(routine => {
+        if (routine.id !== routineId) return routine;
+        return {
+          ...routine,
+          last_completed_at: new Date(),
+          progress: routine.progress.map(p => ({
+            ...p,
+            completed: isSameDay(p.date, new Date())
+          }))
+          };
+      }));
+
     } catch (error) {
       console.error('Error completing routine:', error);
     } finally {
       setLoading(false);
     }
-  };
-
-  const getProgress = async (routineId: string) => {
-    const routine = routines.find(r => r.id === routineId);
-    if (!routine) return [];
-
-    // make call to get routine_progress data
-    try {
-      const response = await fetch(`${API.getUrl('ROUTINES')}/${routineId}/progress`, {
-        credentials: 'include',
-      });
-      if (!response.ok) throw new Error('Failed to fetch routine progress');
-
-      const progressData = await response.json();
-      const progress: RoutineProgress[] = [];
-      const today = new Date();
-
-      //create an array of {date, completed} objects for the +- 15 days from today
-      for (let i = 15; i >= -15; i--) {
-        const date = new Date(today);
-        date.setDate(date.getDate() - i);
-        const dateStr = date.toISOString();
-
-        progress.push({
-          date: new Date(dateStr),
-          completed: progressData.some((p: RoutineProgress) => isSameDay(new Date(p.date), date))
-        });
-      }
-      return progress;
-    } catch (error) {
-      console.error('Error fetching routine progress:', error);
-      return [];
-    }
-
-
-    // Generate last 30 days of progress
-
   };
 
   return (
