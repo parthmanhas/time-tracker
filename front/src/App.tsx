@@ -24,46 +24,44 @@ export default function App() {
 
   return (
     <AuthProvider>
-      <SubscriptionProvider>
-        <RoutineProvider>
-          <SidebarProvider>
-            <BrowserRouter>
-              <Routes>
-                {/* Public routes */}
-                <Route path="/" element={<LandingPage />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<Signup />} />
-                <Route path="/forgot-password" element={<ForgotPassword />} />
+      <RoutineProvider>
+        <SidebarProvider>
+          <BrowserRouter>
+            <Routes>
+              {/* Public routes */}
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
 
-                {/* Protected routes */}
-                <Route
-                  path="/*"
-                  element={
-                    <ProtectedRoute>
-                      <AppSidebar />
-                      <div className="flex h-screen w-screen">
-                        <div className='w-full h-full'>
-                          <Routes>
-                            <Route path="/welcome" element={<WelcomePage />} />
-                            <Route path="/timers" element={<CountdownTimerDashboard />} />
-                            <Route path="/stats" element={<Stats />} />
-                            <Route path="/tags" element={<TagStats />} />
-                            <Route path="/journal" element={<JournalDashboard />} />
-                            <Route path="/goals" element={<Goals />} />
-                            <Route path="/settings" element={<Settings />} />
-                            <Route path="/routines" element={<RoutineDashboard />} />
-                          </Routes>
-                        </div>
+              {/* Protected routes */}
+              <Route
+                path="/*"
+                element={
+                  <ProtectedRoute>
+                    <AppSidebar />
+                    <div className="flex h-screen w-screen">
+                      <div className='w-full h-full'>
+                        <Routes>
+                          <Route path="/welcome" element={<WelcomePage />} />
+                          <Route path="/timers" element={<CountdownTimerDashboard />} />
+                          <Route path="/stats" element={<Stats />} />
+                          <Route path="/tags" element={<TagStats />} />
+                          <Route path="/journal" element={<JournalDashboard />} />
+                          <Route path="/goals" element={<Goals />} />
+                          <Route path="/settings" element={<Settings />} />
+                          <Route path="/routines" element={<RoutineDashboard />} />
+                        </Routes>
                       </div>
-                    </ProtectedRoute>
-                  }
-                />
-              </Routes>
-              <Toaster />
-            </BrowserRouter>
-          </SidebarProvider>
-        </RoutineProvider>
-      </SubscriptionProvider>
+                    </div>
+                  </ProtectedRoute>
+                }
+              />
+            </Routes>
+            <Toaster />
+          </BrowserRouter>
+        </SidebarProvider>
+      </RoutineProvider>
     </AuthProvider>
   )
 }

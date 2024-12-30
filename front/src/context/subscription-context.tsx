@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Subscription } from '@/types/payment';
-import { PaymentService } from '@/services/payment';
+// import { PaymentService } from '@/services/payment';
 import { useAuth } from './auth-context';
 
 interface SubscriptionContextType {
@@ -23,8 +23,8 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
   const fetchSubscription = async () => {
     if (!isAuthenticated) return;
     try {
-      const data = await PaymentService.getSubscription();
-      setSubscription(data);
+      // const data = await PaymentService.getSubscription();
+      // setSubscription(data);
     } catch (error) {
       console.error('Failed to fetch subscription:', error);
     } finally {
