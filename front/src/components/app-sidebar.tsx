@@ -1,4 +1,4 @@
-import { BarChart2, BookOpen, Clock, LogOut, Settings, Tag, Target } from "lucide-react"
+import { BarChart2, BookOpen, Clock, LogOut, Settings, Tag, Target, ListChecks } from "lucide-react"
 import { cn } from "@/lib/utils"
 import {
     Sidebar,
@@ -12,7 +12,7 @@ import {
     SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { useNavigate, useLocation } from "react-router-dom"
-import { useAuth } from "@/context/AuthContext"
+import { useAuth } from "@/context/auth-context"
 import { Separator } from "./ui/separator"
 
 const items = [
@@ -50,6 +50,13 @@ const items = [
         icon: Target,
         color: "text-red-600",
         bgColor: "bg-red-100",
+    },
+    {
+        title: "Routines",
+        url: "/routines",
+        icon: ListChecks,
+        color: "text-teal-600",
+        bgColor: "bg-teal-100",
     },
 ]
 

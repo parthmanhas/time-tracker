@@ -5,9 +5,9 @@ import { fetchAllTimers } from '@/lib/utils'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip, Legend } from 'recharts'
 import { subDays, startOfMonth, eachDayOfInterval, format } from 'date-fns'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useAuth } from '@/context/AuthContext'
+import { useAuth } from '@/context/auth-context'
 import { WithLoading } from '@/hoc/hoc'
-import { WithSidebarTrigger } from './WithSidebarTrigger'
+import { WithSidebarTrigger } from './with-sidebar-trigger'
 
 export function Stats() {
   const { allTimers, setAllTimers } = useTimerStore()

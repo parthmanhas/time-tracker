@@ -26,10 +26,10 @@ import { Badge } from "@/components/ui/badge"
 import { API } from '@/config/api'
 import { WithLoading } from '@/hoc/hoc'
 import { soundManager } from '@/lib/sound'
-import { useAuth } from '@/context/AuthContext'
+import { useAuth } from '@/context/auth-context'
 import { toast } from '@/hooks/use-toast'
 import { CompactTimer } from "./timer-compact"
-import { WithSidebarTrigger } from './WithSidebarTrigger'
+import { WithSidebarTrigger } from './with-sidebar-trigger'
 import DashboardHeader from './dashboard-header'
 import { isSameDay } from 'date-fns'
 

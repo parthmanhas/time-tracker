@@ -16,10 +16,10 @@ import {
 } from "@/components/ui/alert-dialog"
 import { fetchAllTimers } from '@/lib/utils'
 import { API } from '@/config/api'
-import { useAuth } from '@/context/AuthContext'
+import { useAuth } from '@/context/auth-context'
 import { Switch } from "@/components/ui/switch"
 import { WithLoading } from '@/hoc/hoc'
-import { WithSidebarTrigger } from './WithSidebarTrigger'
+import { WithSidebarTrigger } from './with-sidebar-trigger'
 
 export function Settings() {
   const { allTimers, setAllTimers } = useTimerStore()

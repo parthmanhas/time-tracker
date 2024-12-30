@@ -1,6 +1,6 @@
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
-import { useSubscription } from "@/context/SubscriptionContext"
+import { useSubscription } from "@/context/subscription-context"
 import { Link } from "react-router-dom"
 import { Clock } from "lucide-react"
 

@@ -1,7 +1,7 @@
 import { Timer, LineChart, Bell } from 'lucide-react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { useSubscription } from '@/context/SubscriptionContext';
+import { useSubscription } from '@/context/subscription-context';
 import { useNavigate } from 'react-router-dom';
 
 const features = [

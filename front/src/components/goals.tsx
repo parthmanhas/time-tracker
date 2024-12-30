@@ -37,8 +37,8 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { CompletedTimeGoal } from './completed-time-goal'
 import { CompletedCountGoal } from './completed-count-goal'
-import { WithSidebarTrigger } from './WithSidebarTrigger'
-import { useAuth } from '@/context/AuthContext'
+import { WithSidebarTrigger } from './with-sidebar-trigger'
+import { useAuth } from '@/context/auth-context'
 
 export function Goals() {
     const [goals, setGoals] = React.useState<Goal[]>([])

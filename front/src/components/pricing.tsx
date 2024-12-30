@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Check } from "lucide-react"
 import { PaymentService } from "@/services/payment"
-import { useSubscription } from "@/context/SubscriptionContext"
+import { useSubscription } from "@/context/subscription-context"
 import { PricingPlan } from "@/types/payment"
 
 const plans: PricingPlan[] = [

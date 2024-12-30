@@ -84,17 +84,29 @@ model tags {
 }
 
 model goal {
-  id           Int          @id @default(autoincrement())
-  title        String
-  description  String?
-  target_hours Float?
-  target_count Int?
-  current_count Int?        @default(0)
-  type         GoalType     @default(TIME)
-  priority     GoalPriority
-  tags         tags[]
-  user_id      String
-  created_at   DateTime     @default(now())
-  completed_at DateTime?
-  is_active    Boolean      @default(true)
+  id            Int          @id @default(autoincrement())
+  title         String
+  description   String?
+  target_hours  Float?
+  target_count  Int?
+  current_count Int?         @default(0)
+  type          GoalType     @default(TIME)
+  priority      GoalPriority
+  tags          tags[]
+  user_id       String
+  created_at    DateTime     @default(now())
+  completed_at  DateTime?
+  is_active     Boolean      @default(true)
+}
+
+model routine {
+  id                Int       @id @default(autoincrement())
+  title             String
+  description       String?
+  type              GoalType  @default(TIME)
+  daily_target      Int
+  streak            Int
+  last_completed_at DateTime?
+  user_id           String
+  created_at        DateTime  @default(now())
 }

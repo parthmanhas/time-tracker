@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Subscription } from '@/types/payment';
 import { PaymentService } from '@/services/payment';
-import { useAuth } from './AuthContext';
+import { useAuth } from './auth-context';
 
 interface SubscriptionContextType {
   subscription: Subscription | null;

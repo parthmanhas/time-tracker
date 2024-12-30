@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/collapsible"
 import { API } from '@/config/api'
 import { WithLoading } from "@/hoc/hoc"
-import { useAuth } from "@/context/AuthContext"
+import { useAuth } from "@/context/auth-context"
 import { Textarea } from "./ui/textarea"
 import { cn } from "@/lib/utils"
 

@@ -10,6 +10,7 @@ type ApiEndpoints = {
   GOALS: string
   CHECKOUT_SESSION: string
   SUBSCRIPTION: string
+  ROUTINES: string
 }
 
 const API_URL = import.meta.env.VITE_API_URL

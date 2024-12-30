@@ -7,7 +7,7 @@ import { API } from '@/config/api'
 import { format } from 'date-fns'
 import { Pencil, Trash, Save, X, BookOpen, Calendar, Clock } from 'lucide-react'
 import { WithLoading } from '@/hoc/hoc'
-import { WithSidebarTrigger } from './WithSidebarTrigger'
+import { WithSidebarTrigger } from './with-sidebar-trigger'
 import { cn } from '@/lib/utils'
 import { Separator } from './ui/separator'
 

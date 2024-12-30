@@ -4,7 +4,7 @@ import { Timer, Target, Calendar, BookOpen, BarChart2, Tags, Sparkles, ArrowRigh
 import { SciFiClock } from "./sci-fi-clock"
 import { cn } from "@/lib/utils"
 import { useEffect } from "react"
-import { useAuth } from "@/context/AuthContext"
+import { useAuth } from "@/context/auth-context"
 
 export function LandingPage() {
 
