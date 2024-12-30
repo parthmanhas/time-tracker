@@ -21,12 +21,11 @@ const plans: PricingPlan[] = [
       'Custom Tags',
       'Export Data'
     ]
-  },
-  // ...add more plans
+  }
 ];
 
 export function PricingPage() {
-  const { subscription, isTrialExpired, daysLeftInTrial } = useSubscription();
+  const { subscription, daysLeftInTrial } = useSubscription();
 
   return (
     <div className="container mx-auto py-12">
@@ -67,16 +66,9 @@ export function PricingPage() {
               <div className="mt-6 space-y-2">
                 <Button 
                   className="w-full" 
-                  onClick={() => PaymentService.createCheckoutSession(plan.stripePriceId, 'stripe')}
+                  onClick={() => PaymentService.createCheckoutSession('payment_monthly_plan', 'stripe')}
                 >
                   Subscribe with Stripe
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="w-full"
-                  onClick={() => PaymentService.createCheckoutSession(plan.razorpayPlanId, 'razorpay')}
-                >
-                  Pay with Razorpay
                 </Button>
               </div>
             </CardContent>

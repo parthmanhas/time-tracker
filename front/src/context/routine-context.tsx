@@ -8,7 +8,7 @@ import { isSameDay } from 'date-fns';
 interface RoutineContextType {
   loading: boolean;
   routines: Routine[];
-  addRoutine: (routine: Omit<Routine, 'id' | 'createdAt' | 'streak' | 'lastCompleted'>) => Promise<void>;
+  addRoutine: (routine: Omit<Routine, 'id' | 'createdAt' | 'streak' | 'lastCompleted' | 'user_id' | 'last_completed_at' | 'created_at' | 'progress'>) => Promise<void>;
   // updateProgress: (routineId: string, progress: number) => Promise<void>;
   // getProgress: (routineId: string) => Promise<RoutineProgress[]>;
   handleComplete: (routineId: string) => Promise<void>;

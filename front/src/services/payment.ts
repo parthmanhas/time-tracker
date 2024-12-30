@@ -1,8 +1,8 @@
-import Stripe from 'stripe';
+import { loadStripe } from '@stripe/stripe-js';
 import { API } from '@/config/api';
 import { PaymentProvider, Subscription } from '@/types/payment';
 
-const stripePromise = new Stripe(import.meta.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || 'test');
+const stripePromise = loadStripe(import.meta.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || 'test');
 
 export const PaymentService = {
   async createCheckoutSession(priceId: string, provider: PaymentProvider) {
@@ -17,8 +17,10 @@ export const PaymentService = {
       const data = await response.json();
       
       if (provider === 'stripe') {
-        const stripe = await stripePromise;
-        await stripe?.redirectToCheckout({ sessionId: data.sessionId });
+        const stripeInstance = await stripePromise;
+        if (stripeInstance) {
+          await stripeInstance.redirectToCheckout({ sessionId: data.sessionId });
+        }
       }
     } catch (error) {
       console.error('Payment error:', error);
