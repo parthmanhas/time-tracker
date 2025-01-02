@@ -145,23 +145,23 @@ export function Timer({ timer, workerRef }: TimerProps) {
         }
     }
 
-    const addTime = async () => {
+    const addTime = async (seconds = 600) => {
         setIsLoading(true);
-        setDuration(timer.id, timer.duration + 600);
+        setDuration(timer.id, timer.duration + seconds);
         setStatus(timer.id, 'ACTIVE');
-        setRemainingTime(timer.id, 600);
+        setRemainingTime(timer.id, seconds);
         try {
             await fetch(API.getUrl('TIMER'), {
                 method: 'PATCH',
                 credentials: 'include',
-                body: JSON.stringify({ userId, id: timer.id, duration: timer.duration + 600, status: timer.status }),
+                body: JSON.stringify({ userId, id: timer.id, duration: timer.duration + seconds, status: timer.status }),
                 headers: {
                     'Content-Type': 'application/json'
                 }
             })
             workerRef.current?.postMessage({
                 type: 'START_TIMER',
-                payload: { id: timer.id, remainingTime: timer.remainingTime + 600 },
+                payload: { id: timer.id, remainingTime: timer.remainingTime + seconds },
             });
         } catch (e) {
             console.error(e);
@@ -294,7 +294,7 @@ export function Timer({ timer, workerRef }: TimerProps) {
                         <div className="flex flex-wrap gap-2">
                             {timer.status !== 'COMPLETED' ? (
                                 <>
-                                    <Button 
+                                    <Button
                                         className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white"
                                         disabled={allTimers.findIndex(t => t.status === 'ACTIVE') > -1 && timer.status === 'PAUSED'}
                                         onClick={toggleTimer}
@@ -305,7 +305,7 @@ export function Timer({ timer, workerRef }: TimerProps) {
                                             <><Play className="mr-2 h-4 w-4" /> Resume</>
                                         )}
                                     </Button>
-                                    <Button 
+                                    <Button
                                         onClick={() => {
                                             markComplete(timer, setStatus, setIsLoading);
                                             workerRef.current?.postMessage({ type: 'STOP_TIMER' })
@@ -316,12 +316,27 @@ export function Timer({ timer, workerRef }: TimerProps) {
                                     </Button>
                                 </>
                             ) : (
-                                <Button 
-                                    onClick={addTime}
-                                    className="bg-purple-500 hover:bg-purple-600 text-white"
-                                >
-                                    + 10 Minutes
-                                </Button>
+                                <>
+                                    <Button
+                                        onClick={() => addTime(600)}
+                                        className="bg-blue-500 hover:bg-blue-600 text-white"
+                                    >
+                                        + 10 Min
+                                    </Button>
+                                    <Button
+                                        onClick={() => addTime(1200)}
+                                        className="bg-blue-500 hover:bg-blue-600 text-white"
+                                    >
+                                        + 20 Min
+                                    </Button>
+                                    <Button
+                                        onClick={() => addTime(1800)}
+                                        className="bg-blue-500 hover:bg-blue-600 text-white"
+                                    >
+                                        + 30 Min
+                                    </Button>
+                                </>
+
                             )}
                         </div>
 
@@ -333,7 +348,7 @@ export function Timer({ timer, workerRef }: TimerProps) {
                                 onChange={(e) => setNewTag(e.target.value)}
                                 className="bg-slate-50"
                             />
-                            <Button 
+                            <Button
                                 variant="outline"
                                 size="icon"
                                 onClick={async () => {
@@ -385,7 +400,7 @@ export function Timer({ timer, workerRef }: TimerProps) {
                                         }}
                                         className="bg-slate-50 min-h-[80px]"
                                     />
-                                    <Button 
+                                    <Button
                                         onClick={addCommentToTimer}
                                         size="sm"
                                         className="self-start"

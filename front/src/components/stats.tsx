@@ -181,15 +181,16 @@ export function Stats() {
     <div className="container mx-auto p-4 sm:p-8 space-y-8 max-w-7xl">
       <WithLoading isLoading={isLoading} size={80} isScreen={true}>
         {/* Header Section */}
-        <div className="flex flex-col sm:flex-row gap-4 items-center bg-gradient-to-r from-violet-50/80 to-violet-100/80 dark:from-violet-950/40 dark:to-violet-900/40 p-4 sm:p-6 rounded-xl shadow-lg border border-violet-200/50 dark:border-violet-800/50 backdrop-blur-sm">
+        <div className="flex flex-col sm:flex-row gap-1 items-start bg-gradient-to-r from-violet-50/80 to-violet-100/80 dark:from-violet-950/40 dark:to-violet-900/40 p-4 sm:p-6 rounded-xl shadow-lg border border-violet-200/50 dark:border-violet-800/50 backdrop-blur-sm">
           <WithSidebarTrigger>
             <div className="flex-1 space-y-1 text-center sm:text-left">
               <h1 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-violet-600 to-violet-500 bg-clip-text text-transparent dark:from-violet-400 dark:to-violet-300">
                 Statistics
               </h1>
-              <p className="text-sm text-muted-foreground">Track your progress and analyze patterns</p>
+              <p className="text-sm text-muted-foreground hidden sm:block">Track your progress and analyze patterns</p>
             </div>
           </WithSidebarTrigger>
+          <p className="text-sm text-muted-foreground sm:hidden">Track your progress and analyze patterns</p>
         </div>
 
         <div className="grid gap-6">
@@ -255,7 +256,6 @@ export function Stats() {
               </div>
             </CardContent>
           </Card>
-
           {/* Time per Tag stats */}
           <Card className="overflow-hidden border-violet-100 dark:border-violet-900/50 hover:shadow-lg transition-all duration-300">
             <CardHeader>
@@ -267,7 +267,7 @@ export function Stats() {
               <Tabs defaultValue="day" className="w-full">
                 <TabsList className="mb-4 bg-violet-50 dark:bg-violet-900/50">
                   {["Last 24h", "Last 3 Days", "Last Week", "This Month"].map((label, i) => (
-                    <TabsTrigger 
+                    <TabsTrigger
                       key={label}
                       value={["day", "threeDays", "week", "month"][i]}
                       className="data-[state=active]:bg-violet-100 dark:data-[state=active]:bg-violet-800"
@@ -283,8 +283,8 @@ export function Stats() {
                       <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={data}>
                           <CartesianGrid strokeDasharray="3 3" className="opacity-50" />
-                          <XAxis 
-                            dataKey="tag" 
+                          <XAxis
+                            dataKey="tag"
                             tick={{ fill: 'currentColor', fontSize: 12 }}
                           />
                           <YAxis

@@ -16,6 +16,8 @@ import { WithLoading } from '@/hoc/hoc'
 import { WithSidebarTrigger } from './with-sidebar-trigger'
 import { cn } from '@/lib/utils'
 import { Separator } from './ui/separator'
+import { motion } from 'framer-motion';
+import { Button } from './ui/button'
 
 type SortOption = 'name' | 'timeAsc' | 'timeDesc'
 
@@ -78,21 +80,38 @@ export function TagStats() {
     <div className="container mx-auto p-6">
       <WithLoading isLoading={isLoading} isScreen={true}>
         <div className="space-y-6">
+          {/* New Header Section */}
+          {/* <div className="flex flex-col sm:flex-row gap-4 sm:gap-0 justify-between items-center bg-gradient-to-r from-green-50 to-green-100 dark:from-green-950/20 dark:to-green-900/20 p-6 rounded-lg shadow-sm border border-green-200/50 dark:border-green-800/50">
+            <div className="space-y-1">
+              <WithSidebarTrigger>
+                <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-green-600 to-green-500 bg-clip-text text-transparent dark:from-green-400 dark:to-green-300">
+                  Routines
+                </h1>
+              </WithSidebarTrigger>
+              <p className="text-muted-foreground">Build lasting habits with daily tracking</p>
+            </div>
+            <Button
+              onClick={() => setShowCreateDialog(true)}
+              size="lg"
+              className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white shadow-md hover:shadow-lg transition-all dark:bg-green-700 dark:hover:bg-green-600"
+            >
+              <Plus className="mr-2 h-5 w-5" /> New Routine
+            </Button>
+          </div> */}
           {/* Header Section */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <WithSidebarTrigger>
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-green-100 rounded-lg">
-                  <BarChart className="h-5 w-5 text-green-600" />
-                </div>
+          <div className="flex flex-col sm:flex-row gap-4 sm:gap-0 justify-between items-start bg-gradient-to-r from-green-50 to-green-100 dark:from-green-950/20 dark:to-green-900/20 p-6 rounded-lg shadow-sm border border-green-200/50 dark:border-green-800/50">
+            <div className="flex items-center gap-3">
+              <WithSidebarTrigger>
                 <div>
-                  <h1 className="text-2xl font-bold text-slate-800">Tag Statistics</h1>
+                  <h1 className="text-3xl font-bold leading-10 tracking-tight bg-gradient-to-r from-green-600 to-green-500 bg-clip-text text-transparent dark:from-green-400 dark:to-green-300">
+                    Tag Statistics
+                  </h1>
                   <p className="text-sm text-slate-500">Track your productivity by tags</p>
                 </div>
-              </div>
-            </WithSidebarTrigger>
-            
-            <div className="flex items-center gap-2 bg-slate-50 p-2 rounded-lg">
+              </WithSidebarTrigger>
+            </div>
+
+            <div className="flex items-center self-center gap-2 bg-slate-50 p-2 rounded-lg">
               <ArrowUpDown className="h-4 w-4 text-slate-500" />
               <Select
                 value={sortBy}
@@ -115,43 +134,49 @@ export function TagStats() {
           {/* Stats Grid */}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {tagStats.map(({ tag, count, timeSpent }) => (
-              <Card key={tag} className={cn(
-                "bg-gradient-to-br from-white to-slate-50",
-                "hover:shadow-md transition-all duration-200"
-              )}>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="flex items-center gap-2">
-                    <Tag className="h-4 w-4 text-slate-400" />
-                    <Badge 
-                      variant={tag ? "default" : "destructive"} 
-                      className={cn(
-                        "font-medium",
-                        tag ? "bg-green-100 text-green-700 hover:bg-green-200" : ""
-                      )}
-                    >
-                      {tag || 'UNTAGGED'}
-                    </Badge>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-sm text-slate-500">
-                        <CheckCircle className="h-4 w-4 text-green-600" />
-                        <span>Completed</span>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Card key={tag} className={cn(
+                  "bg-gradient-to-br from-white to-slate-50",
+                  "hover:shadow-md transition-all duration-200"
+                )}>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="flex items-center gap-2">
+                      <Tag className="h-4 w-4 text-slate-400" />
+                      <Badge
+                        variant={tag ? "default" : "destructive"}
+                        className={cn(
+                          "font-medium",
+                          tag ? "bg-green-100 text-green-700 hover:bg-green-200" : ""
+                        )}
+                      >
+                        {tag || 'UNTAGGED'}
+                      </Badge>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-sm text-slate-500">
+                          <CheckCircle className="h-4 w-4 text-green-600" />
+                          <span>Completed</span>
+                        </div>
+                        <p className="text-2xl font-bold text-slate-800">{count}</p>
                       </div>
-                      <p className="text-2xl font-bold text-slate-800">{count}</p>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-sm text-slate-500">
-                        <Clock className="h-4 w-4 text-blue-600" />
-                        <span>Time Spent</span>
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-sm text-slate-500">
+                          <Clock className="h-4 w-4 text-blue-600" />
+                          <span>Time Spent</span>
+                        </div>
+                        <p className="text-2xl font-bold text-slate-800">{formatTime(timeSpent)}</p>
                       </div>
-                      <p className="text-2xl font-bold text-slate-800">{formatTime(timeSpent)}</p>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </motion.div>
             ))}
           </div>
         </div>

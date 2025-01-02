@@ -18,15 +18,18 @@ export function RoutineDashboard() {
         <div className="flex flex-col sm:flex-row gap-4 sm:gap-0 justify-between items-center bg-gradient-to-r from-teal-50 to-teal-100 dark:from-teal-950/20 dark:to-teal-900/20 p-6 rounded-lg shadow-sm border border-teal-200/50 dark:border-teal-800/50">
           <div className="space-y-1">
             <WithSidebarTrigger>
-              <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-teal-600 to-teal-500 bg-clip-text text-transparent dark:from-teal-400 dark:to-teal-300">
-                Routines
-              </h1>
+              <div>
+                <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-teal-600 to-teal-500 bg-clip-text text-transparent dark:from-teal-400 dark:to-teal-300">
+                  Routines
+                </h1>
+                <p className="text-muted-foreground hidden sm:block">Build lasting habits with daily tracking</p>
+              </div>
             </WithSidebarTrigger>
-            <p className="text-muted-foreground">Build lasting habits with daily tracking</p>
+            <p className="text-muted-foreground sm:hidden">Build lasting habits with daily tracking</p>
           </div>
-          <Button 
-            onClick={() => setShowCreateDialog(true)} 
-            size="lg" 
+          <Button
+            onClick={() => setShowCreateDialog(true)}
+            size="lg"
             className="w-full sm:w-auto bg-teal-600 hover:bg-teal-700 text-white shadow-md hover:shadow-lg transition-all dark:bg-teal-700 dark:hover:bg-teal-600"
           >
             <Plus className="mr-2 h-5 w-5" /> New Routine
@@ -53,16 +56,15 @@ export function RoutineDashboard() {
                         <span>Daily Target: {routine.daily_target}</span>
                       </div>
                     </div>
-                    <Button 
-                      size="sm" 
+                    <Button
+                      size="sm"
                       variant={isCompletedToday(routine.last_completed_at) ? "secondary" : "default"}
                       onClick={() => handleComplete(routine.id)}
                       disabled={isCompletedToday(routine.last_completed_at)}
-                      className={`shadow-sm hover:shadow-md transition-all ${
-                        isCompletedToday(routine.last_completed_at)
+                      className={`shadow-sm hover:shadow-md transition-all ${isCompletedToday(routine.last_completed_at)
                           ? 'bg-teal-100 text-teal-900 hover:bg-teal-200 dark:bg-teal-900 dark:text-teal-100'
                           : 'bg-teal-600 text-white hover:bg-teal-700 dark:bg-teal-700 dark:hover:bg-teal-600'
-                      }`}
+                        }`}
                     >
                       {isCompletedToday(routine.last_completed_at) ? (
                         <>
@@ -74,7 +76,7 @@ export function RoutineDashboard() {
                       )}
                     </Button>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <div className="flex justify-between items-center text-sm">
                       <span className="font-medium text-teal-700 dark:text-teal-300">Current Streak</span>

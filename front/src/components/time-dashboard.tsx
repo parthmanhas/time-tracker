@@ -32,6 +32,7 @@ import { CompactTimer } from "./timer-compact"
 import { WithSidebarTrigger } from './with-sidebar-trigger'
 import DashboardHeader from './dashboard-header'
 import { isSameDay } from 'date-fns'
+import { motion } from 'framer-motion';
 
 const timeOptions = [
   { value: '600', label: '10 minutes' },
@@ -245,30 +246,30 @@ export default function CountdownTimerDashboard() {
     window.addEventListener('switchToGridView', handleSwitchView);
     return () => window.removeEventListener('switchToGridView', handleSwitchView);
   }, []);
-  
+
 
   return (
     <div className="container mx-auto p-6">
       <WithLoading isLoading={isLoading} size={80} isScreen={true}>
         <div className="space-y-6">
-          {/* Header Section */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <WithSidebarTrigger>
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-purple-100 rounded-lg">
-                  <Clock className="h-5 w-5 text-purple-600" />
-                </div>
-                <div>
-                  <h1 className="text-2xl font-bold text-slate-800">Countdown Timers</h1>
-                  <p className="text-sm text-slate-500">Manage and track your time effectively</p>
-                </div>
-              </div>
-            </WithSidebarTrigger>
 
+          {/* Header Section */}
+          <div className="flex flex-col sm:flex-row gap-4 sm:gap-0 justify-between items-center bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-950/20 dark:to-blue-900/20 p-6 rounded-lg shadow-sm border border-blue-200/50 dark:border-blue-800/50">
+            <div className="space-y-1">
+              <WithSidebarTrigger>
+                <div>
+                  <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent dark:from-blue-400 dark:to-blue-300">
+                    Countdown Timers
+                  </h1>
+                  <p className="text-muted-foreground hidden sm:block">Manage and track your time effectively</p>
+                </div>
+              </WithSidebarTrigger>
+              <p className="text-muted-foreground sm:hidden">Manage and track your time effectively</p>
+            </div>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
-                <Button 
-                  className="w-full sm:w-auto bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white shadow-sm" 
+                <Button
+                  className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-sm"
                   disabled={allTimers.findIndex(timer => timer.status === 'ACTIVE') > -1}
                 >
                   <Plus className="mr-2 h-4 w-4" /> Add Timer
@@ -277,8 +278,8 @@ export default function CountdownTimerDashboard() {
               <DialogContent className="sm:max-w-[425px] p-0">
                 <DialogHeader className="p-6 pb-0">
                   <DialogTitle className="flex items-center gap-3 text-xl">
-                    <div className="p-2 bg-purple-100 rounded-lg">
-                      <CirclePlusIcon className="h-5 w-5 text-purple-600" />
+                    <div className="p-2 bg-blue-100 rounded-lg">
+                      <CirclePlusIcon className="h-5 w-5 text-blue-600" />
                     </div>
                     Add New Timer
                   </DialogTitle>
@@ -294,7 +295,7 @@ export default function CountdownTimerDashboard() {
                         id="name"
                         value={newTimerTitle}
                         onChange={(e) => setNewTimerTitle(e.target.value)}
-                        className="border-slate-200 focus:border-purple-200 focus:ring-purple-200"
+                        className="border-slate-200 focus:border-blue-200 focus:ring-blue-200"
                         placeholder="Enter timer name..."
                       />
                     </div>
@@ -304,15 +305,15 @@ export default function CountdownTimerDashboard() {
                         Duration
                       </Label>
                       <Select onValueChange={setNewTimerDuration} value={newTimerDuration}>
-                        <SelectTrigger className="w-full border-slate-200 focus:border-purple-200 focus:ring-purple-200">
+                        <SelectTrigger className="w-full border-slate-200 focus:border-blue-200 focus:ring-blue-200">
                           <SelectValue placeholder="Select duration" />
                         </SelectTrigger>
                         <SelectContent>
                           {timeOptions.map(option => (
-                            <SelectItem 
-                              key={option.value} 
+                            <SelectItem
+                              key={option.value}
                               value={option.value}
-                              className="focus:bg-purple-50"
+                              className="focus:bg-blue-50"
                             >
                               {option.label}
                             </SelectItem>
@@ -335,9 +336,9 @@ export default function CountdownTimerDashboard() {
                             variant={selectedTags.includes(tag) ? "default" : "outline"}
                             className={cn(
                               "cursor-pointer transition-all",
-                              selectedTags.includes(tag) 
-                                ? "bg-purple-100 text-purple-700 hover:bg-purple-200" 
-                                : "hover:border-purple-200"
+                              selectedTags.includes(tag)
+                                ? "bg-blue-100 text-blue-700 hover:bg-blue-200"
+                                : "hover:border-blue-200"
                             )}
                             onClick={() => handleTagSelect(tag)}
                           >
@@ -347,16 +348,16 @@ export default function CountdownTimerDashboard() {
                       </div>
                     )}
                     <div className="flex gap-2">
-                      <Input 
-                        placeholder="Add new tag" 
-                        value={newTag} 
+                      <Input
+                        placeholder="Add new tag"
+                        value={newTag}
                         onChange={(e) => setNewTag(e.target.value)}
-                        className="border-slate-200 focus:border-purple-200 focus:ring-purple-200"
+                        className="border-slate-200 focus:border-blue-200 focus:ring-blue-200"
                       />
-                      <Button 
+                      <Button
                         onClick={() => handleTagSelect(newTag)}
                         variant="outline"
-                        className="border-slate-200 hover:bg-purple-50 hover:text-purple-600"
+                        className="border-slate-200 hover:bg-blue-50 hover:text-blue-600"
                       >
                         Add
                       </Button>
@@ -366,18 +367,18 @@ export default function CountdownTimerDashboard() {
                   {/* Action Buttons */}
                   <div className="flex flex-col gap-2 pt-4 border-t">
                     <WithLoading isLoading={isLoading} addingTimer={true}>
-                      <Button 
-                        disabled={selectedTags.length === 0 || !newTimerTitle || !newTimerDuration} 
+                      <Button
+                        disabled={selectedTags.length === 0 || !newTimerTitle || !newTimerDuration}
                         onClick={() => addTimer("ACTIVE")}
-                        className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800"
+                        className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
                       >
                         <Play className="mr-2 h-4 w-4" /> Start Now (Active)
                       </Button>
-                      <Button 
-                        disabled={selectedTags.length === 0 || !newTimerTitle || !newTimerDuration} 
+                      <Button
+                        disabled={selectedTags.length === 0 || !newTimerTitle || !newTimerDuration}
                         onClick={() => addTimer("PAUSED")}
                         variant="outline"
-                        className="w-full border-purple-200 text-purple-700 hover:bg-purple-50"
+                        className="w-full border-blue-200 text-blue-700 hover:bg-blue-50"
                       >
                         <Clock className="mr-2 h-4 w-4" /> Start Later (Queued)
                       </Button>
@@ -389,125 +390,141 @@ export default function CountdownTimerDashboard() {
           </div>
 
           {/* Search and Filters Section */}
-          <div className="space-y-4 bg-white p-4 rounded-lg border shadow-sm">
-            <div className="relative">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-slate-400" />
-              <Input
-                placeholder="Search timers..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-8 border-slate-200 focus:border-purple-200 focus:ring-purple-200"
-              />
-            </div>
-
-            <div className="space-y-4">
-              <div className="flex flex-wrap gap-2">
-                {['ALL', 'ACTIVE', 'QUEUED', 'COMPLETED'].map((filter) => (
-                  <Button
-                    key={filter}
-                    variant={activeFilter === filter ? "secondary" : "outline"}
-                    onClick={() => {
-                      setActiveFilter(filter as ActiveFilter)
-                      setSelectedTag(null)
-                    }}
-                    className={cn(
-                      "transition-all",
-                      activeFilter === filter && "bg-purple-100 text-purple-700 border-purple-200"
-                    )}
-                  >
-                    {filter === 'ALL' ? 'All' : 
-                     filter === 'ACTIVE' ? 'Active (In progress)' :
-                     filter === 'QUEUED' ? 'Queued' : 'Completed'}
-                  </Button>
-                ))}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <div className="space-y-4 bg-white p-4 rounded-lg border shadow-sm">
+              <div className="relative">
+                <Search className="absolute left-2 top-2.5 h-4 w-4 text-slate-400" />
+                <Input
+                  placeholder="Search timers..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-8 border-slate-200 focus:border-blue-200 focus:ring-blue-200"
+                />
               </div>
 
-              {uniqueTags.length > 0 && (
-                <div className="space-y-2">
-                  <h3 className="text-sm font-medium text-slate-700">Tags</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {uniqueTags.map(tag => (
-                      <Button
-                        key={tag}
-                        variant={selectedTag === tag ? "secondary" : "outline"}
-                        size="sm"
-                        onClick={() => setSelectedTag(tag === selectedTag ? null : tag)}
-                        className={cn(
-                          "h-7",
-                          selectedTag === tag && "bg-purple-100 text-purple-700 border-purple-200"
-                        )}
-                      >
-                        {tag}
-                      </Button>
-                    ))}
-                  </div>
+              <div className="space-y-4">
+                <div className="flex flex-wrap gap-2">
+                  {['ALL', 'ACTIVE', 'QUEUED', 'COMPLETED'].map((filter) => (
+                    <Button
+                      key={filter}
+                      variant={activeFilter === filter ? "secondary" : "outline"}
+                      onClick={() => {
+                        setActiveFilter(filter as ActiveFilter)
+                        setSelectedTag(null)
+                      }}
+                      className={cn(
+                        "transition-all",
+                        activeFilter === filter && "bg-blue-100 text-blue-700 border-blue-200"
+                      )}
+                    >
+                      {filter === 'ALL' ? 'All' :
+                        filter === 'ACTIVE' ? 'Active (In progress)' :
+                          filter === 'QUEUED' ? 'Queued' : 'Completed'}
+                    </Button>
+                  ))}
                 </div>
-              )}
-            </div>
-          </div>
 
+                {uniqueTags.length > 0 && (
+                  <div className="space-y-2">
+                    <h3 className="text-sm font-medium text-slate-700">Tags</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {uniqueTags.map(tag => (
+                        <Button
+                          key={tag}
+                          variant={selectedTag === tag ? "secondary" : "outline"}
+                          size="sm"
+                          onClick={() => setSelectedTag(tag === selectedTag ? null : tag)}
+                          className={cn(
+                            "h-7",
+                            selectedTag === tag && "bg-blue-100 text-blue-700 border-blue-200"
+                          )}
+                        >
+                          {tag}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </motion.div>
           {/* Dashboard Header */}
-          <DashboardHeader 
-            selectedTag={selectedTag} 
-            activeFilter={activeFilter} 
-            getTimeSpent={getTimeSpent} 
-            filteredByTagTimers={filteredByTagTimers}
-            getTotalTimeRemaining={getTotalTimeRemaining}
-          />
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <DashboardHeader
+              selectedTag={selectedTag}
+              activeFilter={activeFilter}
+              getTimeSpent={getTimeSpent}
+              filteredByTagTimers={filteredByTagTimers}
+              getTotalTimeRemaining={getTotalTimeRemaining}
+            />
+          </motion.div>
 
           {/* Controls Section */}
-          <div className="bg-white p-4 rounded-lg border shadow-sm space-y-4">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-              <div className="flex items-center gap-2 flex-1">
-                <span className="text-sm font-medium text-slate-600 w-16">Sort by:</span>
-                <Select value={sortBy} onValueChange={(value: 'created' | 'duration' | 'remaining') => setSortBy(value)}>
-                  <SelectTrigger className="flex-1 border-slate-200">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="created">Creation Date</SelectItem>
-                    <SelectItem value="duration">Duration</SelectItem>
-                    <SelectItem value="remaining">Remaining Time</SelectItem>
-                  </SelectContent>
-                </Select>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <div className="bg-white p-4 rounded-lg border shadow-sm space-y-4">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                <div className="flex items-center gap-2 flex-1">
+                  <span className="text-sm font-medium text-slate-600 w-16">Sort by:</span>
+                  <Select value={sortBy} onValueChange={(value: 'created' | 'duration' | 'remaining') => setSortBy(value)}>
+                    <SelectTrigger className="flex-1 border-slate-200">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="created">Creation Date</SelectItem>
+                      <SelectItem value="duration">Duration</SelectItem>
+                      <SelectItem value="remaining">Remaining Time</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="flex items-center gap-2 flex-1">
+                  <span className="text-sm font-medium text-slate-600 w-16">Order:</span>
+                  <Select value={sortOrder} onValueChange={(value: 'asc' | 'desc') => setSortOrder(value)}>
+                    <SelectTrigger className="flex-1 border-slate-200">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="desc">Descending</SelectItem>
+                      <SelectItem value="asc">Ascending</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
-              <div className="flex items-center gap-2 flex-1">
-                <span className="text-sm font-medium text-slate-600 w-16">Order:</span>
-                <Select value={sortOrder} onValueChange={(value: 'asc' | 'desc') => setSortOrder(value)}>
-                  <SelectTrigger className="flex-1 border-slate-200">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="desc">Descending</SelectItem>
-                    <SelectItem value="asc">Ascending</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-2 bg-slate-50 p-1 rounded-lg">
+                  <Button
+                    variant={view === 'grid' ? 'secondary' : 'ghost'}
+                    size="icon"
+                    onClick={() => setView('grid')}
+                    className={cn(view === 'grid' && "bg-white shadow-sm")}
+                  >
+                    <LayoutGrid className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant={view === 'list' ? 'secondary' : 'ghost'}
+                    size="icon"
+                    onClick={() => setView('list')}
+                    className={cn(view === 'list' && "bg-white shadow-sm")}
+                  >
+                    <List className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </div>
-
-            <div className="flex justify-between items-center">
-              <div className="flex items-center gap-2 bg-slate-50 p-1 rounded-lg">
-                <Button
-                  variant={view === 'grid' ? 'secondary' : 'ghost'}
-                  size="icon"
-                  onClick={() => setView('grid')}
-                  className={cn(view === 'grid' && "bg-white shadow-sm")}
-                >
-                  <LayoutGrid className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant={view === 'list' ? 'secondary' : 'ghost'}
-                  size="icon"
-                  onClick={() => setView('list')}
-                  className={cn(view === 'list' && "bg-white shadow-sm")}
-                >
-                  <List className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </div>
-
+          </motion.div>
           {/* Timers Grid/List */}
           <div className={cn(
             "gap-4",
@@ -517,30 +534,30 @@ export default function CountdownTimerDashboard() {
           )}>
             {sortedAndFilteredTimers
               .filter(timer => {
-              switch (activeFilter) {
-                case 'ALL':
-                return true;
-                case 'COMPLETED':
-                return timer.status === 'COMPLETED';
-                case 'QUEUED':
-                return timer.status === 'PAUSED';
-                case 'ACTIVE':
-                return timer.status === 'ACTIVE';
-                default:
-                return false;
-              }
+                switch (activeFilter) {
+                  case 'ALL':
+                    return true;
+                  case 'COMPLETED':
+                    return timer.status === 'COMPLETED';
+                  case 'QUEUED':
+                    return timer.status === 'PAUSED';
+                  case 'ACTIVE':
+                    return timer.status === 'ACTIVE';
+                  default:
+                    return false;
+                }
               })
               .map(timer => (
-              view === 'grid' ? (
-                <Timer key={timer.id} timer={timer} workerRef={workerRef} />
-              ) : (
-                <CompactTimer key={timer.id} timer={timer} workerRef={workerRef} />
-              )
+                view === 'grid' ? (
+                  <Timer key={timer.id} timer={timer} workerRef={workerRef} />
+                ) : (
+                  <CompactTimer key={timer.id} timer={timer} workerRef={workerRef} />
+                )
               ))
             }
           </div>
         </div>
-      </WithLoading>
-    </div>
+      </WithLoading >
+    </div >
   )
 }

@@ -111,15 +111,16 @@ export function JournalDashboard() {
             <WithLoading isLoading={isLoading} isScreen={true}>
                 <div className="space-y-6">
                     {/* Header Section */}
-                    <div className="flex flex-col sm:flex-row gap-4 items-center bg-gradient-to-r from-yellow-50/80 to-yellow-100/80 dark:from-yellow-950/40 dark:to-yellow-900/40 p-4 sm:p-6 rounded-xl shadow-lg border border-yellow-200/50 dark:border-yellow-800/50 backdrop-blur-sm">
+                    <div className="flex flex-col sm:flex-row gap-1 items-start bg-gradient-to-r from-yellow-50/80 to-yellow-100/80 dark:from-yellow-950/40 dark:to-yellow-900/40 p-4 sm:p-6 rounded-xl shadow-lg border border-yellow-200/50 dark:border-yellow-800/50 backdrop-blur-sm">
                         <WithSidebarTrigger>
-                            <div className="flex-1 space-y-1 text-center sm:text-left">
-                                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-yellow-600 to-yellow-500 bg-clip-text text-transparent dark:from-yellow-400 dark:to-yellow-300">
+                            <div className="space-y-1 text-left">
+                                <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-yellow-600 to-yellow-500 bg-clip-text text-transparent dark:from-yellow-400 dark:to-yellow-300">
                                     Journal
                                 </h1>
-                                <p className="text-sm text-muted-foreground">Record your thoughts and reflections</p>
+                                <p className="text-sm text-muted-foreground hidden sm:block">Record your thoughts and reflections</p>
                             </div>
                         </WithSidebarTrigger>
+                        <p className="text-sm text-muted-foreground sm:hidden">Record your thoughts and reflections</p>
                     </div>
 
                     {/* New Entry Section */}

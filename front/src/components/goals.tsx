@@ -352,14 +352,17 @@ export function Goals() {
         <WithLoading isLoading={isLoading} isScreen={true}>
             <div className="container mx-auto p-4 sm:p-8 space-y-6">
                 {/* Header Section - More compact and prominent */}
-                <div className="flex flex-col sm:flex-row gap-4 items-center bg-gradient-to-r from-red-50/80 to-red-100/80 dark:from-red-950/40 dark:to-red-900/40 p-4 sm:p-6 rounded-xl shadow-lg border border-red-200/50 dark:border-red-800/50 backdrop-blur-sm">
-                    <div className="flex-1 space-y-1 text-center sm:text-left">
+                <div className="flex flex-col sm:flex-row gap-4 items-start bg-gradient-to-r from-red-50/80 to-red-100/80 dark:from-red-950/40 dark:to-red-900/40 p-4 sm:p-6 rounded-xl shadow-lg border border-red-200/50 dark:border-red-800/50 backdrop-blur-sm">
+                    <div className="flex-1 space-y-1 text-left">
                         <WithSidebarTrigger>
-                            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-red-600 to-red-500 bg-clip-text text-transparent dark:from-red-400 dark:to-red-300">
-                                Goals
-                            </h1>
+                            <div>
+                                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-red-600 to-red-500 bg-clip-text text-transparent dark:from-red-400 dark:to-red-300">
+                                    Goals
+                                </h1>
+                                <p className="text-sm text-muted-foreground hidden sm:block">Set targets, track progress, achieve more</p>
+                            </div>
                         </WithSidebarTrigger>
-                        <p className="text-sm text-muted-foreground">Set targets, track progress, achieve more</p>
+                        <p className="text-sm text-muted-foreground sm:hidden">Set targets, track progress, achieve more</p>
                     </div>
                     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                         <DialogTrigger asChild>
