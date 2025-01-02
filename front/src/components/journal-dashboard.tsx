@@ -1,15 +1,14 @@
 import * as React from 'react'
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { JournalEntry } from '@/types'
 import { API } from '@/config/api'
 import { format } from 'date-fns'
-import { Pencil, Trash, Save, X, BookOpen, Calendar, Clock } from 'lucide-react'
+import { Pencil, Trash, Save, X, Calendar, Clock } from 'lucide-react'
 import { WithLoading } from '@/hoc/hoc'
 import { WithSidebarTrigger } from './with-sidebar-trigger'
 import { cn } from '@/lib/utils'
-import { Separator } from './ui/separator'
 import { motion } from 'framer-motion'
 
 export function JournalDashboard() {

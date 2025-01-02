@@ -70,14 +70,18 @@ export function Stats() {
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-background border rounded-lg shadow-lg p-3">
-          <p className="font-medium">{label}</p>
-          <p className="text-sm">
-            Completed: {payload[0]?.value} timer{payload[0]?.value !== 1 ? 's' : ''}
-          </p>
-          <p className="text-sm">
-            Total Time: {payload[1]?.value} hours
-          </p>
+        <div className="bg-background/95 backdrop-blur-sm border border-violet-200/50 dark:border-violet-800/50 rounded-lg shadow-lg p-3">
+          <p className="font-medium text-violet-900 dark:text-violet-100">{label}</p>
+          <div className="space-y-1 mt-1.5">
+            <p className="text-sm flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-violet-500" />
+              Completed: {payload[0]?.value} timer{payload[0]?.value !== 1 ? 's' : ''}
+            </p>
+            <p className="text-sm flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-violet-300" />
+              Total Time: {payload[1]?.value} hours
+            </p>
+          </div>
         </div>
       )
     }
@@ -174,62 +178,76 @@ export function Stats() {
   }
 
   return (
-    <div className="container mx-auto p-6">
+    <div className="container mx-auto p-4 sm:p-8 space-y-8 max-w-7xl">
       <WithLoading isLoading={isLoading} size={80} isScreen={true}>
-        <WithSidebarTrigger className='mb-6'>
-          <h1 className="text-2xl font-bold">Statistics</h1>
-        </WithSidebarTrigger>
+        {/* Header Section */}
+        <div className="flex flex-col sm:flex-row gap-4 items-center bg-gradient-to-r from-violet-50/80 to-violet-100/80 dark:from-violet-950/40 dark:to-violet-900/40 p-4 sm:p-6 rounded-xl shadow-lg border border-violet-200/50 dark:border-violet-800/50 backdrop-blur-sm">
+          <WithSidebarTrigger>
+            <div className="flex-1 space-y-1 text-center sm:text-left">
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-violet-600 to-violet-500 bg-clip-text text-transparent dark:from-violet-400 dark:to-violet-300">
+                Statistics
+              </h1>
+              <p className="text-sm text-muted-foreground">Track your progress and analyze patterns</p>
+            </div>
+          </WithSidebarTrigger>
+        </div>
+
         <div className="grid gap-6">
           {/* 30 Day History */}
-          <Card>
+          <Card className="overflow-hidden border-violet-100 dark:border-violet-900/50 hover:shadow-lg transition-all duration-300">
             <CardHeader>
-              <CardTitle>30 Day History</CardTitle>
+              <CardTitle className="text-lg font-semibold tracking-tight text-violet-900 dark:text-violet-100">
+                30 Day History
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="h-[300px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={getLast30DaysData()}>
-                    <CartesianGrid strokeDasharray="3 3" />
+                    <CartesianGrid strokeDasharray="3 3" className="opacity-50" />
                     <XAxis
                       dataKey="date"
                       angle={-45}
                       textAnchor="end"
                       height={70}
+                      tick={{ fill: 'currentColor', fontSize: 12 }}
                     />
                     <YAxis
                       yAxisId="left"
                       allowDecimals={false}
+                      tick={{ fill: 'currentColor', fontSize: 12 }}
                       label={{
                         value: 'Completed Timers',
                         angle: -90,
-                        position: 'insideLeft'
+                        position: 'insideLeft',
+                        style: { fill: 'currentColor' }
                       }}
                     />
                     <YAxis
                       yAxisId="right"
                       orientation="right"
+                      tick={{ fill: 'currentColor', fontSize: 12 }}
                       label={{
                         value: 'Hours',
                         angle: 90,
-                        position: 'insideRight'
+                        position: 'insideRight',
+                        style: { fill: 'currentColor' }
                       }}
                     />
                     <Tooltip content={<CustomTooltip />} />
                     <Bar
                       yAxisId="left"
                       dataKey="completed"
-                      fill="currentColor"
+                      className="fill-violet-500 dark:fill-violet-400"
                       radius={[4, 4, 0, 0]}
-                      className="fill-primary"
                       barSize={30}
                     />
                     <Bar
                       yAxisId="right"
                       dataKey="hours"
-                      fill="currentColor"
+                      className="fill-violet-300 dark:fill-violet-600"
                       radius={[4, 4, 0, 0]}
-                      className="fill-secondary"
-                      opacity={0.5}
+                      opacity={0.7}
                       barSize={30}
                     />
                   </BarChart>
@@ -239,17 +257,24 @@ export function Stats() {
           </Card>
 
           {/* Time per Tag stats */}
-          <Card>
+          <Card className="overflow-hidden border-violet-100 dark:border-violet-900/50 hover:shadow-lg transition-all duration-300">
             <CardHeader>
-              <CardTitle>Time per Tag</CardTitle>
+              <CardTitle className="text-lg font-semibold tracking-tight text-violet-900 dark:text-violet-100">
+                Time per Tag
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <Tabs defaultValue="day">
-                <TabsList className="mb-4">
-                  <TabsTrigger value="day">Last 24h</TabsTrigger>
-                  <TabsTrigger value="threeDays">Last 3 Days</TabsTrigger>
-                  <TabsTrigger value="week">Last Week</TabsTrigger>
-                  <TabsTrigger value="month">This Month</TabsTrigger>
+              <Tabs defaultValue="day" className="w-full">
+                <TabsList className="mb-4 bg-violet-50 dark:bg-violet-900/50">
+                  {["Last 24h", "Last 3 Days", "Last Week", "This Month"].map((label, i) => (
+                    <TabsTrigger 
+                      key={label}
+                      value={["day", "threeDays", "week", "month"][i]}
+                      className="data-[state=active]:bg-violet-100 dark:data-[state=active]:bg-violet-800"
+                    >
+                      {label}
+                    </TabsTrigger>
+                  ))}
                 </TabsList>
 
                 {Object.entries(timeRanges).map(([range, data]) => (
@@ -257,21 +282,25 @@ export function Stats() {
                     {data.length > 0 ? (
                       <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={data}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="tag" />
+                          <CartesianGrid strokeDasharray="3 3" className="opacity-50" />
+                          <XAxis 
+                            dataKey="tag" 
+                            tick={{ fill: 'currentColor', fontSize: 12 }}
+                          />
                           <YAxis
+                            tick={{ fill: 'currentColor', fontSize: 12 }}
                             label={{
                               value: 'Hours',
                               angle: -90,
-                              position: 'insideLeft'
+                              position: 'insideLeft',
+                              style: { fill: 'currentColor' }
                             }}
                           />
                           <Tooltip />
                           <Bar
                             dataKey="hours"
-                            fill="currentColor"
+                            className="fill-violet-500 dark:fill-violet-400"
                             radius={[4, 4, 0, 0]}
-                            className="fill-primary"
                             barSize={30}
                           />
                         </BarChart>
@@ -288,26 +317,31 @@ export function Stats() {
           </Card>
 
           {/* 30 Day Tag History */}
-          <Card>
+          <Card className="overflow-hidden border-violet-100 dark:border-violet-900/50 hover:shadow-lg transition-all duration-300">
             <CardHeader>
-              <CardTitle>30 Day Tag History</CardTitle>
+              <CardTitle className="text-lg font-semibold tracking-tight text-violet-900 dark:text-violet-100">
+                30 Day Tag History
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="h-[400px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={tagHistoryData}>
-                    <CartesianGrid strokeDasharray="3 3" />
+                    <CartesianGrid strokeDasharray="3 3" className="opacity-50" />
                     <XAxis
                       dataKey="date"
                       angle={-45}
                       textAnchor="end"
                       height={70}
+                      tick={{ fill: 'currentColor', fontSize: 12 }}
                     />
                     <YAxis
+                      tick={{ fill: 'currentColor', fontSize: 12 }}
                       label={{
                         value: 'Hours',
                         angle: -90,
-                        position: 'insideLeft'
+                        position: 'insideLeft',
+                        style: { fill: 'currentColor' }
                       }}
                     />
                     <Tooltip content={<TagHistoryTooltip />} />
@@ -317,7 +351,7 @@ export function Stats() {
                         key={tag}
                         dataKey={tag}
                         stackId="a"
-                        fill={`hsl(${index * (360 / uniqueTags.length)}, 70%, 50%)`}
+                        fill={`hsl(${(index * (360 / uniqueTags.length) + 270) % 360}, 70%, 60%)`}
                         radius={[index === uniqueTags.length - 1 ? 4 : 0, index === uniqueTags.length - 1 ? 4 : 0, 0, 0]}
                         barSize={30}
                       />
@@ -331,4 +365,4 @@ export function Stats() {
       </WithLoading>
     </div>
   )
-} 
+}
