@@ -173,15 +173,13 @@ export function RoutineProvider({ children }: { children: React.ReactNode }) {
         }),
       });
       const updatedRoutine = await response.json() as RoutineResponse;
+
       setRoutines(prev => prev.map(r => {
-        if (routine.id !== routine.id) return r;
+        if (routine.id !== r.id) return r;
         return {
           ...r,
           last_completed_at: new Date(),
-          progress: routine.progress.map(p => ({
-            ...p,
-            completed: isSameDay(p.date, new Date())
-          })),
+          progress: r.progress.map(p => updatedRoutine.last_completed_at && isSameDay(p.date, new Date(updatedRoutine.last_completed_at)) ? { ...p, completed: true } : p),
           streak: updatedRoutine.streak
         };
       }));
