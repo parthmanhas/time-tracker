@@ -3,7 +3,7 @@ import { Routine, RoutineProgress, RoutineResponse } from '@/types/routine';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from './auth-context';
 import { API } from '@/config/api';
-import { isSameDay } from 'date-fns';
+import { differenceInDays, isSameDay } from 'date-fns';
 
 interface RoutineContextType {
   loading: boolean;
@@ -29,7 +29,7 @@ export function RoutineProvider({ children }: { children: React.ReactNode }) {
     for (let i = 15; i >= -15; i--) {
       const date = new Date(today);
       date.setDate(date.getDate() - i);
-      
+
       progress.push({
         date,
         completed: routine.progress.some(p => isSameDay(new Date(p.completed_at), date))
@@ -154,27 +154,36 @@ export function RoutineProvider({ children }: { children: React.ReactNode }) {
 
   };
 
-  const handleComplete = async (routineId: string) => {
+  const handleComplete = async (routine: Routine) => {
     setLoading(true);
+    let streak = 0;
+    if (routine.last_completed_at && differenceInDays(new Date(), new Date(routine.last_completed_at)) === 1) {
+      streak = 1;
+    }
     try {
-      await fetch(`${API.getUrl('ROUTINES')}/${routineId}`, {
+      const response = await fetch(`${API.getUrl('ROUTINES')}/${routine.id}`, {
         method: 'PATCH',
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ last_completed_at: new Date().toISOString() }),
+        body: JSON.stringify({
+          last_completed_at: new Date().toISOString(),
+          streak: { increment: streak }
+        }),
       });
-      setRoutines(prev => prev.map(routine => {
-        if (routine.id !== routineId) return routine;
+      const updatedRoutine = await response.json() as RoutineResponse;
+      setRoutines(prev => prev.map(r => {
+        if (routine.id !== routine.id) return r;
         return {
-          ...routine,
+          ...r,
           last_completed_at: new Date(),
           progress: routine.progress.map(p => ({
             ...p,
             completed: isSameDay(p.date, new Date())
-          }))
-          };
+          })),
+          streak: updatedRoutine.streak
+        };
       }));
 
     } catch (error) {

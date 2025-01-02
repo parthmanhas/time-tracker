@@ -53,13 +53,13 @@ export function RoutineDashboard() {
                       </h3>
                       <div className="flex items-center gap-2 text-sm text-teal-600 dark:text-teal-400">
                         <Target className="h-4 w-4" />
-                        <span>Daily Target: {routine.daily_target}</span>
+                        <span>Daily Target: {routine.daily_target} {routine.type === 'TIME' && 'minutes'}</span>
                       </div>
                     </div>
                     <Button
                       size="sm"
                       variant={isCompletedToday(routine.last_completed_at) ? "secondary" : "default"}
-                      onClick={() => handleComplete(routine.id)}
+                      onClick={() => handleComplete(routine)}
                       disabled={isCompletedToday(routine.last_completed_at)}
                       className={`shadow-sm hover:shadow-md transition-all ${isCompletedToday(routine.last_completed_at)
                           ? 'bg-teal-100 text-teal-900 hover:bg-teal-200 dark:bg-teal-900 dark:text-teal-100'
