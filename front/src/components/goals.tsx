@@ -161,30 +161,6 @@ export function Goals() {
         setProgress(progressData);
     };
 
-    const updateGoalCompletion = async (goalId: string) => {
-        try {
-            const response = await fetch(`${API.getUrl('GOALS')}/${goalId}`, {
-                method: 'PATCH',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    completed_at: new Date().toISOString()
-                })
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to update goal completion');
-            }
-
-            const updatedGoal = await response.json();
-            setGoals(prev => prev.map(g => g.id === goalId ? updatedGoal : g));
-        } catch (error) {
-            console.error('Failed to update goal completion:', error);
-        }
-    };
-
     const handleCompleteGoal = async (goalId: string) => {
         try {
             const response = await fetch(`${API.getUrl('GOALS')}/${goalId}`, {

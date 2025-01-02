@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { ArrowUpDown, Tag, Clock, CheckCircle, BarChart } from "lucide-react"
+import { ArrowUpDown, Tag, Clock, CheckCircle } from "lucide-react"
 import { fetchAllTimers } from '@/lib/utils'
 import { useAuth } from '@/context/auth-context'
 import { WithLoading } from '@/hoc/hoc'
@@ -17,7 +17,6 @@ import { WithSidebarTrigger } from './with-sidebar-trigger'
 import { cn } from '@/lib/utils'
 import { Separator } from './ui/separator'
 import { motion } from 'framer-motion';
-import { Button } from './ui/button'
 
 type SortOption = 'name' | 'timeAsc' | 'timeDesc'
 
