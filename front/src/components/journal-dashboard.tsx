@@ -10,6 +10,7 @@ import { WithLoading } from '@/hoc/hoc'
 import { WithSidebarTrigger } from './with-sidebar-trigger'
 import { cn } from '@/lib/utils'
 import { Separator } from './ui/separator'
+import { motion } from 'framer-motion'
 
 export function JournalDashboard() {
     const [entries, setEntries] = React.useState<JournalEntry[]>([])
@@ -107,124 +108,124 @@ export function JournalDashboard() {
     };
 
     return (
-        <div className="container mx-auto p-6">
+        <div className="container mx-auto p-4 sm:p-8 space-y-8 max-w-7xl">
             <WithLoading isLoading={isLoading} isScreen={true}>
                 <div className="space-y-6">
                     {/* Header Section */}
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col sm:flex-row gap-4 items-center bg-gradient-to-r from-yellow-50/80 to-yellow-100/80 dark:from-yellow-950/40 dark:to-yellow-900/40 p-4 sm:p-6 rounded-xl shadow-lg border border-yellow-200/50 dark:border-yellow-800/50 backdrop-blur-sm">
                         <WithSidebarTrigger>
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 bg-purple-100 rounded-lg">
-                                    <BookOpen className="h-5 w-5 text-purple-600" />
-                                </div>
-                                <div>
-                                    <h1 className="text-2xl font-bold text-slate-800">Journal</h1>
-                                    <p className="text-sm text-slate-500">Record your thoughts and reflections</p>
-                                </div>
+                            <div className="flex-1 space-y-1 text-center sm:text-left">
+                                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-yellow-600 to-yellow-500 bg-clip-text text-transparent dark:from-yellow-400 dark:to-yellow-300">
+                                    Journal
+                                </h1>
+                                <p className="text-sm text-muted-foreground">Record your thoughts and reflections</p>
                             </div>
                         </WithSidebarTrigger>
                     </div>
 
                     {/* New Entry Section */}
-                    <Card className="border-2 border-dashed hover:border-solid transition-all duration-200">
-                        <CardHeader className="space-y-1">
-                            <CardTitle className="text-xl font-semibold text-slate-800">New Entry</CardTitle>
-                            <p className="text-sm text-slate-500">Write your thoughts for today</p>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="space-y-4">
-                                <Textarea
-                                    placeholder="What's on your mind?"
-                                    value={newEntry}
-                                    onChange={(e) => setNewEntry(e.target.value)}
-                                    className="min-h-[200px] bg-slate-50 border-slate-200 focus:border-purple-200 focus:ring-purple-200"
-                                />
-                                <Button
-                                    onClick={addEntry}
-                                    disabled={isLoading || !newEntry.trim()}
-                                    className="bg-purple-600 hover:bg-purple-700"
-                                >
-                                    Add Entry
-                                </Button>
-                            </div>
+                    <Card className="overflow-hidden border-yellow-100 dark:border-yellow-900/50 hover:shadow-lg transition-all duration-300">
+                        <CardContent className="p-6 space-y-4">
+                            <Textarea
+                                placeholder="What's on your mind?"
+                                value={newEntry}
+                                onChange={(e) => setNewEntry(e.target.value)}
+                                className="min-h-[150px] border-yellow-200/50 dark:border-yellow-800/50 resize-none focus:ring-yellow-500/30 focus:border-yellow-500/30"
+                            />
+                            <Button
+                                onClick={addEntry}
+                                disabled={isLoading || !newEntry.trim()}
+                                size="lg"
+                                className="w-full sm:w-auto bg-yellow-600 text-white shadow-md hover:shadow-lg transition-all dark:from-yellow-700 dark:to-yellow-600"
+                            >
+                                Add Entry
+                            </Button>
                         </CardContent>
                     </Card>
 
                     {/* Entries List */}
-                    <div className="space-y-4">
+                    <div className="grid gap-4 md:grid-cols-1">
                         {entries.map(entry => (
-                            <Card key={entry.id} className={cn(
-                                "border shadow-sm hover:shadow-md transition-all duration-200",
-                                editingId === entry.id && "border-purple-200"
-                            )}>
-                                <CardContent className="pt-6">
-                                    {editingId === entry.id ? (
-                                        <div className="space-y-4">
-                                            <Textarea
-                                                value={editContent}
-                                                onChange={(e) => setEditContent(e.target.value)}
-                                                className="min-h-[200px] bg-slate-50"
-                                            />
-                                            <div className="flex gap-2">
-                                                <Button
-                                                    size="sm"
-                                                    onClick={() => updateEntry(entry.id)}
-                                                    disabled={isLoading}
-                                                    className="bg-green-600 hover:bg-green-700"
-                                                >
-                                                    <Save className="h-4 w-4 mr-2" />
-                                                    Save Changes
-                                                </Button>
-                                                <Button
-                                                    size="sm"
-                                                    variant="outline"
-                                                    onClick={() => setEditingId(null)}
-                                                >
-                                                    <X className="h-4 w-4 mr-2" />
-                                                    Cancel
-                                                </Button>
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <div className="space-y-4">
-                                            <p className="whitespace-pre-wrap text-slate-700 leading-relaxed">
-                                                {entry.content}
-                                            </p>
-                                            <Separator />
-                                            <div className="flex justify-between items-center pt-2">
-                                                <div className="flex items-center gap-2 text-sm text-slate-500">
-                                                    <Calendar className="h-4 w-4" />
-                                                    <span>{format(new Date(entry.created_at), 'PP')}</span>
-                                                    <span className="text-slate-300">•</span>
-                                                    <Clock className="h-4 w-4" />
-                                                    <span>{format(new Date(entry.created_at), 'p')}</span>
-                                                </div>
+                            <motion.div
+                                key={entry.id}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.3 }}
+                            >
+                                <Card className={cn(
+                                    "group hover:shadow-lg transition-all duration-300 border-yellow-100 dark:border-yellow-900/50",
+                                    editingId === entry.id && "ring-2 ring-yellow-500/30"
+                                )}>
+                                    <CardContent className="p-4">
+                                        {editingId === entry.id ? (
+                                            <div className="space-y-4">
+                                                <Textarea
+                                                    value={editContent}
+                                                    onChange={(e) => setEditContent(e.target.value)}
+                                                    className="min-h-[150px] bg-yellow-50/50 dark:bg-yellow-950/50 border-yellow-200/50 dark:border-yellow-800/50 resize-none"
+                                                />
                                                 <div className="flex gap-2">
                                                     <Button
                                                         size="sm"
-                                                        variant="ghost"
-                                                        onClick={() => {
-                                                            setEditingId(entry.id);
-                                                            setEditContent(entry.content);
-                                                        }}
-                                                        className="text-slate-600 hover:text-slate-900"
+                                                        onClick={() => updateEntry(entry.id)}
+                                                        disabled={isLoading}
+                                                        className="bg-gradient-to-r from-green-600 to-green-500"
                                                     >
-                                                        <Pencil className="h-4 w-4" />
+                                                        <Save className="h-4 w-4 mr-2" /> Save
                                                     </Button>
                                                     <Button
                                                         size="sm"
-                                                        variant="ghost"
-                                                        onClick={() => deleteEntry(entry.id)}
-                                                        className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                                                        variant="outline"
+                                                        onClick={() => setEditingId(null)}
+                                                        className="border-yellow-200 hover:border-yellow-300 dark:border-yellow-800 dark:hover:border-yellow-700"
                                                     >
-                                                        <Trash className="h-4 w-4" />
+                                                        <X className="h-4 w-4 mr-2" /> Cancel
                                                     </Button>
                                                 </div>
                                             </div>
-                                        </div>
-                                    )}
-                                </CardContent>
-                            </Card>
+                                        ) : (
+                                            <div className="space-y-4">
+                                                <p className="whitespace-pre-wrap text-foreground leading-relaxed">
+                                                    {entry.content}
+                                                </p>
+                                                <div className="flex justify-between items-center pt-2">
+                                                    <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                                                        <div className="flex items-center gap-1.5">
+                                                            <Calendar className="h-4 w-4 text-yellow-500" />
+                                                            <span>{format(new Date(entry.created_at), 'PP')}</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-1.5">
+                                                            <Clock className="h-4 w-4 text-yellow-500" />
+                                                            <span>{format(new Date(entry.created_at), 'p')}</span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        <Button
+                                                            size="sm"
+                                                            variant="ghost"
+                                                            onClick={() => {
+                                                                setEditingId(entry.id);
+                                                                setEditContent(entry.content);
+                                                            }}
+                                                            className="text-yellow-600 hover:text-yellow-700 hover:bg-yellow-50"
+                                                        >
+                                                            <Pencil className="h-4 w-4" />
+                                                        </Button>
+                                                        <Button
+                                                            size="sm"
+                                                            variant="ghost"
+                                                            onClick={() => deleteEntry(entry.id)}
+                                                            className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                                                        >
+                                                            <Trash className="h-4 w-4" />
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </CardContent>
+                                </Card>
+                            </motion.div>
                         ))}
                     </div>
                 </div>

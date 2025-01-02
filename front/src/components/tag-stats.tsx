@@ -82,8 +82,8 @@ export function TagStats() {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <WithSidebarTrigger>
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-purple-100 rounded-lg">
-                  <BarChart className="h-5 w-5 text-purple-600" />
+                <div className="p-2 bg-green-100 rounded-lg">
+                  <BarChart className="h-5 w-5 text-green-600" />
                 </div>
                 <div>
                   <h1 className="text-2xl font-bold text-slate-800">Tag Statistics</h1>
@@ -126,7 +126,7 @@ export function TagStats() {
                       variant={tag ? "default" : "destructive"} 
                       className={cn(
                         "font-medium",
-                        tag ? "bg-purple-100 text-purple-700 hover:bg-purple-200" : ""
+                        tag ? "bg-green-100 text-green-700 hover:bg-green-200" : ""
                       )}
                     >
                       {tag || 'UNTAGGED'}
@@ -137,29 +137,17 @@ export function TagStats() {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <div className="flex items-center gap-2 text-sm text-slate-500">
-                        <CheckCircle className="h-4 w-4" />
+                        <CheckCircle className="h-4 w-4 text-green-600" />
                         <span>Completed</span>
                       </div>
                       <p className="text-2xl font-bold text-slate-800">{count}</p>
                     </div>
                     <div className="space-y-2">
                       <div className="flex items-center gap-2 text-sm text-slate-500">
-                        <Clock className="h-4 w-4" />
+                        <Clock className="h-4 w-4 text-blue-600" />
                         <span>Time Spent</span>
                       </div>
                       <p className="text-2xl font-bold text-slate-800">{formatTime(timeSpent)}</p>
-                    </div>
-                  </div>
-
-                  {/* Progress Bar */}
-                  <div className="mt-4">
-                    <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-purple-500 rounded-full transition-all duration-500"
-                        style={{
-                          width: `${Math.min((count / Math.max(...tagStats.map(s => s.count))) * 100, 100)}%`
-                        }}
-                      />
                     </div>
                   </div>
                 </CardContent>
