@@ -39,6 +39,7 @@ import { CompletedTimeGoal } from './completed-time-goal'
 import { CompletedCountGoal } from './completed-count-goal'
 import { WithSidebarTrigger } from './with-sidebar-trigger'
 import { useAuth } from '@/context/auth-context'
+import { motion } from 'framer-motion'
 
 export function Goals() {
     const [goals, setGoals] = React.useState<Goal[]>([])
@@ -341,26 +342,27 @@ export function Goals() {
 
     const getPriorityColor = (priority: GoalPriority) => {
         switch (priority) {
-            case 'HIGH': return 'bg-red-500';
-            case 'MEDIUM': return 'bg-yellow-500';
-            case 'LOW': return 'bg-green-500';
-            default: return 'bg-gray-500';
+            case 'HIGH': return 'bg-gradient-to-r from-red-500 to-red-600';
+            case 'MEDIUM': return 'bg-gradient-to-r from-amber-500 to-amber-600';
+            case 'LOW': return 'bg-gradient-to-r from-teal-500 to-teal-600';
+            default: return 'bg-gradient-to-r from-slate-500 to-slate-600';
         }
     };
 
     return (
-        <div className="container mx-auto p-6">
-            <WithLoading isLoading={isLoading} isScreen={true}>
-                <div className="flex justify-between items-center mb-6">
-                    <WithSidebarTrigger>
-                        <h1 className="text-2xl font-bold">Goals</h1>
-                    </WithSidebarTrigger>
-                    {/* add goal dialog */}
+        <WithLoading isLoading={isLoading} isScreen={true}>
+            <div className="container mx-auto p-8 space-y-8 max-w-7xl">
+                <div className="flex justify-between items-center bg-gradient-to-r from-red-50 to-red-100 dark:from-red-950/20 dark:to-red-900/20 p-6 rounded-lg shadow-sm border border-red-200/50 dark:border-red-800/50">
+                    <div className="space-y-1">
+                        <WithSidebarTrigger>
+                            <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-red-600 to-red-500 bg-clip-text text-transparent dark:from-red-400 dark:to-red-300">Goals</h1>
+                        </WithSidebarTrigger>
+                        <p className="text-muted-foreground">Track your progress and achievements</p>
+                    </div>
                     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                         <DialogTrigger asChild>
-                            <Button>
-                                <Plus className="mr-2 h-4 w-4" />
-                                Add Goal
+                            <Button size="lg" className="bg-red-600 hover:bg-red-700 text-white shadow-md hover:shadow-lg transition-all dark:bg-red-700 dark:hover:bg-red-600">
+                                <Plus className="mr-2 h-5 w-5" /> New Goal
                             </Button>
                         </DialogTrigger>
                         <DialogContent>
@@ -495,223 +497,235 @@ export function Goals() {
                         const completionDetails = getCompletionDetails(goal);
                         const startDate = getGoalStartDate(goal);
                         return (
-                            <Card
+                            <motion.div
                                 key={goal.id}
-                                className={cn(
-                                    "transition-all duration-200",
-                                    completionDetails && "bg-muted/50"
-                                )}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.3 }}
                             >
-                                <CardHeader>
-                                    <div className="flex flex-col gap-2 items-start sm:flex-row sm:items-center justify-between">
-                                        <div className="space-y-1">
-                                            <CardTitle className="flex items-center gap-2">
-                                                {completionDetails ? (
-                                                    <CheckCircle className="h-5 w-5 text-green-500" />
-                                                ) : (
-                                                    <Target className="h-5 w-5" />
-                                                )}
-                                                <span className={cn(
-                                                    completionDetails && "text-muted-foreground"
-                                                )}>
-                                                    {goal.title}
-                                                </span>
-                                            </CardTitle>
-                                            <div className="flex flex-col gap-1 text-sm text-muted-foreground">
-
-                                                {completionDetails && (
-                                                    <div className="space-y-1 mt-1 p-2 rounded-md bg-background">
-                                                        {goal.type === 'TIME' ? (
-                                                            <CompletedTimeGoal
-                                                                startDate={startDate}
-                                                                goalCreatedAt={goal.created_at}
-                                                                completedAt={goal.completed_at!}
-                                                                daysToComplete={completionDetails.daysToComplete}
-                                                                totalHours={completionDetails.totalHours}
-                                                            />
-                                                        ) : (
-                                                            <CompletedCountGoal
-                                                                createdAt={goal.created_at}
-                                                                completedAt={goal.completed_at!}
-                                                                daysToComplete={completionDetails.daysToComplete}
-                                                                currentCount={goal.current_count!}
-                                                                targetCount={goal.target_count!}
-                                                            />
-                                                        )}
-                                                    </div>
-                                                )}
-                                            </div>
-                                            {goal.description && (
-                                                <p className={cn(
-                                                    "text-sm mt-2",
-                                                    completionDetails ? "text-muted-foreground" : "text-foreground"
-                                                )}>
-                                                    {goal.description}
-                                                </p>
-                                            )}
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            {!completionDetails && (
-                                                <AlertDialog>
-                                                    <AlertDialogTrigger asChild>
-                                                        <Button variant="outline" size="sm">
-                                                            Complete Goal
-                                                        </Button>
-                                                    </AlertDialogTrigger>
-                                                    <AlertDialogContent>
-                                                        <AlertDialogHeader>
-                                                            <AlertDialogTitle>Complete Goal Early?</AlertDialogTitle>
-                                                            <AlertDialogDescription>
-                                                                <div className="space-y-2">
-                                                                    {goal.type === 'TIME' ? (
-                                                                        <>
-                                                                            <p>
-                                                                                This goal is at {Math.round(progress[goal.id]?.percentageComplete || 0)}% completion.
-                                                                            </p>
-                                                                            <Progress
-                                                                                value={progress[goal.id]?.percentageComplete || 0}
-                                                                                className="h-2"
-                                                                            />
-                                                                        </>
-                                                                    ) : (
-                                                                        <>
-                                                                            <p>
-                                                                                Current progress: {goal.current_count} out of {goal.target_count} {goal.target_count === 1 ? 'count' : 'counts'}
-                                                                            </p>
-                                                                            <Progress
-                                                                                value={((goal.current_count || 0) / (goal.target_count || 1)) * 100}
-                                                                                className="h-2"
-                                                                            />
-                                                                        </>
-                                                                    )}
-                                                                    <p className="text-sm mt-4">
-                                                                        Are you sure you want to mark it as complete? This action cannot be undone.
-                                                                    </p>
-                                                                </div>
-                                                            </AlertDialogDescription>
-                                                        </AlertDialogHeader>
-                                                        <AlertDialogFooter>
-                                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                            <AlertDialogAction
-                                                                onClick={() => handleCompleteGoal(goal.id)}
-                                                            >
-                                                                Complete Goal
-                                                            </AlertDialogAction>
-                                                        </AlertDialogFooter>
-                                                    </AlertDialogContent>
-                                                </AlertDialog>
-                                            )}
-                                            <Badge
-                                                className={cn(
-                                                    getPriorityColor(goal.priority),
-                                                    "text-white",
-                                                    completionDetails && "opacity-75"
-                                                )}
-                                            >
-                                                {goal.priority}
-                                            </Badge>
-                                        </div>
-                                    </div>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="space-y-4">
-                                        {goal.tags && goal.tags.length > 0 && (
-                                            <div className="flex flex-wrap gap-2">
-                                                {goal.tags.map(tag => (
-                                                    <Badge
-                                                        key={tag}
-                                                        variant={completionDetails ? "outline" : "secondary"}
-                                                        className={cn(
-                                                            "flex items-center gap-1",
-                                                            completionDetails && "opacity-75"
-                                                        )}
-                                                    >
-                                                        <Tag className="h-3 w-3" />
-                                                        {tag}
-                                                    </Badge>
-                                                ))}
-                                            </div>
-                                        )}
-                                        {goal.type === 'TIME' ? (
-                                            <div className="space-y-2">
-                                                <div className="flex justify-between text-sm">
-                                                    <span>Progress</span>
-                                                    <span>
-                                                        {Math.round(progress[goal.id]?.currentHours || 0)}h / {goal.target_hours}h
-                                                    </span>
-                                                </div>
-                                                <Progress
-                                                    value={progress[goal.id]?.percentageComplete || 0}
-                                                    className={cn(
-                                                        completionDetails && "opacity-75"
+                                <Card
+                                    key={goal.id}
+                                    className={cn(
+                                        "transition-all duration-300 hover:shadow-lg border-teal-200/50 dark:border-teal-800/50",
+                                        completionDetails && "bg-muted/50"
+                                    )}
+                                >
+                                    <CardHeader className="space-y-4">
+                                        <div className="flex flex-col gap-4 sm:flex-row sm:items-start justify-between">
+                                            <div className="space-y-1">
+                                                <CardTitle className="flex items-center gap-2 text-xl">
+                                                    {completionDetails ? (
+                                                        <CheckCircle className="h-5 w-5 text-teal-500" />
+                                                    ) : (
+                                                        <Target className="h-5 w-5 text-teal-500" />
                                                     )}
-                                                />
-                                                {!completionDetails && (
-                                                    <p className="text-sm text-muted-foreground">
-                                                        {progress[goal.id]?.remainingHours.toFixed(1)}h remaining
+                                                    <span className={cn(
+                                                        "tracking-tight",
+                                                        completionDetails && "text-muted-foreground"
+                                                    )}>
+                                                        {goal.title}
+                                                    </span>
+                                                </CardTitle>
+                                                <div className="flex flex-col gap-1 text-sm text-muted-foreground">
+
+                                                    {completionDetails && (
+                                                        <div className="space-y-1 mt-1 p-2 rounded-md bg-background">
+                                                            {goal.type === 'TIME' ? (
+                                                                <CompletedTimeGoal
+                                                                    startDate={startDate}
+                                                                    goalCreatedAt={goal.created_at}
+                                                                    completedAt={goal.completed_at!}
+                                                                    daysToComplete={completionDetails.daysToComplete}
+                                                                    totalHours={completionDetails.totalHours}
+                                                                />
+                                                            ) : (
+                                                                <CompletedCountGoal
+                                                                    createdAt={goal.created_at}
+                                                                    completedAt={goal.completed_at!}
+                                                                    daysToComplete={completionDetails.daysToComplete}
+                                                                    currentCount={goal.current_count!}
+                                                                    targetCount={goal.target_count!}
+                                                                />
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                {goal.description && (
+                                                    <p className={cn(
+                                                        "text-sm mt-2",
+                                                        completionDetails ? "text-muted-foreground" : "text-foreground"
+                                                    )}>
+                                                        {goal.description}
                                                     </p>
                                                 )}
                                             </div>
-                                        ) : (
-                                            <div className="space-y-2">
-                                                <div className="flex justify-between items-center">
-                                                    <span>Progress</span>
-                                                    <div className="flex items-center gap-2">
-                                                        {!completionDetails && (
-                                                            <>
-                                                                <Button
-                                                                    variant="outline"
-                                                                    size="icon"
-                                                                    onClick={() => handleCountUpdate(goal.id, -1)}
+                                            <div className="flex items-center gap-2">
+                                                {!completionDetails && (
+                                                    <AlertDialog>
+                                                        <AlertDialogTrigger asChild>
+                                                            <Button 
+                                                                variant="outline" 
+                                                                size="sm"
+                                                                className="border-teal-200 hover:border-teal-300 dark:border-teal-800 dark:hover:border-teal-700"
+                                                            >
+                                                                Complete Goal
+                                                            </Button>
+                                                        </AlertDialogTrigger>
+                                                        <AlertDialogContent>
+                                                            <AlertDialogHeader>
+                                                                <AlertDialogTitle>Complete Goal Early?</AlertDialogTitle>
+                                                                <AlertDialogDescription>
+                                                                    <div className="space-y-2">
+                                                                        {goal.type === 'TIME' ? (
+                                                                            <>
+                                                                                <p>
+                                                                                    This goal is at {Math.round(progress[goal.id]?.percentageComplete || 0)}% completion.
+                                                                                </p>
+                                                                                <Progress
+                                                                                    value={progress[goal.id]?.percentageComplete || 0}
+                                                                                    className="h-2"
+                                                                                />
+                                                                            </>
+                                                                        ) : (
+                                                                            <>
+                                                                                <p>
+                                                                                    Current progress: {goal.current_count} out of {goal.target_count} {goal.target_count === 1 ? 'count' : 'counts'}
+                                                                                </p>
+                                                                                <Progress
+                                                                                    value={((goal.current_count || 0) / (goal.target_count || 1)) * 100}
+                                                                                    className="h-2"
+                                                                                />
+                                                                            </>
+                                                                        )}
+                                                                        <p className="text-sm mt-4">
+                                                                            Are you sure you want to mark it as complete? This action cannot be undone.
+                                                                        </p>
+                                                                    </div>
+                                                                </AlertDialogDescription>
+                                                            </AlertDialogHeader>
+                                                            <AlertDialogFooter>
+                                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                                <AlertDialogAction
+                                                                    onClick={() => handleCompleteGoal(goal.id)}
                                                                 >
-                                                                    <MinusCircle className="h-4 w-4" />
-                                                                </Button>
-                                                                <Button
-                                                                    variant="outline"
-                                                                    size="icon"
-                                                                    onClick={() => handleCountUpdate(goal.id, 1)}
-                                                                >
-                                                                    <PlusCircle className="h-4 w-4" />
-                                                                </Button>
-                                                                <DropdownMenu>
-                                                                    <DropdownMenuTrigger asChild>
-                                                                        <Button variant="outline" size="sm">
-                                                                            Add Multiple
-                                                                        </Button>
-                                                                    </DropdownMenuTrigger>
-                                                                    <DropdownMenuContent>
-                                                                        {quickIncrements.map(({ label, value }) => (
-                                                                            <DropdownMenuItem
-                                                                                key={value}
-                                                                                onClick={() => handleCountUpdate(goal.id, value)}
-                                                                            >
-                                                                                {label}
-                                                                            </DropdownMenuItem>
-                                                                        ))}
-                                                                    </DropdownMenuContent>
-                                                                </DropdownMenu>
-                                                            </>
-                                                        )}
-                                                        <span className="min-w-[80px] text-right">
-                                                            {goal.current_count || 0} / {goal.target_count}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                                <Progress
-                                                    value={((goal.current_count || 0) / (goal.target_count || 1)) * 100}
+                                                                    Complete Goal
+                                                                </AlertDialogAction>
+                                                            </AlertDialogFooter>
+                                                        </AlertDialogContent>
+                                                    </AlertDialog>
+                                                )}
+                                                <Badge
                                                     className={cn(
+                                                        "text-white transition-all",
+                                                        getPriorityColor(goal.priority),
                                                         completionDetails && "opacity-75"
                                                     )}
-                                                />
+                                                >
+                                                    {goal.priority}
+                                                </Badge>
                                             </div>
-                                        )}
-                                    </div>
-                                </CardContent>
-                            </Card>
+                                        </div>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="space-y-4">
+                                            {goal.tags && goal.tags.length > 0 && (
+                                                <div className="flex flex-wrap gap-2">
+                                                    {goal.tags.map(tag => (
+                                                        <Badge
+                                                            key={tag}
+                                                            variant={completionDetails ? "outline" : "secondary"}
+                                                            className={cn(
+                                                                "flex items-center gap-1 bg-teal-100 text-teal-900 dark:bg-teal-900 dark:text-teal-100",
+                                                                completionDetails && "opacity-75"
+                                                            )}
+                                                        >
+                                                            <Tag className="h-3 w-3" />
+                                                            {tag}
+                                                        </Badge>
+                                                    ))}
+                                                </div>
+                                            )}
+                                            {goal.type === 'TIME' ? (
+                                                <div className="space-y-2">
+                                                    <div className="flex justify-between text-sm">
+                                                        <span>Progress</span>
+                                                        <span>
+                                                            {Math.round(progress[goal.id]?.currentHours || 0)}h / {goal.target_hours}h
+                                                        </span>
+                                                    </div>
+                                                    <Progress
+                                                        value={progress[goal.id]?.percentageComplete || 0}
+                                                        className={cn(
+                                                            completionDetails && "opacity-75"
+                                                        )}
+                                                    />
+                                                    {!completionDetails && (
+                                                        <p className="text-sm text-muted-foreground">
+                                                            {progress[goal.id]?.remainingHours.toFixed(1)}h remaining
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            ) : (
+                                                <div className="space-y-2">
+                                                    <div className="flex justify-between items-center">
+                                                        <span>Progress</span>
+                                                        <div className="flex items-center gap-2">
+                                                            {!completionDetails && (
+                                                                <>
+                                                                    <Button
+                                                                        variant="outline"
+                                                                        size="icon"
+                                                                        onClick={() => handleCountUpdate(goal.id, -1)}
+                                                                    >
+                                                                        <MinusCircle className="h-4 w-4" />
+                                                                    </Button>
+                                                                    <Button
+                                                                        variant="outline"
+                                                                        size="icon"
+                                                                        onClick={() => handleCountUpdate(goal.id, 1)}
+                                                                    >
+                                                                        <PlusCircle className="h-4 w-4" />
+                                                                    </Button>
+                                                                    <DropdownMenu>
+                                                                        <DropdownMenuTrigger asChild>
+                                                                            <Button variant="outline" size="sm">
+                                                                                Add Multiple
+                                                                            </Button>
+                                                                        </DropdownMenuTrigger>
+                                                                        <DropdownMenuContent>
+                                                                            {quickIncrements.map(({ label, value }) => (
+                                                                                <DropdownMenuItem
+                                                                                    key={value}
+                                                                                    onClick={() => handleCountUpdate(goal.id, value)}
+                                                                                >
+                                                                                    {label}
+                                                                                </DropdownMenuItem>
+                                                                            ))}
+                                                                        </DropdownMenuContent>
+                                                                    </DropdownMenu>
+                                                                </>
+                                                            )}
+                                                            <span className="min-w-[80px] text-right">
+                                                                {goal.current_count || 0} / {goal.target_count}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <Progress
+                                                        value={((goal.current_count || 0) / (goal.target_count || 1)) * 100}
+                                                        className={cn(
+                                                            completionDetails && "opacity-75"
+                                                        )}
+                                                    />
+                                                </div>
+                                            )}
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            </motion.div>
                         );
                     })}
                 </div>
-            </WithLoading>
-        </div>
+            </div>
+        </WithLoading>
     )
-} 
+}
