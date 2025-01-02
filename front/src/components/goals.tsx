@@ -635,33 +635,24 @@ export function Goals() {
                             {goals?.filter(goal => goal.completed_at).map(goal => {
                                 const completionDetails = getCompletionDetails(goal);
                                 return (
-                                    <motion.div
-                                        key={goal.id}
-                                        initial={{ opacity: 0, y: 20 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        transition={{ duration: 0.3 }}
-                                    >
-                                        {/* Use CompletedCountGoal or CompletedTimeGoal directly in a card */}
-                                        <Card className="overflow-hidden">
-                                            {goal.type === 'TIME' ? (
-                                                <CompletedTimeGoal 
-                                                    completedAt={goal.completed_at!}
-                                                    goalCreatedAt={goal.created_at}
-                                                    daysToComplete={100}
-                                                    totalHours={completionDetails?.totalHours || 0}
-                                                    startDate={new Date(completionDetails!.startDate)}
-                                                />
-                                            ) : (
-                                                <CompletedCountGoal
-                                                    createdAt={goal.created_at}
-                                                    completedAt={goal.completed_at!}
-                                                    daysToComplete={completionDetails?.daysToComplete || 0}
-                                                    currentCount={goal.current_count!}
-                                                    targetCount={goal.target_count!}
-                                                />
-                                            )}
-                                        </Card>
-                                    </motion.div>
+                                    <Card className="flex flex-col justify-between">
+                                        {goal.type === 'TIME' ? (
+                                            <CompletedTimeGoal
+                                                completedAt={goal.completed_at!}
+                                                goalCreatedAt={goal.created_at}
+                                                daysToComplete={100}
+                                                totalHours={completionDetails?.totalHours || 0}
+                                            />
+                                        ) : (
+                                            <CompletedCountGoal
+                                                createdAt={goal.created_at}
+                                                completedAt={goal.completed_at!}
+                                                daysToComplete={completionDetails?.daysToComplete || 0}
+                                                currentCount={goal.current_count!}
+                                                targetCount={goal.target_count!}
+                                            />
+                                        )}
+                                    </Card>
                                 );
                             })}
                         </div>

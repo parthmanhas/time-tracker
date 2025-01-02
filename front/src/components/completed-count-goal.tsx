@@ -29,9 +29,9 @@ export function CompletedCountGoal({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
       className={cn(
-        "bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800",
-        "p-6 rounded-xl border border-slate-200 dark:border-slate-700",
-        "hover:shadow-lg transition-all duration-200"
+        "bg-gradient-to-br from-green-50 to-green-100 dark:from-slate-900 dark:to-slate-800",
+        "p-6 flex-1",
+        "hover:shadow-lg transition-all duration-200",
       )}
     >
       {/* Achievement Badge */}
