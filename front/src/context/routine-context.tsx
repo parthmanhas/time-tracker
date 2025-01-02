@@ -11,7 +11,7 @@ interface RoutineContextType {
   addRoutine: (routine: Omit<Routine, 'id' | 'createdAt' | 'streak' | 'lastCompleted' | 'user_id' | 'last_completed_at' | 'created_at' | 'progress'>) => Promise<void>;
   // updateProgress: (routineId: string, progress: number) => Promise<void>;
   // getProgress: (routineId: string) => Promise<RoutineProgress[]>;
-  handleComplete: (routineId: string) => Promise<void>;
+  handleComplete: (routine: Routine) => Promise<void>;
 }
 
 const RoutineContext = createContext<RoutineContextType | undefined>(undefined);
